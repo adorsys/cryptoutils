@@ -25,7 +25,8 @@ public class SelfSignedCertBuilder {
 	private X500Name subjectDN;	
 	private GeneralNames subjectAltNames;
 	private boolean ca;
-	
+
+	boolean dirty = false;
 	/**
 	 * Returns the message key pair subject certificate holder.
 	 * 
@@ -37,7 +38,6 @@ public class SelfSignedCertBuilder {
 	 * 
 	 * @return KeyPairAndCertificateHolder
 	 */
-	boolean dirty = false;
 	public SelfSignedKeyPairData build(KeyPair keyPair) {
 		if(dirty)throw new IllegalStateException("Builder can not be reused");
 		dirty=true;

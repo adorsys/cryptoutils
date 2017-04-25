@@ -46,9 +46,6 @@ public class TsService {
 	 * @param data : data sent by the caller for time stamping.
 	 * @param iss : the issuer. Set by the server using this routine. Might be retrieved from the 
 	 *   URIInfo object in a REST application.
-	 * @return
-	 * @throws TsMissingFieldException 
-	 * @throws TsSignatureException 
 	 */
     public String stamp(TsData data, String iss) throws TsMissingFieldException, TsSignatureException {
         Builder builder = new JWTClaimsSet.Builder();

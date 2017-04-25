@@ -19,14 +19,14 @@ public class SecretKeyBuilder {
 	private Integer keyLength;
 	private String keyAlg;
 	
+	boolean dirty = false;
 	/**
 	 * Returns the message key pair subject certificate holder.
-	 * 
-	 * Following entity must be validated  
-	 * 
+	 *
+	 * Following entity must be validated
+	 *
 	 * @return KeyPairAndCertificateHolder
 	 */
-	boolean dirty = false;
 	public SecretKey build() {
 		if(dirty)throw new IllegalStateException("Builder can not be reused");
 		dirty=true;

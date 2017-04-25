@@ -31,9 +31,9 @@
 
 	<modules>
 		<module>jjwk</module>
+        <module>encobject</module>
 		<module>jtstamp</module>
 		<module>jkeyutils</module>
-		<module>trustedp</module>
 	</modules>
 	<dependencyManagement>
 		<dependencies>			

@@ -35,10 +35,6 @@ public class JWSSignerAndAlgorithmBuilder {
 
 	/**
 	 * Select a signer and an algorithm for use.
-	 * 
-	 * @param jwk
-	 * @param algoPrefs
-	 * @return
 	 */
 	public static JWSSignerAndAlgorithm build(JWK jwk, LinkedHashSet<JWSAlgorithm> algoPrefs) {
 	    JWSSigner signer = null;

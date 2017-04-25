@@ -68,8 +68,6 @@ public class TsSignInput {
      * JWT.  The processing of this claim is generally application specific.
      * The "iss" value is a case-sensitive string containing a StringOrURI
      * value.  Use of this claim is OPTIONAL.
-     *
-     * @return
      */
 	@ApiModelProperty(required=true, value = "Returns the issuer of this token. The \"iss\" (issuer) claim identifies the principal that issued the token.  The processing of this claim is generally application specific. The \"iss\" value is a case-sensitive string containing a StringOrURI value.  Use of this claim is OPTIONAL.")
     public String getIss() {
@@ -88,8 +86,6 @@ public class TsSignInput {
      * The processing of this claim is generally application specific.  The
      * "sub" value is a case-sensitive string containing a StringOrURI
      * value.  Use of this claim is OPTIONAL.
-     *
-     * @return
      */
     @ApiModelProperty(required=true, value = "The \"sub\" (subject) claim identifies the principal that is the subject of the JWT.  The claims in a JWT are normally statements about the subject.  The subject value MUST either be scoped to be locally unique in the context of the issuer or be globally unique. The processing of this claim is generally application specific.  The \"sub\" value is a case-sensitive string containing a StringOrURI value.  Use of this claim is OPTIONAL.")
         public String getSub() {
@@ -105,8 +101,6 @@ public class TsSignInput {
      * issued.  This claim can be used to determine the age of the JWT.  Its
      * value MUST be a number containing a NumericDate value.  Use of this
      * claim is OPTIONAL.
-     *
-     * @return
      */
     @ApiModelProperty(required=true, value = "The \"iat\" (issued at) claim identifies the time at which the JWT was issued. This claim can be used to determine the age of the JWT. Its value MUST be a number containing a NumericDate value. Use of this claim is OPTIONAL.")
     public Date getIat() {

@@ -21,14 +21,11 @@ public class KeyPairBuilder {
 	private Integer keyLength;
 	private String keyAlg;
 	
+	boolean dirty = false;
+
 	/**
 	 * Returns the message key pair subject certificate holder.
-	 * 
-	 * Following entity must be validated  
-	 * 
-	 * @return KeyPairAndCertificateHolder
 	 */
-	boolean dirty = false;
 	public KeyPair build() {
 		if(dirty)throw new IllegalStateException("Builder can not be reused");
 		dirty=true;

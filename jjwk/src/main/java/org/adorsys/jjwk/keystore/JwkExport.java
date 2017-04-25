@@ -82,9 +82,6 @@ public class JwkExport {
 	
 	/**
 	 * Select a random key by random picking a number between 0 (inclusive) and size exclusive;
-	 * 
-	 * @param serverKeys
-	 * @return
 	 */
     public static JWK randomKey(List<JWK> keys){
     	int nextInt = RandomUtils.nextInt(0, keys.size());

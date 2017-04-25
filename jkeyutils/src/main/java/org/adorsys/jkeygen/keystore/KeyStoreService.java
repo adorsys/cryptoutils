@@ -33,11 +33,6 @@ public class KeyStoreService {
 
 	/**
 	 * Create an initializes a new key store. The key store is not yet password protected.
-	 * 
-	 * @param storeType
-	 * @param keyPairHolders
-	 * @return
-	 * @throws KeyStoreException
 	 */
 	public static KeyStore newKeyStore(String storeType) throws IOException {
 
@@ -55,11 +50,9 @@ public class KeyStoreService {
 	/**
 	 * Write this key store into a byte array
 	 * 
-	 * @return
 	 * @throws IOException if there was an I/O problem with data
 	 * @throws CertificateException if any of the certificates included in the keystore data could not be stored
 	 * @throws NoSuchAlgorithmException  if the appropriate data integrity algorithm could not be found
-	 * @throws KeyStoreException 
 	 */
 	public static byte[] toByteArray(KeyStore keystore, String storeId, CallbackHandler storePassSrc) throws NoSuchAlgorithmException, CertificateException, IOException{
 		ByteArrayOutputStream stream = new ByteArrayOutputStream();
@@ -78,7 +71,6 @@ public class KeyStoreService {
 	 * @param storeId : The store id. This is passed to the callback handler to identify the requested password record.
 	 * @param storeType : the type of this key store. f null, the defaut java keystore type is used.
 	 * @param storePassSrc : the callback handler that retrieves the store password. 
-	 * @return
 	 * @throws KeyStoreException either NoSuchAlgorithmException or NoSuchProviderException
 	 * @throws NoSuchAlgorithmException  if the algorithm used to check the integrity of the keystore cannot be found
 	 * @throws CertificateException if any of the certificates in the keystore could not be loaded
@@ -112,7 +104,6 @@ public class KeyStoreService {
 	 * @param storeId : The store id. This is passed to the callback handler to identify the requested password record.
 	 * @param storeType : the type of this key store. f null, the defaut java keystore type is used.
 	 * @param storePassSrc : the callback handler that retrieves the store password. 
-	 * @return
 	 * @throws KeyStoreException either NoSuchAlgorithmException or NoSuchProviderException
 	 * @throws NoSuchAlgorithmException  if the algorithm used to check the integrity of the keystore cannot be found
 	 * @throws CertificateException if any of the certificates in the keystore could not be loaded
@@ -125,9 +116,6 @@ public class KeyStoreService {
 	
 	/**
 	 * Put the given entries into a key store. The key store must have been initialized before.
-	 * 
-	 * @param ks
-	 * @param keyEntries
 	 */
 	public static void fillKeyStore(final KeyStore ks, Collection<KeyEntryData> keyEntries) {
 		try {

@@ -1,4 +1,4 @@
-# Keu Utils
+# Key Utils
 
 JCA cryptography routines including
 

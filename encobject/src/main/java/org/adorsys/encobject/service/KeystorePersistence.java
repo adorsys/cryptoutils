@@ -41,13 +41,37 @@ public class KeystorePersistence {
 		}
 	}
 	
-	public KeyStore loadKeystore(ObjectHandle handle, CallbackHandler handler) throws ObjectNotFoundException, CertificateException, WrongKeystoreCredentialException, MissingKeystoreAlgorithmException, MissingKeystoreProviderException, MissingKeyAlgorithmException, IOException, UnknownContainerException{
+	public KeyStore loadKeystore(ObjectHandle handle, CallbackHandler handler) throws KeystoreNotFoundException, CertificateException, WrongKeystoreCredentialException, MissingKeystoreAlgorithmException, MissingKeystoreProviderException, MissingKeyAlgorithmException, IOException, UnknownContainerException{
 		KeystoreData keystoreData = loadKeystoreData(handle);
 		return initKeystore(keystoreData, handle.getName(), handler);
 	}	
 	
-	private KeystoreData loadKeystoreData(ObjectHandle handle) throws ObjectNotFoundException, UnknownContainerException{
-		byte[] keyStoreBytes = blobStoreConnection.getBlob(handle);
+	/**
+	 * Checks if a keystore if available for the given handle. This is generally true if 
+	 * the container exists and the file with name "name" is in that container.
+	 * 
+	 * @param handle
+	 * @return
+	 * @throws ObjectNotFoundException
+	 * @throws UnknownContainerException
+	 */
+	public boolean hasKeystore(ObjectHandle handle) {
+		try {
+			return blobStoreConnection.getBlob(handle)!=null;
+		} catch (UnknownContainerException | ObjectNotFoundException e) {
+			return false;
+		}
+	}
+
+	
+	private KeystoreData loadKeystoreData(ObjectHandle handle) throws KeystoreNotFoundException, UnknownContainerException{
+		byte[] keyStoreBytes;
+		try {
+			keyStoreBytes = blobStoreConnection.getBlob(handle);
+		} catch (ObjectNotFoundException e) {
+			throw new KeystoreNotFoundException(e.getMessage(), e);
+		}
+		
 		try {
 			return KeystoreData.parseFrom(keyStoreBytes);
 		} catch (IOException e) {

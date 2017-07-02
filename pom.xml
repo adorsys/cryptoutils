@@ -44,6 +44,15 @@
 		<module>jtstamp</module>
 		<module>jkeyutils</module>
 	</modules>
+	<repositories>
+		<repository>
+			<id>jclouds-snapshots</id>
+			<url>https://repository.apache.org/content/repositories/snapshots</url>
+			<snapshots>
+				<enabled>true</enabled>
+			</snapshots>
+		</repository>
+	</repositories>
 	<dependencyManagement>
 		<dependencies>			
 			<dependency>

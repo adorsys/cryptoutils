@@ -16,6 +16,7 @@
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 		<version.swagger>1.5.5</version.swagger>
 		<jclouds.version>2.1.0-SNAPSHOT</jclouds.version>
+		<envutils.version>0.2</envutils.version>
 	</properties>
 	<build>
 		<finalName>encobject</finalName>
@@ -90,6 +91,14 @@
 				<artifactId>filesystem</artifactId>
 				<version>${jclouds.version}</version>
 			</dependency>
+
+			<!-- Env -->
+			<dependency>
+				<groupId>de.adorsys.envutils</groupId>
+				<artifactId>envutils4j</artifactId>
+				<version>${envutils.version}</version>
+			</dependency>
+
 		</dependencies>
 	</dependencyManagement>
 	<dependencies>
@@ -118,6 +127,10 @@
 		<dependency>
 			<groupId>org.apache.jclouds.api</groupId>
 			<artifactId>filesystem</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>de.adorsys.envutils</groupId>
+			<artifactId>envutils4j</artifactId>
 		</dependency>
 
 		<dependency>

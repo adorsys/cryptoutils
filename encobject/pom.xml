@@ -4,7 +4,7 @@
 	<parent>
 		<groupId>de.adorsys.cryptoutils</groupId>
 		<artifactId>cryptoutils</artifactId>
-		<version>0.4-SNAPSHOT</version>
+		<version>0.4</version>
 	</parent>
 	<artifactId>encobject</artifactId>
 
@@ -71,11 +71,11 @@
 			<dependency>
 				<groupId>de.adorsys.cryptoutils</groupId>
 				<artifactId>jjwk</artifactId>
-				<version>0.4-SNAPSHOT</version>
+				<version>0.4</version>
 			</dependency>
 			<dependency>
 				<groupId>de.adorsys.cryptoutils</groupId>
-				<version>0.4-SNAPSHOT</version>
+				<version>0.4</version>
 				<artifactId>jkeyutils</artifactId>
 			</dependency>
 

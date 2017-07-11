@@ -54,15 +54,15 @@ public class ServerObjectPersistence {
 	/**
 	 * Uses the given keyId to encrypt and store data[].
 	 * 
-	 * @param data
-	 * @param metaIno
-	 * @param handle
-	 * @param serverKeyManager
-	 * @param keyID
-	 * @param encParams
-	 * @throws UnsupportedEncAlgorithmException
-	 * @throws UnsupportedKeyLengthException
-	 * @throws UnknownContainerException
+	 * @param data data
+	 * @param metaIno metaIno
+	 * @param handle handle
+	 * @param serverKeyManager serverKeyManager
+	 * @param keyID keyID
+	 * @param encParams encParams
+	 * @throws UnsupportedEncAlgorithmException UnsupportedEncAlgorithmException
+	 * @throws UnsupportedKeyLengthException UnsupportedKeyLengthException
+	 * @throws UnknownContainerException UnknownContainerException
 	 */
 	public void storeObject(byte[] data, ContentMetaInfo metaIno, ObjectHandle handle,
 			ServerKeyManager serverKeyManager, String keyID, EncryptionParams encParams)
@@ -137,12 +137,12 @@ public class ServerObjectPersistence {
 	/**
 	 * Loads the object stored under the given handle. Uses a server key to decrypt the object.
 	 * 
-	 * @param handle
-	 * @param serverKeyManager
-	 * @return
-	 * @throws ObjectNotFoundException
-	 * @throws WrongKeyCredentialException
-	 * @throws UnknownContainerException
+	 * @param handle handle
+	 * @param serverKeyManager serverKeyManager
+	 * @return byte[]
+	 * @throws ObjectNotFoundException ObjectNotFoundException
+	 * @throws WrongKeyCredentialException WrongKeyCredentialException
+	 * @throws UnknownContainerException UnknownContainerException
 	 */
 	public byte[] loadObject(ObjectHandle handle, ServerKeyManager serverKeyManager)
 			throws ObjectNotFoundException, WrongKeyCredentialException, UnknownContainerException {

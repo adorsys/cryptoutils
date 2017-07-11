@@ -35,7 +35,7 @@ public class ObjectPersistenceAdapter {
 	/**
 	 * Checks if the user with the given key credential has a store.
 	 * 
-	 * @return
+	 * @return if the given key credential has a store
 	 */
 	public boolean hasStore(){
 		return encObjectService.hasKeystore(keyCredentials);
@@ -43,8 +43,6 @@ public class ObjectPersistenceAdapter {
 	
 	/**
 	 * Initializes the store of the user with the given keyCredentials
-	 * 
-	 * @return
 	 */
 	public void initStore(){
 		try {

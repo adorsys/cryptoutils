@@ -47,13 +47,11 @@ public class KeystorePersistence {
 	}	
 	
 	/**
-	 * Checks if a keystore if available for the given handle. This is generally true if 
+	 * Checks if a keystore available for the given handle. This is generally true if
 	 * the container exists and the file with name "name" is in that container.
 	 * 
-	 * @param handle
-	 * @return
-	 * @throws ObjectNotFoundException
-	 * @throws UnknownContainerException
+	 * @param handle handle to check
+	 * @return if a keystore available for the given handle
 	 */
 	public boolean hasKeystore(ObjectHandle handle) {
 		try {

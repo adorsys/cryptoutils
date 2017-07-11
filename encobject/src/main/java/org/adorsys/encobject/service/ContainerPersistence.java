@@ -15,8 +15,9 @@ public class ContainerPersistence {
 	}
 
 	/**
-	 * Creates a container in the blob store. 
-	 * 
+	 * Creates a container in the blob store.
+     *
+	 * @param container container name
 	 * @throws ContainerExistsException if a container with the same name already exists in the blob store.
 	 */
 	public void creteContainer(String container) throws ContainerExistsException {
@@ -25,6 +26,9 @@ public class ContainerPersistence {
 	
 	/**
 	 * Checks if a container with this name exists.
+     *
+     * @param container container name
+     * @return true if a container with this name exists
 	 */
 	public boolean containerExists(String container){
 		return blobStoreConnection.containerExists(container);
@@ -32,6 +36,9 @@ public class ContainerPersistence {
 	
 	/**
 	 * Delete the container with the given name.
+     *
+     * @param container container name
+	 * @throws UnknownContainerException when no container with given name exists
 	 */
 	public void deleteContainer(String container) throws UnknownContainerException {
 		blobStoreConnection.deleteContainer(container);

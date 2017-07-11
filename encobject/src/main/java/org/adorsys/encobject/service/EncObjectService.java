@@ -34,8 +34,8 @@ public class EncObjectService {
 	/**
 	 * Checks if the container with the given name exists.
 	 * 
-	 * @param container
-	 * @throws ContainerExistsException
+	 * @param container container to check
+	 * @return if container exists
 	 */
 	public boolean containerExists(String container) {
 		return containerPersistence.containerExists(container);

@@ -60,7 +60,14 @@
 					</execution>
 				</executions>
 			</plugin>
-
+			<plugin>
+				<artifactId>maven-javadoc-plugin</artifactId>
+                <configuration>
+                    <excludePackageNames>org.adorsys.encobject.domain.*</excludePackageNames>
+                    <show>public</show>
+                    <failOnError>false</failOnError>
+                </configuration>
+			</plugin>
 		</plugins>
 	</build>
 

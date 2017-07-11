@@ -51,7 +51,7 @@ public abstract class AbstractServerKeyManagerConfig {
 	/**
 	 * Implementation shall declare this as Spring Bean to allow injection in other beans.
 	 * 
-	 * @return
+	 * @return ServerKeyManager
 	 */
 	public abstract ServerKeyManager getServerKeyManager();
 	protected abstract FsPersistenceFactory getFsPersistenceFactory();

@@ -79,9 +79,11 @@ public class JwkExport {
 			throw new IllegalStateException(e);
 		}
 	}
-	
+
 	/**
 	 * Select a random key by random picking a number between 0 (inclusive) and size exclusive;
+	 * @param keys keys
+	 * @return jwk
 	 */
     public static JWK randomKey(List<JWK> keys){
     	int nextInt = RandomUtils.nextInt(0, keys.size());

@@ -20,9 +20,12 @@ import com.nimbusds.jose.jwk.JWKSet;
 import com.nimbusds.jose.util.Base64URL;
 
 public class FixKeyId {
-	
+
 	/**
 	 * Replaces each alias of a store with the base 64 encoded sha-1 thumbprint of the corresponding key.
+	 * @param ks ks
+	 * @param callbackHandler callbackHandler
+	 * @return value
 	 */
 	public static boolean fixKeyId(final KeyStore ks, CallbackHandler callbackHandler) {
 		try {

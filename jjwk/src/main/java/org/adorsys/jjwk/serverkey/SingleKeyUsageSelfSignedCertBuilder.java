@@ -29,16 +29,18 @@ public class SingleKeyUsageSelfSignedCertBuilder {
 	private int[] keyUsages;
 
 	boolean dirty = false;
+
 	/**
 	 * Returns the message key pair subject certificate holder.
-	 * 
-	 * Following entity must be validated  
-	 * 
-	 * Will generate a self signed key pair. If there is no UniqueIdentifier in the provided 
+	 *
+	 * Following entity must be validated
+	 *
+	 * Will generate a self signed key pair. If there is no UniqueIdentifier in the provided
 	 * subjectDN, the generated public key identifier will be used for that purpose
 	 * and for the subjectUniqueID of the certificate. Same applies for the issuer fields.
-	 * 
-	 * @return KeyPairAndCertificateHolder
+	 *
+	 * @param keyPair keyPair
+	 * @return SelfSignedKeyPairData
 	 */
 	public SelfSignedKeyPairData build(KeyPair keyPair) {
 		if(dirty)throw new IllegalStateException("Builder can not be reused");

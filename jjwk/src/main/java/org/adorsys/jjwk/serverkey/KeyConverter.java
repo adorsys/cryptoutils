@@ -25,13 +25,6 @@ import com.nimbusds.jose.jwk.SecretJWK;
 public class KeyConverter {
 
     /**
-     *
-     * @param jwkList The JWK list. May be {@code null}.
-     *
-     * @return The converted keys, empty set if none or {@code null}.
-     */
-
-    /**
      * Converts the specified of JSON Web Keys (JWK) it's standard Java
      * class representation. Asymmetric {@link RSAKey RSA} and
      * {@link ECKey EC key} pairs are converted to
@@ -39,7 +32,7 @@ public class KeyConverter {
      * (if specified) objects. {@link OctetSequenceKey secret JWKs} are
      * converted to {@link javax.crypto.SecretKey} objects.
      *
-     * @param jwk
+     * @param jwk jwk
      * @return private key, secret key or nul;
      */
     public static Key toPrivateOrSecret(final JWK jwk) {

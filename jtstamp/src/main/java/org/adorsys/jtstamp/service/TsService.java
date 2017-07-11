@@ -42,7 +42,10 @@ public class TsService {
 
 	/**
 	 * Generates a timestap jwt for the caller, using one of the keys of the server.
-	 * 
+	 *
+     * @throws TsMissingFieldException TsMissingFieldException
+     * @throws TsSignatureException TsSignatureException
+     * @return stamp
 	 * @param data : data sent by the caller for time stamping.
 	 * @param iss : the issuer. Set by the server using this routine. Might be retrieved from the 
 	 *   URIInfo object in a REST application.

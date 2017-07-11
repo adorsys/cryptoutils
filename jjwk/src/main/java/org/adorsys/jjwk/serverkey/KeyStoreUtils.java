@@ -31,6 +31,7 @@ public class KeyStoreUtils {
      * @throws CertificateException if any of the certificates in the keystore could not be loaded
      * @throws UnrecoverableKeyException if a password is required but not given, or if the given password was incorrect
      * @throws IOException if there is an I/O or format problem with the keystore data
+     * @return KeyStore keystore
      */
     public static KeyStore loadKeyStore(InputStream in, String storeId, String storeType, CallbackHandler storePassSrc) throws KeyStoreException, NoSuchAlgorithmException, CertificateException, UnrecoverableKeyException, IOException {
 

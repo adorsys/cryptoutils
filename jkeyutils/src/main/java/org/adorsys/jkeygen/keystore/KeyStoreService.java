@@ -33,6 +33,9 @@ public class KeyStoreService {
 
 	/**
 	 * Create an initializes a new key store. The key store is not yet password protected.
+	 * @param storeType storeType
+	 * @return KeyStore keyStore
+	 * @throws IOException IOException
 	 */
 	public static KeyStore newKeyStore(String storeType) throws IOException {
 
@@ -46,10 +49,13 @@ public class KeyStoreService {
 			throw new IllegalStateException(e);
 		}
 	}
-	
+
 	/**
 	 * Write this key store into a byte array
-	 * 
+	 * @param keystore keystore
+	 * @param storeId storeId
+	 * @param storePassSrc storePassSrc
+	 * @return key store byte array
 	 * @throws IOException if there was an I/O problem with data
 	 * @throws CertificateException if any of the certificates included in the keystore data could not be stored
 	 * @throws NoSuchAlgorithmException  if the appropriate data integrity algorithm could not be found
@@ -76,6 +82,7 @@ public class KeyStoreService {
 	 * @throws CertificateException if any of the certificates in the keystore could not be loaded
 	 * @throws UnrecoverableKeyException if a password is required but not given, or if the given password was incorrect
 	 * @throws IOException if there is an I/O or format problem with the keystore data
+	 * @return KeyStore
 	 */
 	public static KeyStore loadKeyStore(InputStream in, String storeId, String storeType, CallbackHandler storePassSrc) throws KeyStoreException, NoSuchAlgorithmException, CertificateException, UnrecoverableKeyException, IOException {
 
@@ -109,13 +116,16 @@ public class KeyStoreService {
 	 * @throws CertificateException if any of the certificates in the keystore could not be loaded
 	 * @throws UnrecoverableKeyException if a password is required but not given, or if the given password was incorrect
 	 * @throws IOException if there is an I/O or format problem with the keystore data
+	 * @return KeyStore
 	 */
 	public static KeyStore loadKeyStore(byte[] data, String storeId, String storeType, CallbackHandler storePassSrc) throws UnrecoverableKeyException, KeyStoreException, NoSuchAlgorithmException, CertificateException, IOException {
 		return loadKeyStore(new ByteArrayInputStream(data), storeId, storeType, storePassSrc);
-	}	
-	
+	}
+
 	/**
 	 * Put the given entries into a key store. The key store must have been initialized before.
+	 * @param ks ks
+	 * @param keyEntries keyEntries
 	 */
 	public static void fillKeyStore(final KeyStore ks, Collection<KeyEntryData> keyEntries) {
 		try {

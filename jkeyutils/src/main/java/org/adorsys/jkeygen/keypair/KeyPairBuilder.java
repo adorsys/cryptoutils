@@ -25,6 +25,7 @@ public class KeyPairBuilder {
 
 	/**
 	 * Returns the message key pair subject certificate holder.
+	 * @return KeyPair
 	 */
 	public KeyPair build() {
 		if(dirty)throw new IllegalStateException("Builder can not be reused");

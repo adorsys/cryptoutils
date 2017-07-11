@@ -63,6 +63,7 @@ public class ServerKeyMap {
 	
 	/**
 	 * Select a random key by random picking a number between 0 (inclusive) and size exclusive;
+     * @return KeyAndJwk keyAndJwk
 	 */
     public KeyAndJwk randomSignKey(){
     	int nextInt = RandomUtils.nextInt(0, signKeyeyList.size());

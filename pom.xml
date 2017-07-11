@@ -3,7 +3,7 @@
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>de.adorsys.cryptoutils</groupId>
 	<artifactId>cryptoutils</artifactId>
-	<version>0.5</version>
+	<version>0.6-SNAPSHOT</version>
 
 	<name>Cryptographic helpers for Secure Banking</name>
     <description>Utility Components for the development of secure banking modules. Components developed under this tree are released as jar.</description>
@@ -13,7 +13,7 @@
         <connection>scm:git@github.com:adorsys/cryptoutils.git</connection>
         <developerConnection>scm:git:git@github.com:adorsys/cryptoutils.git</developerConnection>
         <url>git@github.com:adorsys/cryptoutils.git</url>
-        <tag>cryptoutils-0.5</tag>
+        <tag>HEAD</tag>
     </scm>
     <licenses>
         <license>

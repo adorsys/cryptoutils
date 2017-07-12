@@ -4,7 +4,7 @@
 	<parent>
 		<groupId>de.adorsys.cryptoutils</groupId>
 		<artifactId>cryptoutils</artifactId>
-		<version>0.2-SNAPSHOT</version>
+		<version>0.6-SNAPSHOT</version>
 	</parent>
 	<artifactId>encobject</artifactId>
 
@@ -14,9 +14,9 @@
 		<maven.compiler.target>1.8</maven.compiler.target>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 		<version.swagger>1.5.5</version.swagger>
-		<jclouds.version>2.0.0</jclouds.version>
+		<jclouds.version>2.1.0-SNAPSHOT</jclouds.version>
+		<envutils.version>0.2</envutils.version>
 	</properties>
-
 	<build>
 		<finalName>encobject</finalName>
 		<pluginManagement>
@@ -60,7 +60,14 @@
 					</execution>
 				</executions>
 			</plugin>
-
+			<plugin>
+				<artifactId>maven-javadoc-plugin</artifactId>
+                <configuration>
+                    <excludePackageNames>org.adorsys.encobject.domain.*</excludePackageNames>
+                    <show>public</show>
+                    <failOnError>false</failOnError>
+                </configuration>
+			</plugin>
 		</plugins>
 	</build>
 
@@ -70,11 +77,11 @@
 			<dependency>
 				<groupId>de.adorsys.cryptoutils</groupId>
 				<artifactId>jjwk</artifactId>
-				<version>0.2-SNAPSHOT</version>
+				<version>0.6-SNAPSHOT</version>
 			</dependency>
 			<dependency>
 				<groupId>de.adorsys.cryptoutils</groupId>
-				<version>0.2-SNAPSHOT</version>
+				<version>0.6-SNAPSHOT</version>
 				<artifactId>jkeyutils</artifactId>
 			</dependency>
 
@@ -88,8 +95,16 @@
 			<dependency>
 				<groupId>org.apache.jclouds.api</groupId>
 				<artifactId>filesystem</artifactId>
-				<version>${jclouds.version}</version>
+				<version>2.1.0-SNAPSHOT</version>
 			</dependency>
+
+			<!-- Env -->
+			<dependency>
+				<groupId>de.adorsys.envutils</groupId>
+				<artifactId>envutils4j</artifactId>
+				<version>${envutils.version}</version>
+			</dependency>
+
 		</dependencies>
 	</dependencyManagement>
 	<dependencies>
@@ -118,6 +133,10 @@
 		<dependency>
 			<groupId>org.apache.jclouds.api</groupId>
 			<artifactId>filesystem</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>de.adorsys.envutils</groupId>
+			<artifactId>envutils4j</artifactId>
 		</dependency>
 
 		<dependency>

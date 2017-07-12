@@ -31,6 +31,16 @@ public class EncObjectService {
 		this.containerPersistence = new ContainerPersistence(blobStoreContextFactory);
 	}
 	
+	/**
+	 * Checks if the container with the given name exists.
+	 * 
+	 * @param container container to check
+	 * @return if container exists
+	 */
+	public boolean containerExists(String container) {
+		return containerPersistence.containerExists(container);
+	}
+
 	public void newContainer(String container) throws ContainerExistsException{
 		containerPersistence.creteContainer(container);
 	}
@@ -71,6 +81,10 @@ public class EncObjectService {
 			UnsupportedEncAlgorithmException, WrongKeyCredentialException, UnsupportedKeyLengthException, UnknownContainerException{
 		KeyStore keyStore = keystorePersistence.loadKeystore(keyCredentials.getHandle(), new PasswordCallbackHandler(keyCredentials.getStorepass().toCharArray()));
 		objectPersistence.storeObject(data, metaIno, handle, keyStore, keyCredentials.getKeyid(), new PasswordCallbackHandler(keyCredentials.getKeypass().toCharArray()), null);
+	}
+	
+	public boolean hasKeystore(KeyCredentials keyCredentials){
+		return keystorePersistence.hasKeystore(keyCredentials.getHandle());
 	}
 
 }

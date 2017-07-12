@@ -1,9 +1,10 @@
-package org.adorsys.jkeygen.keypair;
+package org.adorsys.jjwk.serverkey;
 
 import java.security.KeyPair;
 import java.util.List;
 
-import org.adorsys.jkeygen.utils.KeyUsageUtils;
+import org.adorsys.jkeygen.keypair.CaSignedCertificateBuilder;
+import org.adorsys.jkeygen.keypair.SelfSignedKeyPairData;
 import org.adorsys.jkeygen.validation.BatchValidator;
 import org.adorsys.jkeygen.validation.KeyValue;
 import org.adorsys.jkeygen.validation.ListOfKeyValueBuilder;
@@ -17,7 +18,7 @@ import org.bouncycastle.cert.X509CertificateHolder;
  * @author fpo
  *
  */
-public class SelfSignedCertBuilder {
+public class SingleKeyUsageSelfSignedCertBuilder {
 	
 	private String signatureAlgo;
 	private Integer notAfterInDays;
@@ -25,6 +26,7 @@ public class SelfSignedCertBuilder {
 	private X500Name subjectDN;	
 	private GeneralNames subjectAltNames;
 	private boolean ca;
+	private int[] keyUsages;
 
 	boolean dirty = false;
 
@@ -62,43 +64,49 @@ public class SelfSignedCertBuilder {
 			.withNotAfterInDays(notAfterInDays)
 			.withSubjectDN(subjectDN)
 			.withSubjectPublicKey(keyPair.getPublic());
-		int[] keyUsages = ca?KeyUsageUtils.getCaKeyUsages():KeyUsageUtils.getStdKeyUsages();
-		for (int keyUsage : keyUsages) builder = builder.withKeyUsage(keyUsage);
+		if(keyUsages!=null)
+			for (int keyUsage : keyUsages) builder = builder.withKeyUsage(keyUsage);
 
 		if(subjectAltNames!=null)
 			builder = builder.withSubjectAltNames(subjectAltNames);
+		
 		X509CertificateHolder subjectCert = builder.build(keyPair.getPrivate());
 
 		return new SelfSignedKeyPairData(keyPair, subjectCert);
 	}
 
-	public SelfSignedCertBuilder withSubjectDN(X500Name subjectDN) {
+	public SingleKeyUsageSelfSignedCertBuilder withSubjectDN(X500Name subjectDN) {
 		this.subjectDN = subjectDN;
 		return this;
 	}
 
-	public SelfSignedCertBuilder withSubjectAltNames(GeneralNames subjectAltNames) {
+	public SingleKeyUsageSelfSignedCertBuilder withSubjectAltNames(GeneralNames subjectAltNames) {
 		this.subjectAltNames = subjectAltNames;
 		return this;
 	}
 
-	public SelfSignedCertBuilder withSignatureAlgo(String signatureAlgo) {
+	public SingleKeyUsageSelfSignedCertBuilder withSignatureAlgo(String signatureAlgo) {
 		this.signatureAlgo = signatureAlgo;
 		return this;
 	}
 
-	public SelfSignedCertBuilder withNotAfterInDays(Integer notAfterInDays) {
+	public SingleKeyUsageSelfSignedCertBuilder withNotAfterInDays(Integer notAfterInDays) {
 		this.notAfterInDays = notAfterInDays;
 		return this;
 	}
 
-	public SelfSignedCertBuilder withNotBeforeInDays(Integer notBeforeInDays) {
+	public SingleKeyUsageSelfSignedCertBuilder withNotBeforeInDays(Integer notBeforeInDays) {
 		this.notBeforeInDays = notBeforeInDays;
 		return this;
 	}
 
-	public  SelfSignedCertBuilder withCa(boolean ca) {
+	public  SingleKeyUsageSelfSignedCertBuilder withCa(boolean ca) {
 		this.ca = ca;
+		return this;
+	}	
+
+	public  SingleKeyUsageSelfSignedCertBuilder withKeyUsages(int[] keyUsages) {
+		this.keyUsages = keyUsages;
 		return this;
 	}	
 }

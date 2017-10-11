@@ -20,6 +20,8 @@ import org.adorsys.jjwk.selector.JWEEncryptedSelector;
 import org.adorsys.jjwk.selector.UnsupportedEncAlgorithmException;
 import org.adorsys.jjwk.selector.UnsupportedKeyLengthException;
 import org.adorsys.jjwk.serverkey.ServerKeyManager;
+import org.adorsys.jjwk.serverkey.ServerKeyMap;
+import org.adorsys.jjwk.serverkey.ServerKeyMapProvider;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
 
@@ -53,26 +55,24 @@ public class ServerObjectPersistence {
 
 	/**
 	 * Uses the given keyId to encrypt and store data[].
-	 * 
+	 *
 	 * @param data data
-	 * @param metaIno metaIno
+	 * @param metaInfo metaIno
 	 * @param handle handle
-	 * @param serverKeyManager serverKeyManager
+	 * @param keyMapProvider keyMapProvider
 	 * @param keyID keyID
 	 * @param encParams encParams
 	 * @throws UnsupportedEncAlgorithmException UnsupportedEncAlgorithmException
 	 * @throws UnsupportedKeyLengthException UnsupportedKeyLengthException
 	 * @throws UnknownContainerException UnknownContainerException
 	 */
-	public void storeObject(byte[] data, ContentMetaInfo metaIno, ObjectHandle handle,
-			ServerKeyManager serverKeyManager, String keyID, EncryptionParams encParams)
-			throws UnsupportedEncAlgorithmException, UnsupportedKeyLengthException, UnknownContainerException {
+	public void storeObject(byte[] data, ContentMetaInfo metaInfo, ObjectHandle handle, ServerKeyMapProvider keyMapProvider, String keyID, EncryptionParams encParams) throws UnsupportedEncAlgorithmException, UnsupportedKeyLengthException, UnknownContainerException {
 		// We accept empty meta info
-		if (metaIno == null)
-			metaIno = new ContentMetaInfo();
+		if (metaInfo == null)
+			metaInfo = new ContentMetaInfo();
 
 		// Retrieve the key.
-		Key key = readKey(serverKeyManager, keyID);
+		Key key = readKey(keyMapProvider.getKeyMap(), keyID);
 
 		// Encryption params is optional. If not provided, we select an
 		// encryption param based on the key selected.
@@ -83,12 +83,12 @@ public class ServerObjectPersistence {
 		Builder headerBuilder = new JWEHeader.Builder(encParams.getEncAlgo(), encParams.getEncMethod()).keyID(keyID);
 
 		// content type
-		String contentTrype = metaIno.getContentTrype();
+		String contentTrype = metaInfo.getContentTrype();
 		if (StringUtils.isNotBlank(contentTrype)) {
 			headerBuilder = headerBuilder.contentType(contentTrype);
 		}
 
-		String zip = metaIno.getZip();
+		String zip = metaInfo.getZip();
 		if (StringUtils.isNotBlank(zip)) {
 			headerBuilder = headerBuilder.compressionAlgorithm(CompressionAlgorithm.DEF);
 		} else {
@@ -97,12 +97,12 @@ public class ServerObjectPersistence {
 			}
 		}
 
-		Map<String, Object> addInfos = metaIno.getAddInfos();
+		Map<String, Object> addInfos = metaInfo.getAddInfos();
 		// exp
-		if (metaIno.getExp() != null) {
+		if (metaInfo.getExp() != null) {
 			if (addInfos == null)
 				addInfos = new HashMap<>();
-			addInfos.put("exp", metaIno.getExp().getTime());
+			addInfos.put("exp", metaInfo.getExp().getTime());
 		}
 
 		if (addInfos != null) {
@@ -131,22 +131,19 @@ public class ServerObjectPersistence {
 			throw new IllegalStateException("Unsupported content type", e);
 		}
 		blobStoreConnection.putBlob(handle, bytesToStore);
-
 	}
 
 	/**
 	 * Loads the object stored under the given handle. Uses a server key to decrypt the object.
-	 * 
+	 *
 	 * @param handle handle
-	 * @param serverKeyManager serverKeyManager
+	 * @param keyMapProvider keyMapProvider
 	 * @return byte[]
 	 * @throws ObjectNotFoundException ObjectNotFoundException
 	 * @throws WrongKeyCredentialException WrongKeyCredentialException
 	 * @throws UnknownContainerException UnknownContainerException
 	 */
-	public byte[] loadObject(ObjectHandle handle, ServerKeyManager serverKeyManager)
-			throws ObjectNotFoundException, WrongKeyCredentialException, UnknownContainerException {
-
+	public byte[] loadObject(ObjectHandle handle, ServerKeyMapProvider keyMapProvider) throws UnknownContainerException, ObjectNotFoundException, WrongKeyCredentialException {
 		byte[] jweEncryptedBytes = blobStoreConnection.getBlob(handle);
 		String jweEncryptedObject;
 		try {
@@ -161,7 +158,7 @@ public class ServerObjectPersistence {
 			throw new IllegalStateException("Can not parse jwe object", e);
 		}
 		String keyID = jweObject.getHeader().getKeyID();
-		Key key = readKey(serverKeyManager, keyID);
+		Key key = readKey(keyMapProvider.getKeyMap(), keyID);
 
 		JWEDecrypter decrypter;
 		try {
@@ -181,7 +178,7 @@ public class ServerObjectPersistence {
 	 * Retrieves the key with the given keyID from the keystore. The key
 	 * password will be retrieved by calling the keyPassHandler.
 	 */
-	private Key readKey(ServerKeyManager serverKeyManager, String keyID) {
-		return serverKeyManager.getKeyMap().getKey(keyID);
+	private Key readKey(ServerKeyMap keyMap, String keyID) {
+		return keyMap.getKey(keyID);
 	}
 }

@@ -6,7 +6,7 @@ package org.adorsys.jjwk.serverkey;
  * @author fpo
  *
  */
-public class ServerKeyManager {
+public class ServerKeyManager implements ServerKeyMapProvider {
 
     private final ServerKeysHolder serverKeysHolder;
     private final ServerKeyMap keyMap;

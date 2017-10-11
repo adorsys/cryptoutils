@@ -30,6 +30,14 @@ public class KeystoreBuilder {
 	public byte[] build(CallbackHandler storePassSrc) throws IOException, NoSuchAlgorithmException, CertificateException{
 		KeyStore ks = KeyStoreService.newKeyStore(storeType);
 		KeyStoreService.fillKeyStore(ks, keyEntries.values());
+
 		return KeyStoreService.toByteArray(ks, storeId, storePassSrc);
+	}
+
+	public KeyStore build() throws IOException, NoSuchAlgorithmException, CertificateException{
+		KeyStore ks = KeyStoreService.newKeyStore(storeType);
+		KeyStoreService.fillKeyStore(ks, keyEntries.values());
+
+		return ks;
 	}
 }

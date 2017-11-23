@@ -53,6 +53,7 @@ catalog.xml
 # Maven #
 #########
 target
+pom.xml.versionsBackup
 
 # Maven shade
 #############

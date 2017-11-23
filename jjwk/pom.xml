@@ -14,10 +14,7 @@
 			<groupId>com.nimbusds</groupId>
 			<artifactId>nimbus-jose-jwt</artifactId>
 		</dependency>
-		<dependency>
-			<groupId>org.apache.commons</groupId>
-			<artifactId>commons-lang3</artifactId>
-		</dependency>
+
 		<dependency>
 			<groupId>commons-io</groupId>
 			<artifactId>commons-io</artifactId>
@@ -25,7 +22,6 @@
 
 		<dependency>
 			<groupId>de.adorsys.cryptoutils</groupId>
-			<version>0.7-SNAPSHOT</version>
 			<artifactId>jkeyutils</artifactId>
 		</dependency>
 

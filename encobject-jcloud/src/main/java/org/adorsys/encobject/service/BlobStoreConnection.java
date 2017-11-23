@@ -16,7 +16,7 @@ import org.jclouds.blobstore.domain.Blob;
  * @author fpo
  *
  */
-public class BlobStoreConnection {
+public class BlobStoreConnection implements StoreConnection {
 
 	private BlobStoreContextFactory blobStoreContextFactory;
 

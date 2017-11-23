@@ -15,12 +15,12 @@ public interface BlobStoreContextFactory {
 	 *
 	 * @return allocatedContext
 	 */
-	public BlobStoreContext alocate();
+	BlobStoreContext alocate();
 	
 	/**
 	 * Disposes the {@link BlobStoreContext}
 	 *
 	 * @param context Context to dispose
 	 */
-	public void dispose(BlobStoreContext context);
+	void dispose(BlobStoreContext context);
 }

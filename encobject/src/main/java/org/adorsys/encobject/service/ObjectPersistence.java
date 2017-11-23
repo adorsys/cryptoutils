@@ -38,12 +38,12 @@ public class ObjectPersistence {
 
 	private DefaultJWEDecrypterFactory decrypterFactory = new DefaultJWEDecrypterFactory();
 	
-	private BlobStoreConnection blobStoreConnection;
+	private final StoreConnection blobStoreConnection;
 
-	public ObjectPersistence(BlobStoreContextFactory blobStoreContextFactory) {
-		this.blobStoreConnection = new BlobStoreConnection(blobStoreContextFactory);
+	public ObjectPersistence(StoreConnection blobStoreConnection) {
+		this.blobStoreConnection = blobStoreConnection;
 	}
-	
+
 	public void storeObject(byte[] data, ContentMetaInfo metaIno, ObjectHandle handle, KeyStore keyStore, String keyID, CallbackHandler keyPassHandler, EncryptionParams encParams) throws UnsupportedEncAlgorithmException, WrongKeyCredentialException, UnsupportedKeyLengthException, UnknownContainerException {
 		// We accept empty meta info
 		if(metaIno==null) metaIno=new ContentMetaInfo();

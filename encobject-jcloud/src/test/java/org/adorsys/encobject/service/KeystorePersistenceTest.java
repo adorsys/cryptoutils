@@ -27,8 +27,8 @@ public class KeystorePersistenceTest {
 	public static void beforeClass(){
 		TestKeyUtils.turnOffEncPolicy();
 		storeContextFactory = new TestFsBlobStoreFactory();
-		keystorePersistence = new KeystorePersistence(storeContextFactory);
-		containerPersistence = new ContainerPersistence(storeContextFactory);
+		keystorePersistence = new BlobStoreKeystorePersistence(storeContextFactory);
+		containerPersistence = new ContainerPersistence(new BlobStoreConnection(storeContextFactory));
 		
 		try {
 			containerPersistence.creteContainer(container);

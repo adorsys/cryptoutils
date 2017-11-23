@@ -1,12 +1,7 @@
 package org.adorsys.encobject.utils;
 
-import java.io.ByteArrayInputStream;
-import java.lang.reflect.Field;
-import java.security.KeyStore;
-
-import javax.crypto.SecretKey;
-import javax.security.auth.callback.CallbackHandler;
-
+import com.nimbusds.jose.jwk.JWK;
+import com.nimbusds.jose.jwk.JWKSet;
 import org.adorsys.jjwk.keystore.JwkExport;
 import org.adorsys.jkeygen.keystore.KeyStoreService;
 import org.adorsys.jkeygen.keystore.KeystoreBuilder;
@@ -15,8 +10,11 @@ import org.adorsys.jkeygen.pwd.PasswordCallbackHandler;
 import org.adorsys.jkeygen.pwd.PasswordMapCallbackHandler;
 import org.adorsys.jkeygen.secretkey.SecretKeyBuilder;
 
-import com.nimbusds.jose.jwk.JWK;
-import com.nimbusds.jose.jwk.JWKSet;
+import javax.crypto.SecretKey;
+import javax.security.auth.callback.CallbackHandler;
+import java.io.ByteArrayInputStream;
+import java.lang.reflect.Field;
+import java.security.KeyStore;
 
 public class TestKeyUtils {
 	
@@ -26,7 +24,7 @@ public class TestKeyUtils {
 		try {
 	        Field field = Class.forName("javax.crypto.JceSecurity").getDeclaredField("isRestricted");
 	        field.setAccessible(true);
-	        field.set(null, java.lang.Boolean.FALSE);
+	        field.set(null, Boolean.FALSE);
 	    } catch (ClassNotFoundException | NoSuchFieldException | SecurityException | IllegalArgumentException | IllegalAccessException ex) {
 	        ex.printStackTrace(System.err);
 	    }		

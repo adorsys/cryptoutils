@@ -38,8 +38,8 @@ public class ObjectPersistenceTest {
 	public static void beforeClass(){
 		TestKeyUtils.turnOffEncPolicy();
 		storeContextFactory = new TestFsBlobStoreFactory();
-		objectInfoPersistence = new ObjectPersistence(storeContextFactory);
-		containerPersistence = new ContainerPersistence(storeContextFactory);
+		objectInfoPersistence = new ObjectPersistence(new BlobStoreConnection(storeContextFactory));
+		containerPersistence = new ContainerPersistence(new BlobStoreConnection(storeContextFactory));
 		
 		try {
 			containerPersistence.creteContainer(container);

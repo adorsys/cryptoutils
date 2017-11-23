@@ -1,10 +1,7 @@
 package org.adorsys.encobject.filesystem;
 
 import org.adorsys.encobject.serverdata.ServerObjectPersistence;
-import org.adorsys.encobject.service.BlobStoreContextFactory;
-import org.adorsys.encobject.service.ContainerPersistence;
-import org.adorsys.encobject.service.EncObjectService;
-import org.adorsys.encobject.service.KeystorePersistence;
+import org.adorsys.encobject.service.*;
 
 
 public class FsPersistenceFactory {
@@ -17,10 +14,16 @@ public class FsPersistenceFactory {
 
     public FsPersistenceFactory(String baseDir) {
     	blobStoreFactory = new FsBlobStoreFactory(baseDir);
-    	keystorePersistence = new KeystorePersistence(blobStoreFactory);
-    	containerPersistence = new ContainerPersistence(blobStoreFactory);
-    	serverObjectPersistence = new ServerObjectPersistence(blobStoreFactory);
-    	encObjectService = new EncObjectService(blobStoreFactory);
+    	keystorePersistence = new BlobStoreKeystorePersistence(blobStoreFactory);
+        BlobStoreConnection storeConnection = new BlobStoreConnection(blobStoreFactory);
+
+        containerPersistence = new ContainerPersistence(storeConnection);
+    	serverObjectPersistence = new ServerObjectPersistence(storeConnection);
+    	encObjectService = new EncObjectService(
+    	        keystorePersistence,
+                new ObjectPersistence(storeConnection),
+                containerPersistence
+        );
     }
 
     public BlobStoreContextFactory getBlobStoreContextFactory() {

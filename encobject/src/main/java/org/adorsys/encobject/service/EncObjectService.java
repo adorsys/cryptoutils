@@ -21,16 +21,20 @@ import org.adorsys.jkeygen.secretkey.SecretKeyBuilder;
 
 public class EncObjectService {
 
-	private KeystorePersistence keystorePersistence;
-	private ObjectPersistence objectPersistence;
-	private ContainerPersistence containerPersistence;
+	private final KeystorePersistence keystorePersistence;
+	private final ObjectPersistence objectPersistence;
+	private final ContainerPersistence containerPersistence;
 
-	public EncObjectService(BlobStoreContextFactory blobStoreContextFactory) {
-		this.keystorePersistence = new KeystorePersistence(blobStoreContextFactory);
-		this.objectPersistence = new ObjectPersistence(blobStoreContextFactory);
-		this.containerPersistence = new ContainerPersistence(blobStoreContextFactory);
+	public EncObjectService(
+			KeystorePersistence keystorePersistence,
+			ObjectPersistence objectPersistence,
+			ContainerPersistence containerPersistence
+	) {
+		this.keystorePersistence = keystorePersistence;
+		this.objectPersistence = objectPersistence;
+		this.containerPersistence = containerPersistence;
 	}
-	
+
 	/**
 	 * Checks if the container with the given name exists.
 	 * 

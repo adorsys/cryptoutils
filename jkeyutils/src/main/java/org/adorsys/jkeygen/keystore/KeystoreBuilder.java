@@ -12,7 +12,7 @@ import javax.security.auth.callback.CallbackHandler;
 public class KeystoreBuilder {
 	private String storeType;
 	private String storeId;
-	private Map<String, KeyEntryData> keyEntries = new HashMap<>();
+	private Map<String, KeyEntry> keyEntries = new HashMap<>();
 	
 	public KeystoreBuilder withStoreType(String storeType) {
 		this.storeType = storeType;
@@ -22,7 +22,7 @@ public class KeystoreBuilder {
 		this.storeId = storeId;
 		return this;
 	}
-	public KeystoreBuilder withKeyEntry(KeyEntryData keyEntry) {
+	public KeystoreBuilder withKeyEntry(KeyEntry keyEntry) {
 		this.keyEntries.put(keyEntry.getAlias(), keyEntry);
 		return this;
 	}

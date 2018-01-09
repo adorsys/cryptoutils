@@ -1,27 +1,23 @@
 package org.adorsys.jkeygen.keystore;
 
-import javax.security.auth.callback.CallbackHandler;
-
+import lombok.Builder;
+import lombok.Getter;
 import org.adorsys.jkeygen.keypair.CertificationResult;
 import org.adorsys.jkeygen.keypair.SelfSignedKeyPairData;
 
-public class KeyPairData extends KeyEntryData {
+import javax.security.auth.callback.CallbackHandler;
 
-	private final SelfSignedKeyPairData keyPairs;
-	
-	private final CertificationResult certification;
-	
-	public KeyPairData(SelfSignedKeyPairData keyPairs, CertificationResult certification, String alias, CallbackHandler passwordSource) {
-		super(alias, passwordSource);
-		this.keyPairs = keyPairs;
-		this.certification = certification;
-	}
+@Getter
+public class KeyPairData extends KeyEntryData implements KeyPairEntry {
 
-	public SelfSignedKeyPairData getKeyPairs() {
-		return keyPairs;
-	}
+    private final SelfSignedKeyPairData keyPairs;
 
-	public CertificationResult getCertification() {
-		return certification;
-	}
+    private final CertificationResult certification;
+
+    @Builder
+    private KeyPairData(CallbackHandler passwordSource, String alias, SelfSignedKeyPairData keyPairs, CertificationResult certification) {
+        super(passwordSource, alias);
+        this.keyPairs = keyPairs;
+        this.certification = certification;
+    }
 }

@@ -16,6 +16,7 @@ import org.adorsys.jjwk.selector.UnsupportedEncAlgorithmException;
 import org.adorsys.jjwk.selector.UnsupportedKeyLengthException;
 import org.adorsys.jkeygen.keystore.KeyStoreService;
 import org.adorsys.jkeygen.keystore.SecretKeyData;
+import org.adorsys.jkeygen.keystore.SecretKeyEntry;
 import org.adorsys.jkeygen.pwd.PasswordCallbackHandler;
 import org.adorsys.jkeygen.secretkey.SecretKeyBuilder;
 
@@ -56,7 +57,7 @@ public class EncObjectService {
 		CallbackHandler secretKeyPassHandler = new PasswordCallbackHandler(keyCredentials.getKeypass().toCharArray());
 		
 		SecretKey secretKey = new SecretKeyBuilder().withKeyAlg(keyParams.getKeyAlogirithm()).withKeyLength(keyParams.getKeyLength()).build();	
-		SecretKeyData secretKeyData = new SecretKeyData(secretKey, keyCredentials.getKeyid(), secretKeyPassHandler);
+		SecretKeyEntry secretKeyData = SecretKeyData.builder().secretKey(secretKey).alias(keyCredentials.getKeyid()).passwordSource(secretKeyPassHandler).build();
 
 		KeyStore keyStore;
 		try {

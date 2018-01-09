@@ -11,10 +11,7 @@ import javax.security.auth.callback.CallbackHandler;
 import org.adorsys.jkeygen.keypair.KeyPairBuilder;
 import org.adorsys.jkeygen.keypair.SelfSignedCertBuilder;
 import org.adorsys.jkeygen.keypair.SelfSignedKeyPairData;
-import org.adorsys.jkeygen.keystore.KeyPairData;
-import org.adorsys.jkeygen.keystore.KeyStoreService;
-import org.adorsys.jkeygen.keystore.KeystoreBuilder;
-import org.adorsys.jkeygen.keystore.SecretKeyData;
+import org.adorsys.jkeygen.keystore.*;
 import org.adorsys.jkeygen.pwd.PasswordCallbackHandler;
 import org.adorsys.jkeygen.pwd.PasswordMapCallbackHandler;
 import org.adorsys.jkeygen.secretkey.SecretKeyBuilder;
@@ -67,17 +64,17 @@ public class Ktsu {
 		}
 	}
 	
-	private static KeyPairData newKeyPair(String userName, String alias, CallbackHandler keyPassHandler){
+	private static KeyPairEntry newKeyPair(String userName, String alias, CallbackHandler keyPassHandler){
 		KeyPair keyPair = new KeyPairBuilder().withKeyAlg("RSA").withKeyLength(2048).build();
 		X500Name cn = new X500NameBuilder(BCStyle.INSTANCE).addRDN(BCStyle.CN, userName).build();
 		SelfSignedKeyPairData keyPairData = new SelfSignedCertBuilder().withSubjectDN(cn)
 				.withSignatureAlgo("SHA256withRSA").withNotAfterInDays(300).withCa(false).build(keyPair);
-		return new KeyPairData(keyPairData, null, alias, keyPassHandler);
+		return KeyPairData.builder().keyPairs(keyPairData).alias(alias).passwordSource(keyPassHandler).build();
 	}
 	
-	private static SecretKeyData newSecretKey(String alias, CallbackHandler secretKeyPassHandler){
+	private static SecretKeyEntry newSecretKey(String alias, CallbackHandler secretKeyPassHandler){
 		SecretKey secretKey = new SecretKeyBuilder().withKeyAlg("AES").withKeyLength(256).build();	
-		return new SecretKeyData(secretKey, alias, secretKeyPassHandler);
+		return SecretKeyData.builder().secretKey(secretKey).alias(alias).passwordSource(secretKeyPassHandler).build();
 	}
 	
 	public static PasswordMapCallbackHandler.Builder callbackHandlerBuilder(){

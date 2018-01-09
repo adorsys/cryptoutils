@@ -127,15 +127,15 @@ public class KeyStoreService {
 	 * @param ks ks
 	 * @param keyEntries keyEntries
 	 */
-	public static void fillKeyStore(final KeyStore ks, Collection<KeyEntryData> keyEntries) {
+	public static void fillKeyStore(final KeyStore ks, Collection<KeyEntry> keyEntries) {
 		try {
-			for (KeyEntryData keyEntryData : keyEntries) {
-				if(keyEntryData instanceof KeyPairData){
-					addToKeyStore(ks, (KeyPairData)keyEntryData);
-				} else if (keyEntryData instanceof SecretKeyData){
-					addToKeyStore(ks, (SecretKeyData)keyEntryData);
-				} else if (keyEntryData instanceof TrustedCertData){
-					addToKeyStore(ks, (TrustedCertData)keyEntryData);
+			for (KeyEntry keyEntryData : keyEntries) {
+				if(keyEntryData instanceof KeyPairEntry){
+					addToKeyStore(ks, (KeyPairEntry)keyEntryData);
+				} else if (keyEntryData instanceof SecretKeyEntry){
+					addToKeyStore(ks, (SecretKeyEntry)keyEntryData);
+				} else if (keyEntryData instanceof TrustedCertEntry){
+					addToKeyStore(ks, (TrustedCertEntry)keyEntryData);
 				} 
 			}
 		} catch(KeyStoreException ex){
@@ -143,7 +143,7 @@ public class KeyStoreService {
 		}
 	}
 
-	private static void addToKeyStore(final KeyStore ks, KeyPairData keyPairHolder) throws KeyStoreException {
+	private static void addToKeyStore(final KeyStore ks, KeyPairEntry keyPairHolder) throws KeyStoreException {
 
 		List<Certificate> chainList = new ArrayList<>();
 		CertificationResult certification = keyPairHolder.getCertification();
@@ -160,7 +160,7 @@ public class KeyStoreService {
 				PasswordCallbackUtils.getPassword(keyPairHolder.getPasswordSource(), keyPairHolder.getAlias()), chain);
 	}
 
-	public static void addToKeyStore(final KeyStore ks, SecretKeyData secretKeyData) {
+	public static void addToKeyStore(final KeyStore ks, SecretKeyEntry secretKeyData) {
 		KeyStore.SecretKeyEntry entry = new KeyStore.SecretKeyEntry(secretKeyData.getSecretKey());
 		ProtectionParameter protParam = new KeyStore.PasswordProtection(PasswordCallbackUtils.getPassword(secretKeyData.getPasswordSource(), secretKeyData.getAlias()));
 		try {
@@ -172,7 +172,7 @@ public class KeyStoreService {
 	}
 	
 	
-	private static void addToKeyStore(final KeyStore ks, TrustedCertData trustedCertHolder) throws KeyStoreException {
+	private static void addToKeyStore(final KeyStore ks, TrustedCertEntry trustedCertHolder) throws KeyStoreException {
 		ks.setCertificateEntry(trustedCertHolder.getAlias(), V3CertificateUtils.getX509JavaCertificate(trustedCertHolder.getCertificate()));
 	}
 }

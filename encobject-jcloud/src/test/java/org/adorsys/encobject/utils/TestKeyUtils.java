@@ -6,6 +6,7 @@ import org.adorsys.jjwk.keystore.JwkExport;
 import org.adorsys.jkeygen.keystore.KeyStoreService;
 import org.adorsys.jkeygen.keystore.KeystoreBuilder;
 import org.adorsys.jkeygen.keystore.SecretKeyData;
+import org.adorsys.jkeygen.keystore.SecretKeyEntry;
 import org.adorsys.jkeygen.pwd.PasswordCallbackHandler;
 import org.adorsys.jkeygen.pwd.PasswordMapCallbackHandler;
 import org.adorsys.jkeygen.secretkey.SecretKeyBuilder;
@@ -48,9 +49,9 @@ public class TestKeyUtils {
 		}
 	}
 
-	public static SecretKeyData newSecretKey(String alias, CallbackHandler secretKeyPassHandler){
+	public static SecretKeyEntry newSecretKey(String alias, CallbackHandler secretKeyPassHandler){
 		SecretKey secretKey = new SecretKeyBuilder().withKeyAlg("AES").withKeyLength(256).build();	
-		return new SecretKeyData(secretKey, alias, secretKeyPassHandler);
+		return SecretKeyData.builder().secretKey(secretKey).alias(alias).passwordSource(secretKeyPassHandler).build();
 	}
 	
 	public static PasswordMapCallbackHandler.Builder callbackHandlerBuilder(String secretKeyAlias, char[] secretKeyPass){

@@ -11,6 +11,7 @@ import org.adorsys.jkeygen.keypair.KeyPairBuilder;
 import org.adorsys.jkeygen.keypair.SelfSignedCertBuilder;
 import org.adorsys.jkeygen.keypair.SelfSignedKeyPairData;
 import org.adorsys.jkeygen.keystore.KeyPairData;
+import org.adorsys.jkeygen.keystore.KeyPairEntry;
 import org.adorsys.jkeygen.keystore.KeyStoreService;
 import org.adorsys.jkeygen.keystore.KeystoreBuilder;
 import org.adorsys.jkeygen.pwd.PasswordCallbackHandler;
@@ -55,12 +56,12 @@ public class KstUtils {
 		}
 	}
 	
-	private static KeyPairData newKeyPair(String userName, String alias, CallbackHandler keyPassHandler){
+	private static KeyPairEntry newKeyPair(String userName, String alias, CallbackHandler keyPassHandler){
 		KeyPair keyPair = new KeyPairBuilder().withKeyAlg("RSA").withKeyLength(2048).build();
 		X500Name cn = new X500NameBuilder(BCStyle.INSTANCE).addRDN(BCStyle.CN, userName).build();
 		SelfSignedKeyPairData keyPairData = new SelfSignedCertBuilder().withSubjectDN(cn)
 				.withSignatureAlgo("SHA256withRSA").withNotAfterInDays(300).withCa(false).build(keyPair);
-		return new KeyPairData(keyPairData, null, alias, keyPassHandler);
+		return KeyPairData.builder().keyPairs(keyPairData).alias(alias).passwordSource(keyPassHandler).build();
 	}
 
 	public static PasswordMapCallbackHandler.Builder callbackHandlerBuilder(){

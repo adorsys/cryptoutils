@@ -77,10 +77,11 @@ public class KeyStoreServiceTest {
 		CallbackHandler keyPassHandler = new PasswordCallbackHandler(keyPairPass);
 		CallbackHandler storePassHandler = new PasswordCallbackHandler(storePass);
 
-		KeyPairData keyPairStoreData = new KeyPairData(keyPairData, null, keyPairAlias, keyPassHandler);
+		KeyPairEntry keyPairStoreData = KeyPairData.builder().keyPairs(keyPairData).alias(keyPairAlias).passwordSource(keyPassHandler).build();
 
 		CallbackHandler secretKeyPassHandler = new PasswordCallbackHandler(secretKeyPass);
-		SecretKeyData secretKeyData = new SecretKeyData(secretKey, secretKeyAlias, secretKeyPassHandler);
+		SecretKeyEntry secretKeyData = SecretKeyData.builder().secretKey(secretKey).alias(secretKeyAlias).passwordSource(secretKeyPassHandler).build();
+
 		try {
 			new KeystoreBuilder()
 				.withKeyEntry(keyPairStoreData)
@@ -223,10 +224,10 @@ public class KeyStoreServiceTest {
 		CallbackHandler keyPassHandler = new PasswordCallbackHandler(keyPairPass);
 		CallbackHandler storePassHandler = new PasswordCallbackHandler(storePass);
 
-		KeyPairData keyPairStoreData = new KeyPairData(keyPairData, null, keyPairAlias, keyPassHandler);
+		KeyPairEntry keyPairStoreData = KeyPairData.builder().keyPairs(keyPairData).alias(keyPairAlias).passwordSource(keyPassHandler).build();
 
 		CallbackHandler secretKeyPassHandler = new PasswordCallbackHandler(secretKeyPass);
-		SecretKeyData secretKeyData = new SecretKeyData(secretKey, secretKeyAlias, secretKeyPassHandler);
+		SecretKeyEntry secretKeyData = SecretKeyData.builder().secretKey(secretKey).alias(secretKeyAlias).passwordSource(secretKeyPassHandler).build();
 
 		try {
 			return new KeystoreBuilder()

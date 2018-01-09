@@ -30,9 +30,7 @@ import org.adorsys.jjwk.serverkey.ServerKeysHolder;
 import org.adorsys.jjwk.serverkey.SingleKeyUsageSelfSignedCertBuilder;
 import org.adorsys.jkeygen.keypair.KeyPairBuilder;
 import org.adorsys.jkeygen.keypair.SelfSignedKeyPairData;
-import org.adorsys.jkeygen.keystore.KeyPairData;
-import org.adorsys.jkeygen.keystore.KeystoreBuilder;
-import org.adorsys.jkeygen.keystore.SecretKeyData;
+import org.adorsys.jkeygen.keystore.*;
 import org.adorsys.jkeygen.pwd.PasswordCallbackHandler;
 import org.adorsys.jkeygen.secretkey.SecretKeyBuilder;
 import org.apache.commons.lang3.BooleanUtils;
@@ -171,7 +169,7 @@ public abstract class AbstractServerKeyManagerConfig {
         }
     }
 
-    private KeyPairData newKeyPair(String userName, String alias, CallbackHandler keyPassHandler, int[] keyUsages) {
+    private KeyPairEntry newKeyPair(String userName, String alias, CallbackHandler keyPassHandler, int[] keyUsages) {
     	String keyAlgo = EnvProperties.getEnvOrSysProp(ServerKeyPropertiesConstants.SERVER_KEYSTORE_KEYPAIR_ALGO, "RSA");// RSA
     	String keySizeStr = EnvProperties.getEnvOrSysProp(ServerKeyPropertiesConstants.SERVER_KEYSTORE_KEYPAIR_SIZE, "2048");// 2048
     	String serverSigAlgo = EnvProperties.getEnvOrSysProp(ServerKeyPropertiesConstants.SERVER_KEYSTORE_RSA_SIGN_ALGO, "SHA256withRSA"); // SHA1withRSA
@@ -185,15 +183,24 @@ public abstract class AbstractServerKeyManagerConfig {
                 .withCa(false)
                 .withKeyUsages(keyUsages)
                 .build(keyPair);
-        return new KeyPairData(keyPairData, null, alias, keyPassHandler);
+
+        return KeyPairData.builder()
+                .keyPairs(keyPairData)
+                .passwordSource(keyPassHandler)
+                .build();
     }
     
-	public static SecretKeyData newSecretKey(String alias, CallbackHandler secretKeyPassHandler){
+	public static SecretKeyEntry newSecretKey(String alias, CallbackHandler secretKeyPassHandler){
     	String secretKeyAlgo = EnvProperties.getEnvOrSysProp(ServerKeyPropertiesConstants.SERVER_KEYSTORE_SECRET_KEY_ALGO, "AES");// AES
     	String secretKeySizeStr = EnvProperties.getEnvOrSysProp(ServerKeyPropertiesConstants.SERVER_KEYSTORE_SECRET_KEY_SIZE, "256");// 256
     	int keySize = Integer.parseInt(secretKeySizeStr);
-		SecretKey secretKey = new SecretKeyBuilder().withKeyAlg(secretKeyAlgo).withKeyLength(keySize).build();	
-		return new SecretKeyData(secretKey, alias, secretKeyPassHandler);
+		SecretKey secretKey = new SecretKeyBuilder().withKeyAlg(secretKeyAlgo).withKeyLength(keySize).build();
+
+        return SecretKeyData.builder()
+                .secretKey(secretKey)
+                .alias(alias)
+                .passwordSource(secretKeyPassHandler)
+                .build();
 	}
 
 }

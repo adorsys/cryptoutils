@@ -16,9 +16,9 @@ import com.nimbusds.jose.jwk.SecretJWK;
 
 public class ServerKeyMap {
     private Map<String, KeyAndJwk> keyMap = new HashMap<>();
-    private List<KeyAndJwk> signKeyeyList = new ArrayList<>();
-    private List<KeyAndJwk> encKeyeyList = new ArrayList<>();
-    private List<KeyAndJwk> secretKeyeyList = new ArrayList<>();
+    private List<KeyAndJwk> signKeyList = new ArrayList<>();
+    private List<KeyAndJwk> encKeyList = new ArrayList<>();
+    private List<KeyAndJwk> secretKeyList = new ArrayList<>();
     
     public ServerKeyMap(JWKSet jwkSet){
         List<JWK> keys = jwkSet.getKeys();
@@ -29,9 +29,9 @@ public class ServerKeyMap {
             		KeyAndJwk keyAndJwk = new KeyAndJwk(key, jwk);
             		keyMap.put(jwk.getKeyID(), keyAndJwk);
             		if(KeyUse.SIGNATURE.equals(jwk.getKeyUse())){
-            			signKeyeyList.add(keyAndJwk);
+            			signKeyList.add(keyAndJwk);
             		} else if (KeyUse.ENCRYPTION.equals(jwk.getKeyUse())){
-            			encKeyeyList.add(keyAndJwk);
+            			encKeyList.add(keyAndJwk);
             		}
             	}
             } else if (jwk instanceof SecretJWK) {
@@ -39,7 +39,7 @@ public class ServerKeyMap {
             	if(key!=null && jwk.getKeyID()!=null){
             		KeyAndJwk keyAndJwk = new KeyAndJwk(key, jwk);
             		keyMap.put(jwk.getKeyID(), keyAndJwk);
-            		secretKeyeyList.add(keyAndJwk);
+            		secretKeyList.add(keyAndJwk);
             	}
             }
 
@@ -66,13 +66,13 @@ public class ServerKeyMap {
      * @return KeyAndJwk keyAndJwk
 	 */
     public KeyAndJwk randomSignKey(){
-    	int nextInt = RandomUtils.nextInt(0, signKeyeyList.size());
-    	return signKeyeyList.get(nextInt);
+    	int nextInt = RandomUtils.nextInt(0, signKeyList.size());
+    	return signKeyList.get(nextInt);
     }
 
 	public KeyAndJwk randomSecretKey() {
-    	int nextInt = RandomUtils.nextInt(0, secretKeyeyList.size());
-    	return secretKeyeyList.get(nextInt);
+    	int nextInt = RandomUtils.nextInt(0, secretKeyList.size());
+    	return secretKeyList.get(nextInt);
 	}
     
 }

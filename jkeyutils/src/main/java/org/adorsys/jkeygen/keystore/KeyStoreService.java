@@ -129,17 +129,27 @@ public class KeyStoreService {
      */
     public static void fillKeyStore(final KeyStore ks, Collection<KeyEntry> keyEntries) {
         try {
-            for (KeyEntry keyEntryData : keyEntries) {
-                if (keyEntryData instanceof KeyPairEntry) {
-                    addToKeyStore(ks, (KeyPairEntry) keyEntryData);
-                } else if (keyEntryData instanceof SecretKeyEntry) {
-                    addToKeyStore(ks, (SecretKeyEntry) keyEntryData);
-                } else if (keyEntryData instanceof TrustedCertEntry) {
-                    addToKeyStore(ks, (TrustedCertEntry) keyEntryData);
-                }
+            for (KeyEntry keyEntry : keyEntries) {
+                addToKeyStore(ks, keyEntry);
             }
         } catch (KeyStoreException ex) {
             throw new IllegalStateException(ex.getMessage(), ex);
+        }
+    }
+
+    /**
+     * Put the given entry into a key store. The key store must have been initialized before.
+     *
+     * @param ks         ks
+     * @param keyEntry keyEntry to be added
+     */
+    public static void addToKeyStore(final KeyStore ks, KeyEntry keyEntry) throws KeyStoreException {
+        if (keyEntry instanceof KeyPairEntry) {
+            addToKeyStore(ks, (KeyPairEntry) keyEntry);
+        } else if (keyEntry instanceof SecretKeyEntry) {
+            addToKeyStore(ks, (SecretKeyEntry) keyEntry);
+        } else if (keyEntry instanceof TrustedCertEntry) {
+            addToKeyStore(ks, (TrustedCertEntry) keyEntry);
         }
     }
 

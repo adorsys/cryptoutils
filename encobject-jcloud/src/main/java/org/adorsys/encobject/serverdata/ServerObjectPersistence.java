@@ -63,7 +63,7 @@ public class ServerObjectPersistence {
 			metaInfo = new ContentMetaInfo();
 
 		// Retrieve the key.
-		Key key = readKey(keyMapProvider.getKeyMap(), keyID);
+		Key key = keyMapProvider.getKey(keyID);
 
 		// Encryption params is optional. If not provided, we select an
 		// encryption param based on the key selected.
@@ -149,7 +149,7 @@ public class ServerObjectPersistence {
 			throw new IllegalStateException("Can not parse jwe object", e);
 		}
 		String keyID = jweObject.getHeader().getKeyID();
-		Key key = readKey(keyMapProvider.getKeyMap(), keyID);
+		Key key = keyMapProvider.getKey(keyID);
 
 		JWEDecrypter decrypter;
 		try {
@@ -163,13 +163,5 @@ public class ServerObjectPersistence {
 			throw new WrongKeyCredentialException(e);
 		}
 		return jweObject.getPayload().toBytes();
-	}
-
-	/*
-	 * Retrieves the key with the given keyID from the keystore. The key
-	 * password will be retrieved by calling the keyPassHandler.
-	 */
-	private Key readKey(ServerKeyMap keyMap, String keyID) {
-		return keyMap.getKey(keyID);
 	}
 }

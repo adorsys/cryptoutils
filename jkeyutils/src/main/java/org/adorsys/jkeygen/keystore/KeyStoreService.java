@@ -1,5 +1,12 @@
 package org.adorsys.jkeygen.keystore;
 
+import org.adorsys.jkeygen.keypair.CertificationResult;
+import org.adorsys.jkeygen.utils.V3CertificateUtils;
+import org.apache.commons.lang3.StringUtils;
+import org.bouncycastle.cert.X509CertificateHolder;
+
+import javax.crypto.BadPaddingException;
+import javax.security.auth.callback.CallbackHandler;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
@@ -15,165 +22,158 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
-import javax.crypto.BadPaddingException;
-import javax.security.auth.callback.CallbackHandler;
-
-import org.adorsys.jkeygen.keypair.CertificationResult;
-import org.adorsys.jkeygen.utils.V3CertificateUtils;
-import org.apache.commons.lang3.StringUtils;
-import org.bouncycastle.cert.X509CertificateHolder;
-
 /**
  * Key store manipulation routines.
- * 
- * @author fpo
  *
+ * @author fpo
  */
 public class KeyStoreService {
 
-	/**
-	 * Create an initializes a new key store. The key store is not yet password protected.
-	 * @param storeType storeType
-	 * @return KeyStore keyStore
-	 * @throws IOException IOException
-	 */
-	public static KeyStore newKeyStore(String storeType) throws IOException {
+    /**
+     * Create an initializes a new key store. The key store is not yet password protected.
+     *
+     * @param storeType storeType
+     * @return KeyStore keyStore
+     * @throws IOException IOException
+     */
+    public static KeyStore newKeyStore(String storeType) throws IOException {
 
-		// Use default type if blank.
-		if (StringUtils.isBlank(storeType))storeType = "UBER";
-		try {
-			KeyStore ks = KeyStore.getInstance(storeType);
-			ks.load(null, null);
-			return ks;
-		} catch (NoSuchAlgorithmException | CertificateException | KeyStoreException e) {
-			throw new IllegalStateException(e);
-		}
-	}
+        // Use default type if blank.
+        if (StringUtils.isBlank(storeType)) storeType = "UBER";
+        try {
+            KeyStore ks = KeyStore.getInstance(storeType);
+            ks.load(null, null);
+            return ks;
+        } catch (NoSuchAlgorithmException | CertificateException | KeyStoreException e) {
+            throw new IllegalStateException(e);
+        }
+    }
 
-	/**
-	 * Write this key store into a byte array
-	 * @param keystore keystore
-	 * @param storeId storeId
-	 * @param storePassSrc storePassSrc
-	 * @return key store byte array
-	 * @throws IOException if there was an I/O problem with data
-	 * @throws CertificateException if any of the certificates included in the keystore data could not be stored
-	 * @throws NoSuchAlgorithmException  if the appropriate data integrity algorithm could not be found
-	 */
-	public static byte[] toByteArray(KeyStore keystore, String storeId, CallbackHandler storePassSrc) throws NoSuchAlgorithmException, CertificateException, IOException{
-		ByteArrayOutputStream stream = new ByteArrayOutputStream();
-		try {
-			keystore.store(stream, PasswordCallbackUtils.getPassword(storePassSrc, storeId));
-		} catch (KeyStoreException e) {
-			throw new IllegalStateException("Keystore not initialized.", e);
-		}
-		return stream.toByteArray();
-	}
-	
-	/**
-	 * Loads a key store. Given the store bytes, the store type 
-	 * 
-	 * @param in : the inputStream from which to read the keystore
-	 * @param storeId : The store id. This is passed to the callback handler to identify the requested password record.
-	 * @param storeType : the type of this key store. f null, the defaut java keystore type is used.
-	 * @param storePassSrc : the callback handler that retrieves the store password. 
-	 * @throws KeyStoreException either NoSuchAlgorithmException or NoSuchProviderException
-	 * @throws NoSuchAlgorithmException  if the algorithm used to check the integrity of the keystore cannot be found
-	 * @throws CertificateException if any of the certificates in the keystore could not be loaded
-	 * @throws UnrecoverableKeyException if a password is required but not given, or if the given password was incorrect
-	 * @throws IOException if there is an I/O or format problem with the keystore data
-	 * @return KeyStore
-	 */
-	public static KeyStore loadKeyStore(InputStream in, String storeId, String storeType, CallbackHandler storePassSrc) throws KeyStoreException, NoSuchAlgorithmException, CertificateException, UnrecoverableKeyException, IOException {
+    /**
+     * Write this key store into a byte array
+     *
+     * @param keystore     keystore
+     * @param storeId      storeId
+     * @param storePassSrc storePassSrc
+     * @return key store byte array
+     * @throws IOException              if there was an I/O problem with data
+     * @throws CertificateException     if any of the certificates included in the keystore data could not be stored
+     * @throws NoSuchAlgorithmException if the appropriate data integrity algorithm could not be found
+     */
+    public static byte[] toByteArray(KeyStore keystore, String storeId, CallbackHandler storePassSrc) throws NoSuchAlgorithmException, CertificateException, IOException {
+        ByteArrayOutputStream stream = new ByteArrayOutputStream();
+        try {
+            keystore.store(stream, PasswordCallbackUtils.getPassword(storePassSrc, storeId));
+        } catch (KeyStoreException e) {
+            throw new IllegalStateException("Keystore not initialized.", e);
+        }
+        return stream.toByteArray();
+    }
 
-		// Use default type if blank.
-		if (StringUtils.isBlank(storeType))storeType = "UBER";
+    /**
+     * Loads a key store. Given the store bytes, the store type
+     *
+     * @param in           : the inputStream from which to read the keystore
+     * @param storeId      : The store id. This is passed to the callback handler to identify the requested password record.
+     * @param storeType    : the type of this key store. f null, the defaut java keystore type is used.
+     * @param storePassSrc : the callback handler that retrieves the store password.
+     * @return KeyStore
+     * @throws KeyStoreException         either NoSuchAlgorithmException or NoSuchProviderException
+     * @throws NoSuchAlgorithmException  if the algorithm used to check the integrity of the keystore cannot be found
+     * @throws CertificateException      if any of the certificates in the keystore could not be loaded
+     * @throws UnrecoverableKeyException if a password is required but not given, or if the given password was incorrect
+     * @throws IOException               if there is an I/O or format problem with the keystore data
+     */
+    public static KeyStore loadKeyStore(InputStream in, String storeId, String storeType, CallbackHandler storePassSrc) throws KeyStoreException, NoSuchAlgorithmException, CertificateException, UnrecoverableKeyException, IOException {
 
-		KeyStore ks = KeyStore.getInstance(storeType);
+        // Use default type if blank.
+        if (StringUtils.isBlank(storeType)) storeType = "UBER";
 
-		try {
-			ks.load(in, PasswordCallbackUtils.getPassword(storePassSrc, storeId));
-		} catch (IOException e) {
-			// catch missing or wrong key.
-			if(e.getCause()!=null && (e.getCause() instanceof UnrecoverableKeyException)){
-				throw (UnrecoverableKeyException)e.getCause();
-			} else if (e.getCause()!=null && (e.getCause() instanceof BadPaddingException)){
-				throw new UnrecoverableKeyException(e.getMessage());
-			}
-			throw e;
-		}
-		return ks;
-	}	
-	
-	/**
-	 * 
-	 * @param data : the byte array containing key store data.
-	 * @param storeId : The store id. This is passed to the callback handler to identify the requested password record.
-	 * @param storeType : the type of this key store. f null, the defaut java keystore type is used.
-	 * @param storePassSrc : the callback handler that retrieves the store password. 
-	 * @throws KeyStoreException either NoSuchAlgorithmException or NoSuchProviderException
-	 * @throws NoSuchAlgorithmException  if the algorithm used to check the integrity of the keystore cannot be found
-	 * @throws CertificateException if any of the certificates in the keystore could not be loaded
-	 * @throws UnrecoverableKeyException if a password is required but not given, or if the given password was incorrect
-	 * @throws IOException if there is an I/O or format problem with the keystore data
-	 * @return KeyStore
-	 */
-	public static KeyStore loadKeyStore(byte[] data, String storeId, String storeType, CallbackHandler storePassSrc) throws UnrecoverableKeyException, KeyStoreException, NoSuchAlgorithmException, CertificateException, IOException {
-		return loadKeyStore(new ByteArrayInputStream(data), storeId, storeType, storePassSrc);
-	}
+        KeyStore ks = KeyStore.getInstance(storeType);
 
-	/**
-	 * Put the given entries into a key store. The key store must have been initialized before.
-	 * @param ks ks
-	 * @param keyEntries keyEntries
-	 */
-	public static void fillKeyStore(final KeyStore ks, Collection<KeyEntry> keyEntries) {
-		try {
-			for (KeyEntry keyEntryData : keyEntries) {
-				if(keyEntryData instanceof KeyPairEntry){
-					addToKeyStore(ks, (KeyPairEntry)keyEntryData);
-				} else if (keyEntryData instanceof SecretKeyEntry){
-					addToKeyStore(ks, (SecretKeyEntry)keyEntryData);
-				} else if (keyEntryData instanceof TrustedCertEntry){
-					addToKeyStore(ks, (TrustedCertEntry)keyEntryData);
-				} 
-			}
-		} catch(KeyStoreException ex){
-			throw new IllegalStateException(ex.getMessage(), ex);
-		}
-	}
+        try {
+            ks.load(in, PasswordCallbackUtils.getPassword(storePassSrc, storeId));
+        } catch (IOException e) {
+            // catch missing or wrong key.
+            if (e.getCause() != null && (e.getCause() instanceof UnrecoverableKeyException)) {
+                throw (UnrecoverableKeyException) e.getCause();
+            } else if (e.getCause() != null && (e.getCause() instanceof BadPaddingException)) {
+                throw new UnrecoverableKeyException(e.getMessage());
+            }
+            throw e;
+        }
+        return ks;
+    }
 
-	private static void addToKeyStore(final KeyStore ks, KeyPairEntry keyPairHolder) throws KeyStoreException {
+    /**
+     * @param data         : the byte array containing key store data.
+     * @param storeId      : The store id. This is passed to the callback handler to identify the requested password record.
+     * @param storeType    : the type of this key store. f null, the defaut java keystore type is used.
+     * @param storePassSrc : the callback handler that retrieves the store password.
+     * @return KeyStore
+     * @throws KeyStoreException         either NoSuchAlgorithmException or NoSuchProviderException
+     * @throws NoSuchAlgorithmException  if the algorithm used to check the integrity of the keystore cannot be found
+     * @throws CertificateException      if any of the certificates in the keystore could not be loaded
+     * @throws UnrecoverableKeyException if a password is required but not given, or if the given password was incorrect
+     * @throws IOException               if there is an I/O or format problem with the keystore data
+     */
+    public static KeyStore loadKeyStore(byte[] data, String storeId, String storeType, CallbackHandler storePassSrc) throws UnrecoverableKeyException, KeyStoreException, NoSuchAlgorithmException, CertificateException, IOException {
+        return loadKeyStore(new ByteArrayInputStream(data), storeId, storeType, storePassSrc);
+    }
 
-		List<Certificate> chainList = new ArrayList<>();
-		CertificationResult certification = keyPairHolder.getCertification();
-		X509CertificateHolder subjectCert = certification!=null?certification.getSubjectCert():keyPairHolder.getKeyPairs().getSubjectCert();
-		chainList.add(V3CertificateUtils.getX509JavaCertificate(subjectCert));
-		if(certification!=null){
-			List<X509CertificateHolder> issuerChain = certification.getIssuerChain();
-			for (X509CertificateHolder x509CertificateHolder : issuerChain) {
-				chainList.add(V3CertificateUtils.getX509JavaCertificate(x509CertificateHolder));
-			}
-		}
-		Certificate[] chain = chainList.toArray(new Certificate[chainList.size()]);
-		ks.setKeyEntry(keyPairHolder.getAlias(), keyPairHolder.getKeyPairs().getKeyPair().getPrivate(), 
-				PasswordCallbackUtils.getPassword(keyPairHolder.getPasswordSource(), keyPairHolder.getAlias()), chain);
-	}
+    /**
+     * Put the given entries into a key store. The key store must have been initialized before.
+     *
+     * @param ks         ks
+     * @param keyEntries keyEntries
+     */
+    public static void fillKeyStore(final KeyStore ks, Collection<KeyEntry> keyEntries) {
+        try {
+            for (KeyEntry keyEntryData : keyEntries) {
+                if (keyEntryData instanceof KeyPairEntry) {
+                    addToKeyStore(ks, (KeyPairEntry) keyEntryData);
+                } else if (keyEntryData instanceof SecretKeyEntry) {
+                    addToKeyStore(ks, (SecretKeyEntry) keyEntryData);
+                } else if (keyEntryData instanceof TrustedCertEntry) {
+                    addToKeyStore(ks, (TrustedCertEntry) keyEntryData);
+                }
+            }
+        } catch (KeyStoreException ex) {
+            throw new IllegalStateException(ex.getMessage(), ex);
+        }
+    }
 
-	public static void addToKeyStore(final KeyStore ks, SecretKeyEntry secretKeyData) {
-		KeyStore.SecretKeyEntry entry = new KeyStore.SecretKeyEntry(secretKeyData.getSecretKey());
-		ProtectionParameter protParam = new KeyStore.PasswordProtection(PasswordCallbackUtils.getPassword(secretKeyData.getPasswordSource(), secretKeyData.getAlias()));
-		try {
-			ks.setEntry(secretKeyData.getAlias(), entry, protParam);
-		} catch (KeyStoreException e) {
-			// Key store not initialized
-			throw new IllegalStateException(e);
-		}
-	}
-	
-	
-	private static void addToKeyStore(final KeyStore ks, TrustedCertEntry trustedCertHolder) throws KeyStoreException {
-		ks.setCertificateEntry(trustedCertHolder.getAlias(), V3CertificateUtils.getX509JavaCertificate(trustedCertHolder.getCertificate()));
-	}
+    private static void addToKeyStore(final KeyStore ks, KeyPairEntry keyPairHolder) throws KeyStoreException {
+
+        List<Certificate> chainList = new ArrayList<>();
+        CertificationResult certification = keyPairHolder.getCertification();
+        X509CertificateHolder subjectCert = certification != null ? certification.getSubjectCert() : keyPairHolder.getKeyPairs().getSubjectCert();
+        chainList.add(V3CertificateUtils.getX509JavaCertificate(subjectCert));
+        if (certification != null) {
+            List<X509CertificateHolder> issuerChain = certification.getIssuerChain();
+            for (X509CertificateHolder x509CertificateHolder : issuerChain) {
+                chainList.add(V3CertificateUtils.getX509JavaCertificate(x509CertificateHolder));
+            }
+        }
+        Certificate[] chain = chainList.toArray(new Certificate[chainList.size()]);
+        ks.setKeyEntry(keyPairHolder.getAlias(), keyPairHolder.getKeyPairs().getKeyPair().getPrivate(),
+                PasswordCallbackUtils.getPassword(keyPairHolder.getPasswordSource(), keyPairHolder.getAlias()), chain);
+    }
+
+    public static void addToKeyStore(final KeyStore ks, SecretKeyEntry secretKeyData) {
+        KeyStore.SecretKeyEntry entry = new KeyStore.SecretKeyEntry(secretKeyData.getSecretKey());
+        ProtectionParameter protParam = new KeyStore.PasswordProtection(PasswordCallbackUtils.getPassword(secretKeyData.getPasswordSource(), secretKeyData.getAlias()));
+        try {
+            ks.setEntry(secretKeyData.getAlias(), entry, protParam);
+        } catch (KeyStoreException e) {
+            // Key store not initialized
+            throw new IllegalStateException(e);
+        }
+    }
+
+
+    private static void addToKeyStore(final KeyStore ks, TrustedCertEntry trustedCertHolder) throws KeyStoreException {
+        ks.setCertificateEntry(trustedCertHolder.getAlias(), V3CertificateUtils.getX509JavaCertificate(trustedCertHolder.getCertificate()));
+    }
 }
 

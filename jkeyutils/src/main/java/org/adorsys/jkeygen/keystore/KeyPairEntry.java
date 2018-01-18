@@ -4,7 +4,7 @@ import org.adorsys.jkeygen.keypair.CertificationResult;
 import org.adorsys.jkeygen.keypair.SelfSignedKeyPairData;
 
 public interface KeyPairEntry extends KeyEntry {
-    SelfSignedKeyPairData getKeyPairs();
+    SelfSignedKeyPairData getKeyPair();
 
     CertificationResult getCertification();
 }

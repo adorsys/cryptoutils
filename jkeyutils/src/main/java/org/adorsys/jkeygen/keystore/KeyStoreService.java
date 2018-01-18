@@ -1,26 +1,26 @@
 package org.adorsys.jkeygen.keystore;
 
 import org.adorsys.jkeygen.keypair.CertificationResult;
+import org.adorsys.jkeygen.keypair.SelfSignedKeyPairData;
+import org.adorsys.jkeygen.pwd.PasswordCallbackHandler;
 import org.adorsys.jkeygen.utils.V3CertificateUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.bouncycastle.cert.X509CertificateHolder;
 
 import javax.crypto.BadPaddingException;
+import javax.crypto.SecretKey;
 import javax.security.auth.callback.CallbackHandler;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.security.KeyStore;
+import java.security.*;
 import java.security.KeyStore.ProtectionParameter;
-import java.security.KeyStoreException;
-import java.security.NoSuchAlgorithmException;
-import java.security.UnrecoverableKeyException;
 import java.security.cert.Certificate;
+import java.security.cert.CertificateEncodingException;
 import java.security.cert.CertificateException;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.List;
+import java.util.*;
+import java.util.stream.Collectors;
 
 /**
  * Key store manipulation routines.
@@ -105,6 +105,27 @@ public class KeyStoreService {
         return ks;
     }
 
+    public static KeyStore loadKeyStore(String storeType, KeyStore.LoadStoreParameter loadStoreParameter) throws KeyStoreException, NoSuchAlgorithmException, CertificateException, UnrecoverableKeyException, IOException {
+
+        // Use default type if blank.
+        if (StringUtils.isBlank(storeType)) storeType = "UBER";
+
+        KeyStore ks = KeyStore.getInstance(storeType);
+
+        try {
+            ks.load(loadStoreParameter);
+        } catch (IOException e) {
+            // catch missing or wrong key.
+            if (e.getCause() != null && (e.getCause() instanceof UnrecoverableKeyException)) {
+                throw (UnrecoverableKeyException) e.getCause();
+            } else if (e.getCause() != null && (e.getCause() instanceof BadPaddingException)) {
+                throw new UnrecoverableKeyException(e.getMessage());
+            }
+            throw e;
+        }
+        return ks;
+    }
+
     /**
      * @param data         : the byte array containing key store data.
      * @param storeId      : The store id. This is passed to the callback handler to identify the requested password record.
@@ -157,7 +178,7 @@ public class KeyStoreService {
 
         List<Certificate> chainList = new ArrayList<>();
         CertificationResult certification = keyPairHolder.getCertification();
-        X509CertificateHolder subjectCert = certification != null ? certification.getSubjectCert() : keyPairHolder.getKeyPairs().getSubjectCert();
+        X509CertificateHolder subjectCert = certification != null ? certification.getSubjectCert() : keyPairHolder.getKeyPair().getSubjectCert();
         chainList.add(V3CertificateUtils.getX509JavaCertificate(subjectCert));
         if (certification != null) {
             List<X509CertificateHolder> issuerChain = certification.getIssuerChain();
@@ -166,13 +187,13 @@ public class KeyStoreService {
             }
         }
         Certificate[] chain = chainList.toArray(new Certificate[chainList.size()]);
-        ks.setKeyEntry(keyPairHolder.getAlias(), keyPairHolder.getKeyPairs().getKeyPair().getPrivate(),
+        ks.setKeyEntry(keyPairHolder.getAlias(), keyPairHolder.getKeyPair().getKeyPair().getPrivate(),
                 PasswordCallbackUtils.getPassword(keyPairHolder.getPasswordSource(), keyPairHolder.getAlias()), chain);
     }
 
     public static void addToKeyStore(final KeyStore ks, SecretKeyEntry secretKeyData) {
         KeyStore.SecretKeyEntry entry = new KeyStore.SecretKeyEntry(secretKeyData.getSecretKey());
-        ProtectionParameter protParam = new KeyStore.PasswordProtection(PasswordCallbackUtils.getPassword(secretKeyData.getPasswordSource(), secretKeyData.getAlias()));
+        ProtectionParameter protParam = getPasswordProtectionParameter(secretKeyData.getPasswordSource(), secretKeyData.getAlias());
         try {
             ks.setEntry(secretKeyData.getAlias(), entry, protParam);
         } catch (KeyStoreException e) {
@@ -181,9 +202,140 @@ public class KeyStoreService {
         }
     }
 
+    private static ProtectionParameter getPasswordProtectionParameter(CallbackHandler passwordSource, String alias) {
+        return new KeyStore.PasswordProtection(PasswordCallbackUtils.getPassword(passwordSource, alias));
+    }
 
     private static void addToKeyStore(final KeyStore ks, TrustedCertEntry trustedCertHolder) throws KeyStoreException {
         ks.setCertificateEntry(trustedCertHolder.getAlias(), V3CertificateUtils.getX509JavaCertificate(trustedCertHolder.getCertificate()));
+    }
+
+    public static List<KeyEntry> loadEntries(KeyStore keyStore, PasswordProvider passwordProvider) {
+        List<KeyEntry> keyEntries = new ArrayList<>();
+        Enumeration<String> aliases;
+
+        try {
+            aliases = keyStore.aliases();
+        } catch (KeyStoreException e) {
+            throw new RuntimeException(e);
+        }
+
+        for(String alias : Collections.list(aliases)) {
+            KeyStore.Entry entry;
+            try {
+                CallbackHandler passwordSource = passwordProvider.providePasswordCallbackHandler(alias);
+                entry = keyStore.getEntry(alias, getPasswordProtectionParameter(passwordSource, alias));
+                KeyEntry keyEntry = createFromKeyStoreEntry(alias, entry, passwordSource);
+
+                keyEntries.add(keyEntry);
+            } catch (NoSuchAlgorithmException | UnrecoverableEntryException | KeyStoreException e) {
+                throw new RuntimeException(e);
+            }
+        }
+
+        return keyEntries;
+    }
+
+    private static KeyEntry createFromKeyStoreEntry(String alias, KeyStore.Entry entry, CallbackHandler passwordSource) {
+        if (entry instanceof KeyStore.PrivateKeyEntry) {
+            KeyStore.PrivateKeyEntry privateKeyEntry = (KeyStore.PrivateKeyEntry) entry;
+            return fromPrivateKeyEntry(alias, passwordSource, privateKeyEntry);
+        } else if (entry instanceof KeyStore.SecretKeyEntry) {
+            KeyStore.SecretKeyEntry secretKeyEntry = (KeyStore.SecretKeyEntry) entry;
+            SecretKey secretKey = secretKeyEntry.getSecretKey();
+
+            return SecretKeyData.builder()
+                    .alias(alias)
+                    .passwordSource(passwordSource)
+                    .secretKey(secretKey)
+                    .keyAlgo(secretKey.getAlgorithm())
+                    .build();
+        } else if(entry instanceof KeyStore.TrustedCertificateEntry) {
+            KeyStore.TrustedCertificateEntry trustedCertificateEntry = (KeyStore.TrustedCertificateEntry) entry;
+
+            return TrustedCertData.builder()
+                    .alias(alias)
+                    .passwordSource(passwordSource)
+                    .certificate(toX509CertificateHolder(trustedCertificateEntry.getTrustedCertificate()))
+                    .build();
+        } else {
+            throw new RuntimeException("Unknown type: " + entry.getClass());
+        }
+    }
+
+    private static KeyPairEntry fromPrivateKeyEntry(String alias, CallbackHandler passwordSource, KeyStore.PrivateKeyEntry privateKeyEntry) {
+        KeyPair keyPair = new KeyPair(privateKeyEntry.getCertificate().getPublicKey(), privateKeyEntry.getPrivateKey());
+
+        X509CertificateHolder subjectCert = toX509CertificateHolder(privateKeyEntry.getCertificate());
+        SelfSignedKeyPairData keyPairData = new SelfSignedKeyPairData(keyPair, subjectCert);
+
+        CertificationResult certification = new CertificationResult(subjectCert, toX509CertificateHolders(privateKeyEntry.getCertificateChain()));
+
+        return KeyPairData.builder()
+                .alias(alias)
+                .keyPair(keyPairData)
+                .certification(certification)
+                .passwordSource(passwordSource)
+                .build();
+    }
+
+    private static List<X509CertificateHolder> toX509CertificateHolders(Certificate[] certificates) {
+        return Arrays.stream(certificates)
+                .map(KeyStoreService::toX509CertificateHolder)
+                .collect(Collectors.toList());
+    }
+
+    private static X509CertificateHolder toX509CertificateHolder(Certificate certificate) {
+        org.bouncycastle.asn1.x509.Certificate bouncyCastleAsn1Certificate = null;
+
+        try {
+            bouncyCastleAsn1Certificate = org.bouncycastle.asn1.x509.Certificate.getInstance(certificate.getEncoded());
+        } catch (CertificateEncodingException e) {
+            throw new RuntimeException(e);
+        }
+
+        return new X509CertificateHolder(bouncyCastleAsn1Certificate);
+    }
+
+    public interface PasswordProvider {
+        CallbackHandler providePasswordCallbackHandler(String keyAlias);
+    }
+
+    public static class PasswordProviderMap implements PasswordProvider {
+        private final Map<String, char[]> passwordsForAlias;
+
+        public PasswordProviderMap(Map<String, char[]> passwordsForAlias) {
+            this.passwordsForAlias = passwordsForAlias;
+        }
+
+        @Override
+        public CallbackHandler providePasswordCallbackHandler(String keyAlias) {
+            char[] password = passwordsForAlias.get(keyAlias);
+
+            if(password == null) {
+                throw new RuntimeException("Password for alias '" + keyAlias + "' not found");
+            }
+
+            return new PasswordCallbackHandler(password);
+        }
+    }
+
+    public static class SimplePasswordProvider implements PasswordProvider {
+
+        private final CallbackHandler callbackHandler;
+
+        public SimplePasswordProvider(char[] password) {
+            this.callbackHandler = new PasswordCallbackHandler(password);
+        }
+
+        public SimplePasswordProvider(CallbackHandler callbackHandler) {
+            this.callbackHandler = callbackHandler;
+        }
+
+        @Override
+        public CallbackHandler providePasswordCallbackHandler(String keyAlias) {
+            return callbackHandler;
+        }
     }
 }
 

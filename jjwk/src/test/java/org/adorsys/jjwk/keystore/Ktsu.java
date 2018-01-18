@@ -69,7 +69,7 @@ public class Ktsu {
 		X500Name cn = new X500NameBuilder(BCStyle.INSTANCE).addRDN(BCStyle.CN, userName).build();
 		SelfSignedKeyPairData keyPairData = new SelfSignedCertBuilder().withSubjectDN(cn)
 				.withSignatureAlgo("SHA256withRSA").withNotAfterInDays(300).withCa(false).build(keyPair);
-		return KeyPairData.builder().keyPairs(keyPairData).alias(alias).passwordSource(keyPassHandler).build();
+		return KeyPairData.builder().keyPair(keyPairData).alias(alias).passwordSource(keyPassHandler).build();
 	}
 	
 	private static SecretKeyEntry newSecretKey(String alias, CallbackHandler secretKeyPassHandler){

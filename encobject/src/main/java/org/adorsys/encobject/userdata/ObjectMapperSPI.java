@@ -1,11 +1,14 @@
 package org.adorsys.encobject.userdata;
 
 import java.io.IOException;
+import java.util.Map;
 
 public interface ObjectMapperSPI {
 
-	public <T> T readValue(byte[] src, Class<T> klass) throws IOException;
+	<T> T readValue(byte[] src, Class<T> klass) throws IOException;
+	<T> T readValue(String src, Class<T> klass) throws IOException;
+	Map<String, String> readValue(String src) throws IOException;
 
-	public <T> byte[] writeValueAsBytes(T t) throws IOException;
-
+	<T> byte[] writeValueAsBytes(T t) throws IOException;
+	<T> String writeValueAsString(T t) throws IOException;
 }

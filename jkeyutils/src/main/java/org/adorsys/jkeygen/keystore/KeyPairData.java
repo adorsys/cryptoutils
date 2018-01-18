@@ -10,14 +10,14 @@ import javax.security.auth.callback.CallbackHandler;
 @Getter
 public class KeyPairData extends KeyEntryData implements KeyPairEntry {
 
-    private final SelfSignedKeyPairData keyPairs;
+    private final SelfSignedKeyPairData keyPair;
 
     private final CertificationResult certification;
 
     @Builder
-    private KeyPairData(CallbackHandler passwordSource, String alias, SelfSignedKeyPairData keyPairs, CertificationResult certification) {
+    private KeyPairData(CallbackHandler passwordSource, String alias, SelfSignedKeyPairData keyPair, CertificationResult certification) {
         super(passwordSource, alias);
-        this.keyPairs = keyPairs;
+        this.keyPair = keyPair;
         this.certification = certification;
     }
 }

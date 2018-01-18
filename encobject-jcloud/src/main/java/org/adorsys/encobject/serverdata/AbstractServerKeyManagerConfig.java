@@ -185,7 +185,8 @@ public abstract class AbstractServerKeyManagerConfig {
                 .build(keyPair);
 
         return KeyPairData.builder()
-                .keyPairs(keyPairData)
+                .alias(alias)
+                .keyPair(keyPairData)
                 .passwordSource(keyPassHandler)
                 .build();
     }

@@ -10,6 +10,9 @@ import java.security.KeyStoreException;
 import java.security.NoSuchAlgorithmException;
 import java.security.UnrecoverableKeyException;
 import java.security.cert.CertificateException;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 import javax.crypto.SecretKey;
 import javax.security.auth.callback.CallbackHandler;
@@ -77,7 +80,7 @@ public class KeyStoreServiceTest {
 		CallbackHandler keyPassHandler = new PasswordCallbackHandler(keyPairPass);
 		CallbackHandler storePassHandler = new PasswordCallbackHandler(storePass);
 
-		KeyPairEntry keyPairStoreData = KeyPairData.builder().keyPairs(keyPairData).alias(keyPairAlias).passwordSource(keyPassHandler).build();
+		KeyPairEntry keyPairStoreData = KeyPairData.builder().keyPair(keyPairData).alias(keyPairAlias).passwordSource(keyPassHandler).build();
 
 		CallbackHandler secretKeyPassHandler = new PasswordCallbackHandler(secretKeyPass);
 		SecretKeyEntry secretKeyData = SecretKeyData.builder().secretKey(secretKey).alias(secretKeyAlias).passwordSource(secretKeyPassHandler).build();
@@ -145,7 +148,7 @@ public class KeyStoreServiceTest {
 		} catch (KeyStoreException | NoSuchAlgorithmException | UnrecoverableKeyException e) {
 			Assert.fail(e.getMessage());
 		}
-	}	
+	}
 
 	@Test
 	public void testLoadSecretKey(){
@@ -218,13 +221,41 @@ public class KeyStoreServiceTest {
 		} catch (KeyStoreException | NoSuchAlgorithmException e) {
 			Assert.fail("Expecting UnrecoverableKeyException");
 		}
-	}	
+	}
+
+	@Test
+	public void testLoadKeyEntries(){
+		byte[] bs = createKeyStore();
+		Assume.assumeNotNull(bs);
+
+		ByteArrayInputStream bis = new ByteArrayInputStream(bs);
+		KeyStore keyStore = null;
+		try {
+			keyStore = KeyStoreService.loadKeyStore(bis, KEY_STORE_NAME, null, new PasswordCallbackHandler(storePass));
+		} catch (IOException | UnrecoverableKeyException | KeyStoreException | NoSuchAlgorithmException | CertificateException e) {
+			// noopt
+		}
+		Assume.assumeNotNull(keyStore);
+
+
+		List<KeyEntry> keyEntries = KeyStoreService.loadEntries(keyStore, createPasswordProviderMap());
+		Assert.assertNotNull(keyEntries);
+		Assert.assertEquals(2, keyEntries.size());
+	}
+
+	private KeyStoreService.PasswordProvider createPasswordProviderMap() {
+		Map<String, char[]> passwordMap = new HashMap<>();
+		passwordMap.put(keyPairAlias, keyPairPass);
+		passwordMap.put(secretKeyAlias, secretKeyPass);
+
+		return new KeyStoreService.PasswordProviderMap(passwordMap);
+	}
 	
 	private byte[] createKeyStore() {
 		CallbackHandler keyPassHandler = new PasswordCallbackHandler(keyPairPass);
 		CallbackHandler storePassHandler = new PasswordCallbackHandler(storePass);
 
-		KeyPairEntry keyPairStoreData = KeyPairData.builder().keyPairs(keyPairData).alias(keyPairAlias).passwordSource(keyPassHandler).build();
+		KeyPairEntry keyPairStoreData = KeyPairData.builder().keyPair(keyPairData).alias(keyPairAlias).passwordSource(keyPassHandler).build();
 
 		CallbackHandler secretKeyPassHandler = new PasswordCallbackHandler(secretKeyPass);
 		SecretKeyEntry secretKeyData = SecretKeyData.builder().secretKey(secretKey).alias(secretKeyAlias).passwordSource(secretKeyPassHandler).build();

@@ -3,12 +3,14 @@ package org.adorsys.encobject.service;
 import com.google.protobuf.ByteString;
 import org.adorsys.encobject.domain.ObjectHandle;
 import org.adorsys.encobject.domain.keystore.KeystoreData;
+import org.adorsys.encobject.domain.Tuple;
 import org.adorsys.jkeygen.keystore.KeyStoreService;
 
 import javax.security.auth.callback.CallbackHandler;
 import java.io.IOException;
 import java.security.*;
 import java.security.cert.CertificateException;
+import java.util.Map;
 
 /**
  * Service in charge of loading and storing user keys.
@@ -34,11 +36,29 @@ public class BlobStoreKeystorePersistence implements KeystorePersistence {
 			throw new IllegalStateException(e);
 		}
 	}
+
+	public void saveKeyStoreWithAttributes(KeyStore keystore, Map<String, String> attributes, CallbackHandler storePassHandler, ObjectHandle handle) throws NoSuchAlgorithmException, CertificateException, UnknownContainerException{
+		try {
+			String storeType = keystore.getType();
+			byte[] bs = KeyStoreService.toByteArray(keystore, handle.getName(), storePassHandler);
+			KeystoreData keystoreData = KeystoreData.newBuilder().setType(storeType).setKeystore(ByteString.copyFrom(bs)).build();
+			blobStoreConnection.putBlobWithMetadata(handle, keystoreData.toByteArray(), attributes);
+		} catch (IOException e) {
+			throw new IllegalStateException(e);
+		}
+	}
 	
 	public KeyStore loadKeystore(ObjectHandle handle, CallbackHandler handler) throws KeystoreNotFoundException, CertificateException, WrongKeystoreCredentialException, MissingKeystoreAlgorithmException, MissingKeystoreProviderException, MissingKeyAlgorithmException, IOException, UnknownContainerException{
 		KeystoreData keystoreData = loadKeystoreData(handle);
 		return initKeystore(keystoreData, handle.getName(), handler);
-	}	
+	}
+
+	public Tuple<KeyStore, Map<String, String>> loadKeystoreAndAttributes(ObjectHandle handle, CallbackHandler handler) throws KeystoreNotFoundException, CertificateException, WrongKeystoreCredentialException, MissingKeystoreAlgorithmException, MissingKeystoreProviderException, MissingKeyAlgorithmException, IOException, UnknownContainerException{
+		Tuple<KeystoreData, Map<String, String>> keystoreDataWithAttributes = loadKeystoreDataWithAttributes(handle);
+		KeyStore keyStore = initKeystore(keystoreDataWithAttributes.getX(), handle.getName(), handler);
+
+		return new Tuple<>(keyStore, keystoreDataWithAttributes.getY());
+	}
 	
 	/**
 	 * Checks if a keystore available for the given handle. This is generally true if
@@ -66,6 +86,23 @@ public class BlobStoreKeystorePersistence implements KeystorePersistence {
 		
 		try {
 			return KeystoreData.parseFrom(keyStoreBytes);
+		} catch (IOException e) {
+			throw new IllegalStateException("Invalid protocol buffer", e);
+		}
+	}
+
+	private Tuple<KeystoreData, Map<String, String>> loadKeystoreDataWithAttributes(ObjectHandle handle) throws KeystoreNotFoundException, UnknownContainerException{
+		Tuple<byte[], Map<String, String>> loadedTuple;
+
+		try {
+			loadedTuple = blobStoreConnection.getBlobAndMetadata(handle);
+		} catch (ObjectNotFoundException e) {
+			throw new KeystoreNotFoundException(e.getMessage(), e);
+		}
+
+		try {
+			KeystoreData keystoreData = KeystoreData.parseFrom(loadedTuple.getX());
+			return new Tuple<>(keystoreData, loadedTuple.getY());
 		} catch (IOException e) {
 			throw new IllegalStateException("Invalid protocol buffer", e);
 		}

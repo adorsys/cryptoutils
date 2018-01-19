@@ -41,8 +41,12 @@ public class BlobStoreKeystorePersistence implements KeystorePersistence {
 		try {
 			String storeType = keystore.getType();
 			byte[] bs = KeyStoreService.toByteArray(keystore, handle.getName(), storePassHandler);
-			KeystoreData keystoreData = KeystoreData.newBuilder().setType(storeType).setKeystore(ByteString.copyFrom(bs)).build();
-			blobStoreConnection.putBlobWithMetadata(handle, keystoreData.toByteArray(), attributes);
+			KeystoreData keystoreData = KeystoreData.newBuilder()
+					.setType(storeType)
+					.setKeystore(ByteString.copyFrom(bs))
+					.putAllAttributes(attributes)
+					.build();
+			blobStoreConnection.putBlob(handle, keystoreData.toByteArray());
 		} catch (IOException e) {
 			throw new IllegalStateException(e);
 		}
@@ -54,10 +58,10 @@ public class BlobStoreKeystorePersistence implements KeystorePersistence {
 	}
 
 	public Tuple<KeyStore, Map<String, String>> loadKeystoreAndAttributes(ObjectHandle handle, CallbackHandler handler) throws KeystoreNotFoundException, CertificateException, WrongKeystoreCredentialException, MissingKeystoreAlgorithmException, MissingKeystoreProviderException, MissingKeyAlgorithmException, IOException, UnknownContainerException{
-		Tuple<KeystoreData, Map<String, String>> keystoreDataWithAttributes = loadKeystoreDataWithAttributes(handle);
-		KeyStore keyStore = initKeystore(keystoreDataWithAttributes.getX(), handle.getName(), handler);
+		KeystoreData keystoreData = loadKeystoreData(handle);
+		KeyStore keyStore = initKeystore(keystoreData, handle.getName(), handler);
 
-		return new Tuple<>(keyStore, keystoreDataWithAttributes.getY());
+		return new Tuple<>(keyStore, keystoreData.getAttributesMap());
 	}
 	
 	/**
@@ -86,23 +90,6 @@ public class BlobStoreKeystorePersistence implements KeystorePersistence {
 		
 		try {
 			return KeystoreData.parseFrom(keyStoreBytes);
-		} catch (IOException e) {
-			throw new IllegalStateException("Invalid protocol buffer", e);
-		}
-	}
-
-	private Tuple<KeystoreData, Map<String, String>> loadKeystoreDataWithAttributes(ObjectHandle handle) throws KeystoreNotFoundException, UnknownContainerException{
-		Tuple<byte[], Map<String, String>> loadedTuple;
-
-		try {
-			loadedTuple = blobStoreConnection.getBlobAndMetadata(handle);
-		} catch (ObjectNotFoundException e) {
-			throw new KeystoreNotFoundException(e.getMessage(), e);
-		}
-
-		try {
-			KeystoreData keystoreData = KeystoreData.parseFrom(loadedTuple.getX());
-			return new Tuple<>(keystoreData, loadedTuple.getY());
 		} catch (IOException e) {
 			throw new IllegalStateException("Invalid protocol buffer", e);
 		}

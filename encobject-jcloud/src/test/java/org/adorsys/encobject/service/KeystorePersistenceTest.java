@@ -7,8 +7,11 @@ import java.security.KeyStoreException;
 import java.security.NoSuchAlgorithmException;
 import java.security.UnrecoverableKeyException;
 import java.security.cert.CertificateException;
+import java.util.HashMap;
+import java.util.Map;
 
 import org.adorsys.encobject.domain.ObjectHandle;
+import org.adorsys.encobject.domain.Tuple;
 import org.adorsys.encobject.utils.TestFsBlobStoreFactory;
 import org.adorsys.encobject.utils.TestKeyUtils;
 import org.junit.AfterClass;
@@ -88,6 +91,52 @@ public class KeystorePersistenceTest {
 		}
 		Assert.assertNotNull(key);
 		
+	}
+
+	@Test
+	public void testLoadKeystoreWithAttributes(){
+		String container = "KeystorePersistenceTest";
+		String storeid = "sampleKeyStorePersistence";
+		char[] storePass = "aSimplePass".toCharArray();
+		KeyStore keystore = TestKeyUtils.testSecretKeystore(storeid, storePass, "mainKey", "aSimpleSecretPass".toCharArray());
+		Assume.assumeNotNull(keystore);
+		try {
+			HashMap<String, String> attributes = new HashMap<>();
+			attributes.put("a", "1");
+			attributes.put("b", "2");
+			attributes.put("c", "3");
+
+			keystorePersistence.saveKeyStoreWithAttributes(keystore, attributes, TestKeyUtils.callbackHandlerBuilder(storeid, storePass).build(), new ObjectHandle(container, storeid));
+		} catch (NoSuchAlgorithmException | CertificateException | UnknownContainerException e) {
+			Assume.assumeNoException(e);
+		}
+
+		KeyStore loadedKeystore = null;
+		Map<String, String> keyStoreAttributes = null;
+
+		try {
+			Tuple<KeyStore, Map<String, String>> keyStoreMapTuple = keystorePersistence.loadKeystoreAndAttributes(new ObjectHandle(container, storeid), TestKeyUtils.callbackHandlerBuilder(storeid, storePass).build());
+			loadedKeystore = keyStoreMapTuple.getX();
+			keyStoreAttributes = keyStoreMapTuple.getY();
+		} catch (CertificateException | ObjectNotFoundException | WrongKeystoreCredentialException
+				| MissingKeystoreAlgorithmException | MissingKeystoreProviderException | MissingKeyAlgorithmException
+				| IOException | UnknownContainerException e) {
+			Assume.assumeNoException(e);
+		}
+
+		Assert.assertNotNull(loadedKeystore);
+		Assert.assertNotNull(keyStoreAttributes);
+
+		Assert.assertEquals(3, keyStoreAttributes.size());
+
+		Key key = null;
+		try {
+			key = loadedKeystore.getKey("mainKey", "aSimpleSecretPass".toCharArray());
+		} catch (UnrecoverableKeyException | KeyStoreException | NoSuchAlgorithmException e) {
+			Assert.fail(e.getMessage());
+		}
+		Assert.assertNotNull(key);
+
 	}
 
 }

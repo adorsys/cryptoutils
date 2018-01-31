@@ -29,6 +29,10 @@ import java.util.stream.Collectors;
  */
 public class KeyStoreService {
 
+    private KeyStoreService() {
+        throw new IllegalStateException("Not supported");
+    }
+
     /**
      * Create an initializes a new key store. The key store is not yet password protected.
      *
@@ -228,6 +232,32 @@ public class KeyStoreService {
                 KeyEntry keyEntry = createFromKeyStoreEntry(alias, entry, passwordSource);
 
                 keyEntries.add(keyEntry);
+            } catch (NoSuchAlgorithmException | UnrecoverableEntryException | KeyStoreException e) {
+                throw new RuntimeException(e);
+            }
+        }
+
+        return keyEntries;
+    }
+
+    public static Map<String, KeyEntry> loadEntryMap(KeyStore keyStore, PasswordProvider passwordProvider) {
+        Map<String, KeyEntry> keyEntries = new HashMap<>();
+        Enumeration<String> aliases;
+
+        try {
+            aliases = keyStore.aliases();
+        } catch (KeyStoreException e) {
+            throw new RuntimeException(e);
+        }
+
+        for(String alias : Collections.list(aliases)) {
+            KeyStore.Entry entry;
+            try {
+                CallbackHandler passwordSource = passwordProvider.providePasswordCallbackHandler(alias);
+                entry = keyStore.getEntry(alias, getPasswordProtectionParameter(passwordSource, alias));
+                KeyEntry keyEntry = createFromKeyStoreEntry(alias, entry, passwordSource);
+
+                keyEntries.put(alias, keyEntry);
             } catch (NoSuchAlgorithmException | UnrecoverableEntryException | KeyStoreException e) {
                 throw new RuntimeException(e);
             }

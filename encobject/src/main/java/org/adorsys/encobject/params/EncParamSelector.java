@@ -16,7 +16,7 @@ import com.nimbusds.jose.JWEAlgorithm;
  *
  */
 public class EncParamSelector {
-	public static EncryptionParams selectEncryptionParams(Key key) throws UnsupportedEncAlgorithmException{
+	public static EncryptionParams selectEncryptionParams(Key key) throws UnsupportedEncAlgorithmException {
 		String algorithm = key.getAlgorithm();
 		// TODO fix hack
 		if(StringUtils.equalsAnyIgnoreCase("NONE", algorithm)){
@@ -25,6 +25,10 @@ public class EncParamSelector {
 		if(StringUtils.equalsAnyIgnoreCase("AES", algorithm)){
 			return new EncryptionParams.Builder().setEncAlgo(JWEAlgorithm.A256GCMKW).setEncMethod(EncryptionMethod.A256GCM).build();
 		}
-		throw new UnsupportedEncAlgorithmException(algorithm);
+		if(StringUtils.equalsAnyIgnoreCase("RSA", algorithm)){
+			return new EncryptionParams.Builder().setEncAlgo(JWEAlgorithm.RSA_OAEP_256).setEncMethod(EncryptionMethod.A128GCM).build();
+		}
+		// TODO EC
+		throw new UnsupportedEncAlgorithmException("UnsupportedEncAlgorithmException from key:" + algorithm);
 	}
 }

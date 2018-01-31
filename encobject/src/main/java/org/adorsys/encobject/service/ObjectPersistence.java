@@ -13,10 +13,19 @@ import java.util.Map;
 
 import javax.security.auth.callback.CallbackHandler;
 
+import org.adorsys.cryptoutils.exceptions.BaseException;
+import org.adorsys.cryptoutils.exceptions.BaseExceptionHandler;
 import org.adorsys.encobject.domain.ContentMetaInfo;
 import org.adorsys.encobject.domain.ObjectHandle;
+import org.adorsys.encobject.exceptions.ExtendedPersistenceException;
+import org.adorsys.encobject.exceptions.FileExistsException;
+import org.adorsys.encobject.keysource.KeySource;
 import org.adorsys.encobject.params.EncParamSelector;
 import org.adorsys.encobject.params.EncryptionParams;
+import org.adorsys.encobject.types.EncryptionType;
+import org.adorsys.encobject.types.KeyID;
+import org.adorsys.encobject.types.OverwriteFlag;
+import org.adorsys.encobject.types.PersistenceLayerContentMetaInfoUtil;
 import org.adorsys.jjwk.selector.JWEEncryptedSelector;
 import org.adorsys.jjwk.selector.UnsupportedEncAlgorithmException;
 import org.adorsys.jjwk.selector.UnsupportedKeyLengthException;
@@ -139,6 +148,97 @@ public class ObjectPersistence {
 		}
 		return jweObject.getPayload().toBytes();
 	}
+	
+    /**
+     * Encrypt and stores an byte array given additional meta information and encryption details.
+     *
+     * @param data      : unencrypted version of bytes to store
+     * @param metaInfo  : document meta information. e.g. content type, compression, expiration
+     * @param location  : location of the document. Includes container name (bucket) and file name.
+     * @param keySource : key producer. Return a key given the keyId
+     * @param keyID     : id of the key to be used from source to encrypt the docuement.
+     * @param encParams
+     */
+    public void storeObject(byte[] data, ContentMetaInfo metaInfo, ObjectHandle location, KeySource keySource, KeyID keyID,
+                            EncryptionParams encParams, OverwriteFlag overwrite) {
+
+        try {
+
+            // We accept empty meta info
+            if (metaInfo == null) metaInfo = new ContentMetaInfo();
+
+            // Retrieve the key.
+            Key key = keySource.readKey(keyID);
+
+            PersistenceLayerContentMetaInfoUtil.setKeyID(metaInfo, keyID);
+            PersistenceLayerContentMetaInfoUtil.setEncryptionType(metaInfo, EncryptionType.JWE);
+
+            // Encryption params is optional. If not provided, we select an
+            // encryption param based on the key selected.
+            if (encParams == null) encParams = EncParamSelector.selectEncryptionParams(key);
+
+            Builder headerBuilder = new JWEHeader.Builder(encParams.getEncAlgo(), encParams.getEncMethod()).keyID(keyID.getValue());
+            ContentMetaInfoUtils.metaInfo2Header(metaInfo, headerBuilder);
+
+            JWEHeader header = headerBuilder.build();
+
+            JWEEncrypter jweEncrypter = JWEEncryptedSelector.geEncrypter(key, encParams.getEncAlgo(),
+                    encParams.getEncMethod());
+
+            JWEObject jweObject = new JWEObject(header, new Payload(data));
+            jweObject.encrypt(jweEncrypter);
+
+            String jweEncryptedObject = jweObject.serialize();
+
+            byte[] bytesToStore = jweEncryptedObject.getBytes("UTF-8");
+
+            if (overwrite == OverwriteFlag.FALSE) {
+            	boolean blobExists = blobStoreConnection.blobExists(location);
+            	if (blobExists) {
+            		throw new FileExistsException("File " + location.getContainer() + " " + location.getName() + " already exists");
+            	}
+            }
+            blobStoreConnection.putBlob(location, bytesToStore);
+        } catch (Exception e) {
+            BaseExceptionHandler.handle(e);
+        }
+    }
+
+    public PersistentObjectWrapper loadObject(ObjectHandle location, KeySource keySource) {
+
+        try {
+            if (location == null)
+                throw new ExtendedPersistenceException("Location for Object must not be null.");
+
+            byte[] jweEncryptedBytes = blobStoreConnection.getBlob(location);
+            String jweEncryptedObject = IOUtils.toString(jweEncryptedBytes, "UTF-8");
+
+            JWEObject jweObject = JWEObject.parse(jweEncryptedObject);
+            ContentMetaInfo metaInfo = new ContentMetaInfo();
+            ContentMetaInfoUtils.header2MetaInfo(jweObject.getHeader(), metaInfo);
+            EncryptionType encryptionType = PersistenceLayerContentMetaInfoUtil.getEncryptionnType(metaInfo);
+            if (! encryptionType.equals(EncryptionType.JWE)) {
+                throw new BaseException("Expected EncryptionType is " + EncryptionType.JWE + " but was " + encryptionType);
+            }
+            KeyID keyID = PersistenceLayerContentMetaInfoUtil.getKeyID(metaInfo);
+            KeyID keyID2 = new KeyID(jweObject.getHeader().getKeyID());
+            if (!keyID.equals(keyID2)) {
+                throw new BaseException("die in der MetaInfo hinterlegte keyID " + keyID + " passt nicht zu der im header hinterlegten KeyID " + keyID2);
+            }
+            Key key = keySource.readKey(keyID);
+
+            if (key == null) {
+                throw new ExtendedPersistenceException("can not read key with keyID " + keyID + " from keySource of class " + keySource.getClass().getName());
+            }
+
+            JWEDecrypter decrypter = decrypterFactory.createJWEDecrypter(jweObject.getHeader(), key);
+            jweObject.decrypt(decrypter);
+            return new PersistentObjectWrapper(jweObject.getPayload().toBytes(), metaInfo, keyID, location);
+        } catch (Exception e) {
+            throw BaseExceptionHandler.handle(e);
+        }
+
+    }
 	
 	/*
 	 * Retrieves the key with the given keyID from the keystore. The key password will be retrieved by

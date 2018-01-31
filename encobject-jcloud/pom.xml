@@ -12,6 +12,11 @@
     <artifactId>encobject-jcloud</artifactId>
 
     <dependencies>
+		<dependency>
+			<groupId>de.adorsys.cryptoutils</groupId>
+			<artifactId>basetypes</artifactId>
+		</dependency>
+
         <dependency>
             <groupId>de.adorsys.cryptoutils</groupId>
             <artifactId>encobject</artifactId>

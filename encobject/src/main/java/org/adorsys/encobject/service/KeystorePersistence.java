@@ -2,21 +2,15 @@ package org.adorsys.encobject.service;
 
 import java.io.IOException;
 import java.security.KeyStore;
-import java.security.KeyStoreException;
 import java.security.NoSuchAlgorithmException;
-import java.security.NoSuchProviderException;
-import java.security.UnrecoverableKeyException;
 import java.security.cert.CertificateException;
 import java.util.Map;
 
 import javax.security.auth.callback.CallbackHandler;
 
+import org.adorsys.encobject.complextypes.KeyStoreLocation;
 import org.adorsys.encobject.domain.ObjectHandle;
 import org.adorsys.encobject.domain.Tuple;
-import org.adorsys.encobject.domain.keystore.KeystoreData;
-import org.adorsys.jkeygen.keystore.KeyStoreService;
-
-import com.google.protobuf.ByteString;
 
 /**
  * Service in charge of loading and storing user keys.
@@ -40,4 +34,7 @@ public interface KeystorePersistence {
 	 * @return if a keystore available for the given handle
 	 */
 	boolean hasKeystore(ObjectHandle handle);
+	
+	public void saveKeyStore(KeyStore keystore, CallbackHandler storePassHandler, KeyStoreLocation keyStoreLocation);
+	public KeyStore loadKeystore(KeyStoreLocation keyStoreLocation, CallbackHandler handler);
 }

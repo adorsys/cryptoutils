@@ -9,17 +9,17 @@ import io.swagger.annotations.ApiModelProperty;
 @ApiModel(value="ContentMetaInfo", description="Contains content meta information generally used to enrich and optimize object storage.")
 public class ContentMetaInfo {
 	
-	private String contentTrype;
+	private String contentType;
 	private String zip;
 	private Date exp;
 	private Map<String, Object> addInfos;
 	
 	@ApiModelProperty(value = "The content mime type")
 	public String getContentTrype() {
-		return contentTrype;
+		return contentType;
 	}
 	public void setContentTrype(String contentTrype) {
-		this.contentTrype = contentTrype;
+		this.contentType = contentTrype;
 	}
 	@ApiModelProperty(value = "The compression algorithm. If not provided, the server will use the content type to decide if to compress the file")
 	public String getZip() {

@@ -5,7 +5,7 @@ import org.adorsys.encobject.domain.ObjectHandle;
 import org.adorsys.encobject.types.KeyID;
 
 /**
- * Describes the structure of a persisten object.
+ * Describes the structure of a persistent object.
  * 
  * @author fpo
  *

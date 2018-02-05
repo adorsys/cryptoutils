@@ -106,6 +106,19 @@ public class BlobStoreConnection implements StoreConnection {
         }
     }
 
+    public void deleteBlob(ObjectHandle handle) throws UnknownContainerException {
+        BlobStoreContext blobStoreContext = blobStoreContextFactory.alocate();
+        try {
+            BlobStore blobStore = blobStoreContext.getBlobStore();
+
+            blobStore.removeBlob(handle.getContainer(), handle.getName());
+        } catch (ContainerNotFoundException ex) {
+            throw new UnknownContainerException(handle.getContainer());
+        } finally {
+            blobStoreContextFactory.dispose(blobStoreContext);
+        }
+    }
+
     public void putBlobWithMetadata(ObjectHandle handle, byte[] bytes, Map<String, String> userMetadata) throws UnknownContainerException {
         BlobStoreContext blobStoreContext = blobStoreContextFactory.alocate();
         try {

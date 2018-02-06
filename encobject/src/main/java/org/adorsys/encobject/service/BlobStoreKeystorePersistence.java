@@ -1,16 +1,6 @@
 package org.adorsys.encobject.service;
 
-import java.io.IOException;
-import java.security.KeyStore;
-import java.security.KeyStoreException;
-import java.security.NoSuchAlgorithmException;
-import java.security.NoSuchProviderException;
-import java.security.UnrecoverableKeyException;
-import java.security.cert.CertificateException;
-import java.util.Map;
-
-import javax.security.auth.callback.CallbackHandler;
-
+import com.google.protobuf.ByteString;
 import org.adorsys.cryptoutils.exceptions.BaseExceptionHandler;
 import org.adorsys.encobject.complextypes.KeyStoreLocation;
 import org.adorsys.encobject.domain.ObjectHandle;
@@ -22,7 +12,15 @@ import org.adorsys.jkeygen.keystore.KeyStoreService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.google.protobuf.ByteString;
+import javax.security.auth.callback.CallbackHandler;
+import java.io.IOException;
+import java.security.KeyStore;
+import java.security.KeyStoreException;
+import java.security.NoSuchAlgorithmException;
+import java.security.NoSuchProviderException;
+import java.security.UnrecoverableKeyException;
+import java.security.cert.CertificateException;
+import java.util.Map;
 
 /**
  * Service in charge of loading and storing user keys.

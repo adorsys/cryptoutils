@@ -1,5 +1,6 @@
 package org.adorsys.encobject.filesystem;
 
+import org.adorsys.encobject.impl.FileSystemExtendedStorageConnection;
 import org.adorsys.encobject.serverdata.ServerObjectPersistence;
 import org.adorsys.encobject.service.*;
 
@@ -7,29 +8,29 @@ import org.adorsys.encobject.service.*;
 public class FsPersistenceFactory {
 
     private KeystorePersistence keystorePersistence;
-    private BlobStoreContextFactory blobStoreFactory; 
+    private ExtendedStoreConnection extendedStoreConnection;
     private ContainerPersistence containerPersistence;
     private ServerObjectPersistence serverObjectPersistence;
     private EncObjectService encObjectService;
 
     public FsPersistenceFactory(String baseDir) {
-    	blobStoreFactory = new FsBlobStoreFactory(baseDir);
-    	keystorePersistence = new BlobStoreKeystorePersistence(blobStoreFactory);
-        BlobStoreConnection storeConnection = new BlobStoreConnection(blobStoreFactory);
+    	extendedStoreConnection = new FileSystemExtendedStorageConnection();
+    	keystorePersistence = new BlobStoreKeystorePersistence(extendedStoreConnection);
 
-        containerPersistence = new ContainerPersistence(storeConnection);
-    	serverObjectPersistence = new ServerObjectPersistence(storeConnection);
+        containerPersistence = new ContainerPersistence(extendedStoreConnection);
+    	serverObjectPersistence = new ServerObjectPersistence(extendedStoreConnection);
     	encObjectService = new EncObjectService(
     	        keystorePersistence,
-                new ObjectPersistence(storeConnection),
+                new ObjectPersistence(extendedStoreConnection),
                 containerPersistence
         );
     }
 
+    /*
     public BlobStoreContextFactory getBlobStoreContextFactory() {
         return blobStoreFactory;
     }
-
+*/
     public KeystorePersistence getKeystorePersistence() {
         return keystorePersistence;
     }
@@ -38,10 +39,11 @@ public class FsPersistenceFactory {
         return containerPersistence;
     }
 
+    /*
 	public BlobStoreContextFactory getBlobStoreFactory() {
 		return blobStoreFactory;
 	}
-
+*/
 	public ServerObjectPersistence getServerObjectPersistence() {
 		return serverObjectPersistence;
 	}

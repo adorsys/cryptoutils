@@ -33,10 +33,10 @@ import com.google.protobuf.ByteString;
 public class BlobStoreKeystorePersistence implements KeystorePersistence {
 	private final static Logger LOGGER = LoggerFactory.getLogger(BlobStoreKeystorePersistence.class);
 
-	private BlobStoreConnection blobStoreConnection;
+	private ExtendedStoreConnection extendedStoreConnection;
 
-	public BlobStoreKeystorePersistence(BlobStoreContextFactory blobStoreContextFactory) {
-		this.blobStoreConnection = new BlobStoreConnection(blobStoreContextFactory);
+	public BlobStoreKeystorePersistence(ExtendedStoreConnection extendedStoreConnection) {
+		this.extendedStoreConnection = extendedStoreConnection;
 	}
 
 	public void saveKeyStore(KeyStore keystore, CallbackHandler storePassHandler, ObjectHandle handle) throws NoSuchAlgorithmException, CertificateException, UnknownContainerException{
@@ -44,7 +44,7 @@ public class BlobStoreKeystorePersistence implements KeystorePersistence {
 			String storeType = keystore.getType();
 			byte[] bs = KeyStoreService.toByteArray(keystore, handle.getName(), storePassHandler);
 			KeystoreData keystoreData = KeystoreData.newBuilder().setType(storeType).setKeystore(ByteString.copyFrom(bs)).build();
-			blobStoreConnection.putBlob(handle, keystoreData.toByteArray());
+			extendedStoreConnection.putBlob(handle, keystoreData.toByteArray());
 		} catch (IOException e) {
 			throw new IllegalStateException(e);
 		}
@@ -59,7 +59,7 @@ public class BlobStoreKeystorePersistence implements KeystorePersistence {
 					.setKeystore(ByteString.copyFrom(bs))
 					.putAllAttributes(attributes)
 					.build();
-			blobStoreConnection.putBlob(handle, keystoreData.toByteArray());
+			extendedStoreConnection.putBlob(handle, keystoreData.toByteArray());
 		} catch (IOException e) {
 			throw new IllegalStateException(e);
 		}
@@ -76,7 +76,7 @@ public class BlobStoreKeystorePersistence implements KeystorePersistence {
 
 		return new Tuple<>(keyStore, keystoreData.getAttributesMap());
 	}
-	
+
 	/**
 	 * Checks if a keystore available for the given handle. This is generally true if
 	 * the container exists and the file with name "name" is in that container.
@@ -86,7 +86,7 @@ public class BlobStoreKeystorePersistence implements KeystorePersistence {
 	 */
 	public boolean hasKeystore(ObjectHandle handle) {
 		try {
-			return blobStoreConnection.getBlob(handle)!=null;
+			return extendedStoreConnection.getBlob(handle)!=null;
 		} catch (UnknownContainerException | ObjectNotFoundException e) {
 			return false;
 		}
@@ -96,7 +96,7 @@ public class BlobStoreKeystorePersistence implements KeystorePersistence {
 	private KeystoreData loadKeystoreData(ObjectHandle handle) throws KeystoreNotFoundException, UnknownContainerException{
 		byte[] keyStoreBytes;
 		try {
-			keyStoreBytes = blobStoreConnection.getBlob(handle);
+			keyStoreBytes = extendedStoreConnection.getBlob(handle);
 		} catch (ObjectNotFoundException e) {
 			throw new KeystoreNotFoundException(e.getMessage(), e);
 		}
@@ -140,7 +140,7 @@ public class BlobStoreKeystorePersistence implements KeystorePersistence {
 			byte[] bs = KeyStoreService.toByteArray(keystore, keyStoreLocation.getLocationHandle().getName(), storePassHandler);
 			
 			// write byte array to blob store.
-			blobStoreConnection.putBlob(keyStoreLocation.getLocationHandle() , bs);
+			extendedStoreConnection.putBlob(keyStoreLocation.getLocationHandle() , bs);
 		} catch (Exception e) {
 			BaseExceptionHandler.handle(e);
 		}
@@ -149,7 +149,7 @@ public class BlobStoreKeystorePersistence implements KeystorePersistence {
 	public KeyStore loadKeystore(KeyStoreLocation keyStoreLocation, CallbackHandler handler) {
 		try {
 			// Read bytes
-			byte[] ksBytes = blobStoreConnection.getBlob(keyStoreLocation.getLocationHandle());
+			byte[] ksBytes = extendedStoreConnection.getBlob(keyStoreLocation.getLocationHandle());
 			LOGGER.debug("loaded keystore has size:" + ksBytes.length);
 			// Initialize key store
 			return KeyStoreService.loadKeyStore(ksBytes, keyStoreLocation.getLocationHandle().getName(), keyStoreLocation.getKeyStoreType().getValue(), handler);

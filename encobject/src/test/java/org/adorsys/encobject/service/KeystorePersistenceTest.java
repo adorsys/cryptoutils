@@ -12,7 +12,7 @@ import java.util.Map;
 
 import org.adorsys.encobject.domain.ObjectHandle;
 import org.adorsys.encobject.domain.Tuple;
-import org.adorsys.encobject.utils.TestFsBlobStoreFactory;
+import org.adorsys.encobject.impl.FileSystemExtendedStorageConnection;
 import org.adorsys.encobject.utils.TestKeyUtils;
 import org.junit.AfterClass;
 import org.junit.Assert;
@@ -22,16 +22,16 @@ import org.junit.Test;
 
 public class KeystorePersistenceTest {
 	private static String container = KeystorePersistenceTest.class.getSimpleName();
-	private static BlobStoreContextFactory storeContextFactory;
+	private static ExtendedStoreConnection extendedStoreConnection;
 	private static KeystorePersistence keystorePersistence;
 	private static ContainerPersistence containerPersistence;
 
 	@BeforeClass
 	public static void beforeClass(){
 		TestKeyUtils.turnOffEncPolicy();
-		storeContextFactory = new TestFsBlobStoreFactory();
-		keystorePersistence = new BlobStoreKeystorePersistence(storeContextFactory);
-		containerPersistence = new ContainerPersistence(new BlobStoreConnection(storeContextFactory));
+		extendedStoreConnection = new FileSystemExtendedStorageConnection();
+		keystorePersistence = new BlobStoreKeystorePersistence(extendedStoreConnection);
+		containerPersistence = new ContainerPersistence(extendedStoreConnection);
 		
 		try {
 			containerPersistence.creteContainer(container);
@@ -58,7 +58,7 @@ public class KeystorePersistenceTest {
 		KeyStore keystore = TestKeyUtils.testSecretKeystore(storeid, storePass, "mainKey", "aSimpleSecretPass".toCharArray());
 		Assume.assumeNotNull(keystore);
 		keystorePersistence.saveKeyStore(keystore, TestKeyUtils.callbackHandlerBuilder(storeid, storePass).build(), new ObjectHandle(container, storeid));
-		Assert.assertTrue(TestFsBlobStoreFactory.existsOnFs(container, storeid));
+		Assert.assertTrue(extendedStoreConnection.blobExists(new ObjectHandle(container, storeid)));
 	}
 	
 	@Test

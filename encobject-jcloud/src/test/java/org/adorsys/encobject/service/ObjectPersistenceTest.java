@@ -1,11 +1,7 @@
 package org.adorsys.encobject.service;
 
-import java.io.UnsupportedEncodingException;
-import java.security.KeyStore;
-import java.util.UUID;
-
-import javax.security.auth.callback.CallbackHandler;
-
+import com.nimbusds.jose.EncryptionMethod;
+import com.nimbusds.jose.JWEAlgorithm;
 import org.adorsys.encobject.domain.ContentMetaInfo;
 import org.adorsys.encobject.domain.ObjectHandle;
 import org.adorsys.encobject.params.EncryptionParams;
@@ -20,8 +16,10 @@ import org.junit.Assume;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
-import com.nimbusds.jose.EncryptionMethod;
-import com.nimbusds.jose.JWEAlgorithm;
+import javax.security.auth.callback.CallbackHandler;
+import java.io.UnsupportedEncodingException;
+import java.security.KeyStore;
+import java.util.UUID;
 
 public class ObjectPersistenceTest {
 

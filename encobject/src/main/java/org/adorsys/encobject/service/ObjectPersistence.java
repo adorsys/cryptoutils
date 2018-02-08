@@ -1,18 +1,14 @@
 package org.adorsys.encobject.service;
 
-import java.io.IOException;
-import java.io.UnsupportedEncodingException;
-import java.security.Key;
-import java.security.KeyStore;
-import java.security.KeyStoreException;
-import java.security.NoSuchAlgorithmException;
-import java.security.UnrecoverableKeyException;
-import java.text.ParseException;
-import java.util.HashMap;
-import java.util.Map;
-
-import javax.security.auth.callback.CallbackHandler;
-
+import com.nimbusds.jose.CompressionAlgorithm;
+import com.nimbusds.jose.JOSEException;
+import com.nimbusds.jose.JWEDecrypter;
+import com.nimbusds.jose.JWEEncrypter;
+import com.nimbusds.jose.JWEHeader;
+import com.nimbusds.jose.JWEHeader.Builder;
+import com.nimbusds.jose.JWEObject;
+import com.nimbusds.jose.Payload;
+import com.nimbusds.jose.crypto.factories.DefaultJWEDecrypterFactory;
 import org.adorsys.cryptoutils.exceptions.BaseException;
 import org.adorsys.cryptoutils.exceptions.BaseExceptionHandler;
 import org.adorsys.encobject.domain.ContentMetaInfo;
@@ -33,15 +29,17 @@ import org.adorsys.jkeygen.keystore.PasswordCallbackUtils;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
 
-import com.nimbusds.jose.CompressionAlgorithm;
-import com.nimbusds.jose.JOSEException;
-import com.nimbusds.jose.JWEDecrypter;
-import com.nimbusds.jose.JWEEncrypter;
-import com.nimbusds.jose.JWEHeader;
-import com.nimbusds.jose.JWEHeader.Builder;
-import com.nimbusds.jose.JWEObject;
-import com.nimbusds.jose.Payload;
-import com.nimbusds.jose.crypto.factories.DefaultJWEDecrypterFactory;
+import javax.security.auth.callback.CallbackHandler;
+import java.io.IOException;
+import java.io.UnsupportedEncodingException;
+import java.security.Key;
+import java.security.KeyStore;
+import java.security.KeyStoreException;
+import java.security.NoSuchAlgorithmException;
+import java.security.UnrecoverableKeyException;
+import java.text.ParseException;
+import java.util.HashMap;
+import java.util.Map;
 
 public class ObjectPersistence {
 

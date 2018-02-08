@@ -1,4 +1,4 @@
-package org.adorsys.encobject.impl;
+package org.adorsys.encobject.filesystem;
 
 import org.adorsys.cryptoutils.exceptions.BaseException;
 import org.adorsys.encobject.domain.Location;

@@ -1,4 +1,4 @@
-package org.adorsys.encobject.exceptions.filesystemstorage;
+package org.adorsys.encobject.filesystem.exceptions;
 
 import org.adorsys.encobject.exceptions.StorageConnectionException;
 

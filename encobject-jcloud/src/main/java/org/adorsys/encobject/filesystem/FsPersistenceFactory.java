@@ -1,6 +1,5 @@
 package org.adorsys.encobject.filesystem;
 
-import org.adorsys.encobject.impl.FileSystemExtendedStorageConnection;
 import org.adorsys.encobject.serverdata.ServerObjectPersistence;
 import org.adorsys.encobject.service.*;
 

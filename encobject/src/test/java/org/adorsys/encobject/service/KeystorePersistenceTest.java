@@ -12,7 +12,7 @@ import java.util.Map;
 
 import org.adorsys.encobject.domain.ObjectHandle;
 import org.adorsys.encobject.domain.Tuple;
-import org.adorsys.encobject.impl.FileSystemExtendedStorageConnection;
+import org.adorsys.encobject.filesystem.FileSystemExtendedStorageConnection;
 import org.adorsys.encobject.utils.TestKeyUtils;
 import org.junit.AfterClass;
 import org.junit.Assert;

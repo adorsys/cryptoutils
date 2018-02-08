@@ -1,28 +1,22 @@
 package org.adorsys.encobject.service;
 
-import java.util.Map;
-
 import org.adorsys.encobject.complextypes.BucketPath;
 import org.adorsys.encobject.domain.ContentInfoEntry;
+import org.adorsys.encobject.domain.ObjectHandle;
+import org.adorsys.encobject.domain.PageSet;
 import org.adorsys.encobject.domain.Payload;
+import org.adorsys.encobject.domain.StorageMetadata;
 import org.adorsys.encobject.types.ListRecursiveFlag;
 
-public interface ExtendedStoreConnection extends StoreConnection {
+import java.util.Map;
 
-	/**
-	 * Add the payload at the location specified in bucketPath
-	 * 
-	 * @param bucketPath
-	 * @param payload
-	 * 
-	 * @return etag of the blob you uploaded, possibly null where etags are
-	 *         unsupported
-	 */
-	String putBlob(BucketPath bucketPath, Payload payload);
+public interface ExtendedStoreConnection extends StoreConnection{
+
+	void putBlob(BucketPath bucketPath, Payload payload);
 
 	/**
 	 * Retrieve meta information of the blob at the location {@link BucketPath}
-	 * 
+	 *
 	 * @param bucketPath
 	 * @return a Map with blob meta information
 	 */
@@ -30,7 +24,7 @@ public interface ExtendedStoreConnection extends StoreConnection {
 
 	/**
 	 * Retrieve the blob at the location {@link BucketPath}
-	 * 
+	 *
 	 * @param bucketPath
 	 * @return
 	 */
@@ -38,7 +32,7 @@ public interface ExtendedStoreConnection extends StoreConnection {
 
 	/**
 	 * Remove the blob at the location {@link BucketPath}
-	 * 
+	 *
 	 * @param bucketPath
 	 */
 	void removeBlob(BucketPath bucketPath);
@@ -46,5 +40,20 @@ public interface ExtendedStoreConnection extends StoreConnection {
 	void removeBlobs(Iterable<BucketPath> bucketPaths);
 
 	long countBlobs(BucketPath bucketPath, ListRecursiveFlag recursive);
+
+	void createContainer(String container);
+
+	boolean containerExists(String container);
+
+	void deleteContainer(String container);
+
+	void putBlob(ObjectHandle handle, byte[] bytes);
+
+	byte[] getBlob(ObjectHandle handle);
+
+	boolean blobExists(ObjectHandle location);
+
+	PageSet<? extends StorageMetadata> list(BucketPath bucketPath, ListRecursiveFlag listRecursiveFlag);
+
 
 }

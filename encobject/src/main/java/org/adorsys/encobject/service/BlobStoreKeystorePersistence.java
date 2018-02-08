@@ -83,22 +83,14 @@ public class BlobStoreKeystorePersistence implements KeystorePersistence {
 	 * @return if a keystore available for the given handle
 	 */
 	public boolean hasKeystore(ObjectHandle handle) {
-		try {
 			return extendedStoreConnection.getBlob(handle)!=null;
-		} catch (UnknownContainerException | ObjectNotFoundException e) {
-			return false;
-		}
 	}
 
 	
 	private KeystoreData loadKeystoreData(ObjectHandle handle) throws KeystoreNotFoundException, UnknownContainerException{
 		byte[] keyStoreBytes;
-		try {
 			keyStoreBytes = extendedStoreConnection.getBlob(handle);
-		} catch (ObjectNotFoundException e) {
-			throw new KeystoreNotFoundException(e.getMessage(), e);
-		}
-		
+
 		try {
 			return KeystoreData.parseFrom(keyStoreBytes);
 		} catch (IOException e) {

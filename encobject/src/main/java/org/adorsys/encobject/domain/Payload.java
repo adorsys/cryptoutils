@@ -3,7 +3,6 @@ package org.adorsys.encobject.domain;
 import java.io.Closeable;
 import java.io.IOException;
 import java.io.InputStream;
-import java.util.Map;
 
 public interface Payload extends Closeable {
 
@@ -33,14 +32,14 @@ public interface Payload extends Closeable {
 	 * 
 	 * @return
 	 */
-	Map<String, ContentInfoEntry> getMetaInfo();
+	DocumentMetaInfo getMetaInfo();
 
 	/**
 	 * Set the content meta info.
 	 * 
 	 * @param metaInfo
 	 */
-	void setMetaInfo(Map<String, ContentInfoEntry> metaInfo);
+	void setMetaInfo(DocumentMetaInfo metaInfo);
 
 	/**
 	 * Sets whether the payload contains sensitive information. This is used

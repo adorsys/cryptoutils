@@ -23,6 +23,11 @@
         </dependency>
 
         <dependency>
+            <groupId>de.adorsys.cryptoutils</groupId>
+            <artifactId>filesystemstoreconnection</artifactId>
+        </dependency>
+
+        <dependency>
             <groupId>de.adorsys.envutils</groupId>
             <artifactId>envutils4j</artifactId>
         </dependency>

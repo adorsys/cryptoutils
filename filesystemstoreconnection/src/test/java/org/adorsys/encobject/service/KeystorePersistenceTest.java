@@ -1,15 +1,5 @@
 package org.adorsys.encobject.service;
 
-import java.io.IOException;
-import java.security.Key;
-import java.security.KeyStore;
-import java.security.KeyStoreException;
-import java.security.NoSuchAlgorithmException;
-import java.security.UnrecoverableKeyException;
-import java.security.cert.CertificateException;
-import java.util.HashMap;
-import java.util.Map;
-
 import org.adorsys.encobject.domain.ObjectHandle;
 import org.adorsys.encobject.domain.Tuple;
 import org.adorsys.encobject.filesystem.FileSystemExtendedStorageConnection;
@@ -19,6 +9,16 @@ import org.junit.Assert;
 import org.junit.Assume;
 import org.junit.BeforeClass;
 import org.junit.Test;
+
+import java.io.IOException;
+import java.security.Key;
+import java.security.KeyStore;
+import java.security.KeyStoreException;
+import java.security.NoSuchAlgorithmException;
+import java.security.UnrecoverableKeyException;
+import java.security.cert.CertificateException;
+import java.util.HashMap;
+import java.util.Map;
 
 public class KeystorePersistenceTest {
 	private static String container = KeystorePersistenceTest.class.getSimpleName();

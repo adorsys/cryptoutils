@@ -49,6 +49,7 @@
 		<module>jtstamp</module>
 		<module>jkeyutils</module>
 		<module>encobject-jcloud</module>
+		<module>filesystemstoreconnection</module>
 	</modules>
 	<repositories>
 		<repository>
@@ -81,6 +82,12 @@
 			<dependency>
 				<groupId>de.adorsys.cryptoutils</groupId>
 				<artifactId>basetypes</artifactId>
+				<version>${project.version}</version>
+			</dependency>
+
+			<dependency>
+				<groupId>de.adorsys.cryptoutils</groupId>
+				<artifactId>filesystemstoreconnection</artifactId>
 				<version>${project.version}</version>
 			</dependency>
 

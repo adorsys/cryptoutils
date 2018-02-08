@@ -7,9 +7,8 @@
         <artifactId>cryptoutils</artifactId>
         <version>0.12.0-SNAPSHOT</version>
     </parent>
-    <artifactId>encobject</artifactId>
+    <artifactId>filesystemstoreconnection</artifactId>
 
-    <name>Encrypted Object Service</name>
     <properties>
         <maven.compiler.source>1.8</maven.compiler.source>
         <maven.compiler.target>1.8</maven.compiler.target>
@@ -17,7 +16,7 @@
     </properties>
 
     <build>
-        <finalName>encobject</finalName>
+        <finalName>filesystemstoreconnection</finalName>
         <plugins>
             <plugin>
                 <groupId>com.github.os72</groupId>
@@ -59,61 +58,14 @@
                 </configuration>
             </plugin>
 
-        <!-- Damit TestKeyUtils auch in encobject-jcloud benutzt werden kann -->
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-jar-plugin</artifactId>
-                <version>2.4</version>
-                <executions>
-                    <execution>
-                        <goals>
-                            <goal>test-jar</goal>
-                        </goals>
-                    </execution>
-                </executions>
-            </plugin>
         </plugins>
 
     </build>
 
     <dependencies>
         <dependency>
-            <groupId>io.swagger</groupId>
-            <artifactId>swagger-annotations</artifactId>
-        </dependency>
-
-        <dependency>
             <groupId>de.adorsys.cryptoutils</groupId>
-            <artifactId>jjwk</artifactId>
-        </dependency>
-
-        <dependency>
-            <groupId>de.adorsys.cryptoutils</groupId>
-            <artifactId>basetypes</artifactId>
-        </dependency>
-
-
-        <dependency>
-            <groupId>com.google.protobuf</groupId>
-            <artifactId>protobuf-java</artifactId>
-        </dependency>
-
-        <!-- logging -->
-        <!-- 2.10.0 ist leider nicht kompatibel mit spring boot -->
-        <dependency>
-            <groupId>org.apache.logging.log4j</groupId>
-            <artifactId>log4j-api</artifactId>
-            <version>2.7</version>
-        </dependency>
-        <dependency>
-            <groupId>org.apache.logging.log4j</groupId>
-            <artifactId>log4j-slf4j-impl</artifactId>
-            <version>2.7</version>
-        </dependency>
-        <dependency>
-            <groupId>org.apache.logging.log4j</groupId>
-            <artifactId>log4j-core</artifactId>
-            <version>2.7</version>
+            <artifactId>encobject</artifactId>
         </dependency>
 
         <!-- test -->
@@ -122,6 +74,15 @@
             <artifactId>junit</artifactId>
             <scope>test</scope>
         </dependency>
+
+        <dependency>
+            <groupId>de.adorsys.cryptoutils</groupId>
+            <artifactId>encobject</artifactId>
+            <version>0.12.0-SNAPSHOT</version>
+            <type>test-jar</type>
+            <scope>test</scope>
+        </dependency>
+
 
     </dependencies>
 </project>

@@ -1,11 +1,5 @@
 package org.adorsys.encobject.service;
 
-import java.io.IOException;
-import java.util.HashSet;
-import java.util.LinkedHashSet;
-import java.util.Map;
-import java.util.Set;
-
 import org.adorsys.encobject.complextypes.BucketPath;
 import org.adorsys.encobject.domain.Location;
 import org.adorsys.encobject.domain.LocationImpl;
@@ -16,7 +10,6 @@ import org.adorsys.encobject.domain.PageSetImpl;
 import org.adorsys.encobject.domain.StorageMetadata;
 import org.adorsys.encobject.domain.StorageMetadataImpl;
 import org.adorsys.encobject.domain.StorageType;
-import org.adorsys.encobject.domain.Tuple;
 import org.adorsys.encobject.types.BucketName;
 import org.adorsys.encobject.types.ListRecursiveFlag;
 import org.apache.commons.io.IOUtils;
@@ -27,6 +20,11 @@ import org.jclouds.blobstore.domain.Blob;
 import org.jclouds.blobstore.options.ListContainerOptions;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import java.io.IOException;
+import java.util.HashSet;
+import java.util.LinkedHashSet;
+import java.util.Set;
 
 /**
  * Provides connection to the blob store. Particularly implements routine for opening
@@ -88,7 +86,7 @@ public class BlobStoreConnection implements StoreConnection {
         }
     }
     
-
+    @Override
     public void putBlob(ObjectHandle handle, byte[] bytes) throws UnknownContainerException {
         BlobStoreContext blobStoreContext = blobStoreContextFactory.alocate();
         try {
@@ -101,6 +99,115 @@ public class BlobStoreConnection implements StoreConnection {
             blobStore.putBlob(handle.getContainer(), blob);
         } catch (ContainerNotFoundException ex) {
             throw new UnknownContainerException(handle.getContainer());
+        } finally {
+            blobStoreContextFactory.dispose(blobStoreContext);
+        }
+    }
+
+
+    @Override
+    public byte[] getBlob(ObjectHandle handle) throws UnknownContainerException, ObjectNotFoundException {
+        BlobStoreContext blobStoreContext = blobStoreContextFactory.alocate();
+        try {
+            BlobStore blobStore = blobStoreContext.getBlobStore();
+            Blob blob;
+            try {
+                blob = blobStore.getBlob(handle.getContainer(), handle.getName());
+                if (blob == null) throw new ObjectNotFoundException(handle.getContainer() + "/" + handle.getName());
+            } catch (ContainerNotFoundException e) {
+                throw new UnknownContainerException(handle.getContainer());
+            }
+
+            try {
+                return IOUtils.toByteArray(blob.getPayload().openStream());
+            } catch (IOException e) {
+                throw new IllegalStateException(e);
+            }
+
+        } finally {
+            blobStoreContextFactory.dispose(blobStoreContext);
+        }
+    }
+
+    @Override
+    public PageSet<? extends StorageMetadata> list(BucketPath bucketPath, ListRecursiveFlag listRecursiveFlag) {
+        BlobStoreContext blobStoreContext = this.blobStoreContextFactory.alocate();
+        try {
+            BlobStore blobStore = blobStoreContext.getBlobStore();
+            ListContainerOptions listContainerOptions = new ListContainerOptions();
+            if (listRecursiveFlag == ListRecursiveFlag.TRUE) {
+                listContainerOptions.recursive();
+            }
+            ObjectHandle objectHandle = bucketPath.getObjectHandle();
+            if (objectHandle.getName() != null) {
+                String prefix = objectHandle.getName() + BucketPath.BUCKET_SEPARATOR;
+                listContainerOptions.prefix(prefix);
+                if (listRecursiveFlag == ListRecursiveFlag.FALSE) {
+                    listContainerOptions.delimiter(BucketName.BUCKET_SEPARATOR);
+                }
+            }
+
+            LOGGER.debug("list container:" + objectHandle.getContainer() + " prefix:" + listContainerOptions.getPrefix() + " del:" + listContainerOptions.getDelimiter());
+            org.jclouds.blobstore.domain.PageSet<? extends org.jclouds.blobstore.domain.StorageMetadata> ps = blobStore.list(objectHandle.getContainer(), listContainerOptions);
+            LinkedHashSet<StorageMetadata> set = new LinkedHashSet<StorageMetadata>();
+            for (org.jclouds.blobstore.domain.StorageMetadata s : ps) {
+                StorageType type =  s.getType()==null?null:StorageType.valueOf(s.getType().name());
+                Location location = copyLocation(new HashSet<String>(), s.getLocation());
+                StorageMetadata e = new StorageMetadataImpl(type, s.getProviderId(),
+                        s.getName(), location, s.getUri(), s.getETag(), s.getCreationDate(), s.getLastModified(),
+                        s.getUserMetadata(), s.getSize());
+                set.add(e);
+            }
+            return new PageSetImpl<>(set, ps.getNextMarker());
+
+        } finally
+
+        {
+            this.blobStoreContextFactory.dispose(blobStoreContext);
+        }
+    }
+
+    @Override
+    public boolean blobExists(ObjectHandle location) {
+        BlobStoreContext blobStoreContext = this.blobStoreContextFactory.alocate();
+        try {
+            BlobStore blobStore = blobStoreContext.getBlobStore();
+            LOGGER.debug("container:" + location.getContainer());
+            LOGGER.debug("name     :" + location.getName());
+            if (location.getContainer() == null) {
+                LOGGER.warn("dont know how to check if container is null");
+                return false;
+            }
+            return blobStore.blobExists(location.getContainer() != null ? location.getContainer() : "",
+                    location.getName() != null ? location.getName() : "");
+        } finally {
+            this.blobStoreContextFactory.dispose(blobStoreContext);
+        }
+    }
+
+    /*
+    // other methods not override
+    public Tuple<byte[], Map<String, String>> getBlobAndMetadata(ObjectHandle handle) throws UnknownContainerException, ObjectNotFoundException {
+        BlobStoreContext blobStoreContext = blobStoreContextFactory.alocate();
+        try {
+            BlobStore blobStore = blobStoreContext.getBlobStore();
+            Blob blob;
+            try {
+                blob = blobStore.getBlob(handle.getContainer(), handle.getName());
+                if (blob == null) throw new ObjectNotFoundException(handle.getContainer() + "/" + handle.getName());
+            } catch (ContainerNotFoundException e) {
+                throw new UnknownContainerException(handle.getContainer());
+            }
+
+            try {
+                byte[] bytes = IOUtils.toByteArray(blob.getPayload().openStream());
+                Map<String, String> userMetadata = blob.getMetadata().getUserMetadata();
+
+                return new Tuple<>(bytes, userMetadata);
+            } catch (IOException e) {
+                throw new IllegalStateException(e);
+            }
+
         } finally {
             blobStoreContextFactory.dispose(blobStoreContext);
         }
@@ -136,116 +243,7 @@ public class BlobStoreConnection implements StoreConnection {
             blobStoreContextFactory.dispose(blobStoreContext);
         }
     }
-
-    public byte[] getBlob(ObjectHandle handle) throws UnknownContainerException, ObjectNotFoundException {
-        BlobStoreContext blobStoreContext = blobStoreContextFactory.alocate();
-        try {
-            BlobStore blobStore = blobStoreContext.getBlobStore();
-            Blob blob;
-            try {
-                blob = blobStore.getBlob(handle.getContainer(), handle.getName());
-                if (blob == null) throw new ObjectNotFoundException(handle.getContainer() + "/" + handle.getName());
-            } catch (ContainerNotFoundException e) {
-                throw new UnknownContainerException(handle.getContainer());
-            }
-
-            try {
-                return IOUtils.toByteArray(blob.getPayload().openStream());
-            } catch (IOException e) {
-                throw new IllegalStateException(e);
-            }
-
-        } finally {
-            blobStoreContextFactory.dispose(blobStoreContext);
-        }
-    }
-
-    public Tuple<byte[], Map<String, String>> getBlobAndMetadata(ObjectHandle handle) throws UnknownContainerException, ObjectNotFoundException {
-        BlobStoreContext blobStoreContext = blobStoreContextFactory.alocate();
-        try {
-            BlobStore blobStore = blobStoreContext.getBlobStore();
-            Blob blob;
-            try {
-                blob = blobStore.getBlob(handle.getContainer(), handle.getName());
-                if (blob == null) throw new ObjectNotFoundException(handle.getContainer() + "/" + handle.getName());
-            } catch (ContainerNotFoundException e) {
-                throw new UnknownContainerException(handle.getContainer());
-            }
-
-            try {
-                byte[] bytes = IOUtils.toByteArray(blob.getPayload().openStream());
-                Map<String, String> userMetadata = blob.getMetadata().getUserMetadata();
-
-                return new Tuple<>(bytes, userMetadata);
-            } catch (IOException e) {
-                throw new IllegalStateException(e);
-            }
-
-        } finally {
-            blobStoreContextFactory.dispose(blobStoreContext);
-        }
-    }
-
-    /**
-     * Achtung, gehört nicht zum derzeitigen Interface
-     *
-     * @return
-     */
-    public boolean blobExists(ObjectHandle location) {
-        BlobStoreContext blobStoreContext = this.blobStoreContextFactory.alocate();
-        try {
-            BlobStore blobStore = blobStoreContext.getBlobStore();
-            LOGGER.debug("container:" + location.getContainer());
-            LOGGER.debug("name     :" + location.getName());
-            if (location.getContainer() == null) {
-                LOGGER.warn("dont know how to check if container is null");
-                return false;
-            }
-            return blobStore.blobExists(location.getContainer() != null ? location.getContainer() : "",
-                    location.getName() != null ? location.getName() : "");
-        } finally {
-            this.blobStoreContextFactory.dispose(blobStoreContext);
-        }
-    }
-    
-    @Override
-    public PageSet<? extends StorageMetadata> list(BucketPath bucketPath, ListRecursiveFlag listRecursiveFlag) {
-        BlobStoreContext blobStoreContext = this.blobStoreContextFactory.alocate();
-        try {
-            BlobStore blobStore = blobStoreContext.getBlobStore();
-            ListContainerOptions listContainerOptions = new ListContainerOptions();
-            if (listRecursiveFlag == ListRecursiveFlag.TRUE) {
-                listContainerOptions.recursive();
-            }
-            ObjectHandle objectHandle = bucketPath.getObjectHandle();
-            if (objectHandle.getName() != null) {
-                String prefix = objectHandle.getName() + BucketPath.BUCKET_SEPARATOR;
-                listContainerOptions.prefix(prefix);
-                if (listRecursiveFlag == ListRecursiveFlag.FALSE) {
-                    listContainerOptions.delimiter(BucketName.BUCKET_SEPARATOR);
-                }
-            }
-
-            LOGGER.debug("list container:" + objectHandle.getContainer() + " prefix:" + listContainerOptions.getPrefix() + " del:" + listContainerOptions.getDelimiter());
-            org.jclouds.blobstore.domain.PageSet<? extends org.jclouds.blobstore.domain.StorageMetadata> ps = blobStore.list(objectHandle.getContainer(), listContainerOptions);
-            LinkedHashSet<StorageMetadata> set = new LinkedHashSet<StorageMetadata>();
-            for (org.jclouds.blobstore.domain.StorageMetadata s : ps) {
-            	StorageType type =  s.getType()==null?null:StorageType.valueOf(s.getType().name());
-            	Location location = copyLocation(new HashSet<String>(), s.getLocation());
-				StorageMetadata e = new StorageMetadataImpl(type, s.getProviderId(), 
-						s.getName(), location, s.getUri(), s.getETag(), s.getCreationDate(), s.getLastModified(), 
-						s.getUserMetadata(), s.getSize());
-				set.add(e);
-			}
-            return new PageSetImpl<>(set, ps.getNextMarker());
-            
-        } finally
-
-        {
-            this.blobStoreContextFactory.dispose(blobStoreContext);
-        }
-    }
-    
+*/
     private Location copyLocation(Set<String> ids, org.jclouds.domain.Location l){
     	if(l==null) return null;
     	if(ids.contains(l.getId())) return null;

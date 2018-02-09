@@ -45,9 +45,9 @@ public class ObjectPersistence {
 
 	private DefaultJWEDecrypterFactory decrypterFactory = new DefaultJWEDecrypterFactory();
 	
-	private final ExtendedStoreConnection blobStoreConnection;
+	private final StoreConnection blobStoreConnection;
 
-	public ObjectPersistence(ExtendedStoreConnection blobStoreConnection) {
+	public ObjectPersistence(StoreConnection blobStoreConnection) {
 		this.blobStoreConnection = blobStoreConnection;
 	}
 

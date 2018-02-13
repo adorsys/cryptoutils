@@ -4,6 +4,7 @@ import com.nimbusds.jose.EncryptionMethod;
 import com.nimbusds.jose.JWEAlgorithm;
 import org.adorsys.encobject.domain.ContentMetaInfo;
 import org.adorsys.encobject.domain.ObjectHandle;
+import org.adorsys.encobject.filesystem.FileSystemExtendedStorageConnection;
 import org.adorsys.encobject.params.EncryptionParams;
 import org.adorsys.encobject.utils.TestFsBlobStoreFactory;
 import org.adorsys.encobject.utils.TestKeyUtils;
@@ -24,7 +25,7 @@ import java.util.UUID;
 public class ObjectPersistenceTest {
 
 	private static String container = ObjectPersistenceTest.class.getSimpleName();
-	private static BlobStoreContextFactory storeContextFactory;
+	private static ExtendedStoreConnection extendedStoreConnection;
 	private static ObjectPersistence objectInfoPersistence;
 	private static ContainerPersistence containerPersistence;
 	private static KeyStore keyStore;
@@ -35,9 +36,9 @@ public class ObjectPersistenceTest {
 	@BeforeClass
 	public static void beforeClass(){
 		TestKeyUtils.turnOffEncPolicy();
-		storeContextFactory = new TestFsBlobStoreFactory();
-		objectInfoPersistence = new ObjectPersistence(new BlobStoreConnection(storeContextFactory));
-		containerPersistence = new ContainerPersistence(new BlobStoreConnection(storeContextFactory));
+		extendedStoreConnection = new FileSystemExtendedStorageConnection();
+		objectInfoPersistence = new ObjectPersistence(extendedStoreConnection);
+		containerPersistence = new ContainerPersistence(extendedStoreConnection);
 		
 		try {
 			containerPersistence.creteContainer(container);

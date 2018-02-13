@@ -1,20 +1,25 @@
 package org.adorsys.encobject.serverdata;
 
-import com.nimbusds.jose.*;
+import com.nimbusds.jose.CompressionAlgorithm;
+import com.nimbusds.jose.JOSEException;
+import com.nimbusds.jose.JWEDecrypter;
+import com.nimbusds.jose.JWEEncrypter;
+import com.nimbusds.jose.JWEHeader;
 import com.nimbusds.jose.JWEHeader.Builder;
+import com.nimbusds.jose.JWEObject;
+import com.nimbusds.jose.Payload;
 import com.nimbusds.jose.crypto.factories.DefaultJWEDecrypterFactory;
 import org.adorsys.encobject.domain.ContentMetaInfo;
 import org.adorsys.encobject.domain.ObjectHandle;
 import org.adorsys.encobject.params.EncParamSelector;
 import org.adorsys.encobject.params.EncryptionParams;
+import org.adorsys.encobject.service.ExtendedStoreConnection;
 import org.adorsys.encobject.service.ObjectNotFoundException;
-import org.adorsys.encobject.service.StoreConnection;
 import org.adorsys.encobject.service.UnknownContainerException;
 import org.adorsys.encobject.service.WrongKeyCredentialException;
 import org.adorsys.jjwk.selector.JWEEncryptedSelector;
 import org.adorsys.jjwk.selector.UnsupportedEncAlgorithmException;
 import org.adorsys.jjwk.selector.UnsupportedKeyLengthException;
-import org.adorsys.jjwk.serverkey.ServerKeyMap;
 import org.adorsys.jjwk.serverkey.ServerKeyMapProvider;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -38,9 +43,9 @@ public class ServerObjectPersistence {
 
 	private DefaultJWEDecrypterFactory decrypterFactory = new DefaultJWEDecrypterFactory();
 
-	private StoreConnection blobStoreConnection;
+	private ExtendedStoreConnection blobStoreConnection;
 
-	public ServerObjectPersistence(StoreConnection storeConnection) {
+	public ServerObjectPersistence(ExtendedStoreConnection storeConnection) {
 		this.blobStoreConnection = storeConnection;
 	}
 

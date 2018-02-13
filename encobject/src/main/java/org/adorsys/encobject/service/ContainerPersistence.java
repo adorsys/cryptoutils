@@ -8,9 +8,9 @@ package org.adorsys.encobject.service;
  */
 public class ContainerPersistence {
 	
-	private StoreConnection blobStoreConnection;
+	private ExtendedStoreConnection blobStoreConnection;
 	
-	public ContainerPersistence(StoreConnection storeConnection) {
+	public ContainerPersistence(ExtendedStoreConnection storeConnection) {
 		this.blobStoreConnection = storeConnection;
 	}
 

@@ -10,7 +10,7 @@ import org.adorsys.encobject.types.ListRecursiveFlag;
 
 import java.util.Map;
 
-public interface ExtendedStoreConnection extends StoreConnection{
+public interface ExtendedStoreConnection {
 
 	void putBlob(BucketPath bucketPath, Payload payload);
 

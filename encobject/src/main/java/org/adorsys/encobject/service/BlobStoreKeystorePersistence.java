@@ -1,19 +1,15 @@
 package org.adorsys.encobject.service;
 
 import com.google.protobuf.ByteString;
-import org.adorsys.cryptoutils.exceptions.BaseExceptionHandler;
-import org.adorsys.encobject.complextypes.KeyStoreLocation;
 import org.adorsys.encobject.domain.ObjectHandle;
 import org.adorsys.encobject.domain.Tuple;
 import org.adorsys.encobject.domain.keystore.KeystoreData;
-import org.adorsys.encobject.exceptions.ExtendedPersistenceException;
 import org.adorsys.encobject.exceptions.KeystoreNotFoundException;
 import org.adorsys.encobject.exceptions.MissingKeyAlgorithmException;
 import org.adorsys.encobject.exceptions.MissingKeystoreAlgorithmException;
 import org.adorsys.encobject.exceptions.MissingKeystoreProviderException;
 import org.adorsys.encobject.exceptions.UnknownContainerException;
 import org.adorsys.encobject.exceptions.WrongKeystoreCredentialException;
-import org.adorsys.encobject.types.KeyStoreType;
 import org.adorsys.jkeygen.keystore.KeyStoreService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -43,19 +39,14 @@ public class BlobStoreKeystorePersistence implements KeystorePersistence {
 		this.extendedStoreConnection = extendedStoreConnection;
 	}
 
-	public void saveKeyStore(KeyStore keystore, CallbackHandler storePassHandler, ObjectHandle handle) throws NoSuchAlgorithmException, CertificateException, UnknownContainerException {
-		try {
+	public void saveKeyStore(KeyStore keystore, CallbackHandler storePassHandler, ObjectHandle handle){
 			String storeType = keystore.getType();
 			byte[] bs = KeyStoreService.toByteArray(keystore, handle.getName(), storePassHandler);
 			KeystoreData keystoreData = KeystoreData.newBuilder().setType(storeType).setKeystore(ByteString.copyFrom(bs)).build();
 			extendedStoreConnection.putBlob(handle, keystoreData.toByteArray());
-		} catch (IOException e) {
-			throw new IllegalStateException(e);
-		}
 	}
 
-	public void saveKeyStoreWithAttributes(KeyStore keystore, Map<String, String> attributes, CallbackHandler storePassHandler, ObjectHandle handle) throws NoSuchAlgorithmException, CertificateException, UnknownContainerException{
-		try {
+	public void saveKeyStoreWithAttributes(KeyStore keystore, Map<String, String> attributes, CallbackHandler storePassHandler, ObjectHandle handle){
 			String storeType = keystore.getType();
 			byte[] bs = KeyStoreService.toByteArray(keystore, handle.getName(), storePassHandler);
 			KeystoreData keystoreData = KeystoreData.newBuilder()
@@ -64,17 +55,14 @@ public class BlobStoreKeystorePersistence implements KeystorePersistence {
 					.putAllAttributes(attributes)
 					.build();
 			extendedStoreConnection.putBlob(handle, keystoreData.toByteArray());
-		} catch (IOException e) {
-			throw new IllegalStateException(e);
-		}
 	}
 	
-	public KeyStore loadKeystore(ObjectHandle handle, CallbackHandler handler) throws KeystoreNotFoundException, CertificateException, WrongKeystoreCredentialException, MissingKeystoreAlgorithmException, MissingKeystoreProviderException, MissingKeyAlgorithmException, IOException, UnknownContainerException{
+	public KeyStore loadKeystore(ObjectHandle handle, CallbackHandler handler) {
 		KeystoreData keystoreData = loadKeystoreData(handle);
 		return initKeystore(keystoreData, handle.getName(), handler);
 	}
 
-	public Tuple<KeyStore, Map<String, String>> loadKeystoreAndAttributes(ObjectHandle handle, CallbackHandler handler) throws KeystoreNotFoundException, CertificateException, WrongKeystoreCredentialException, MissingKeystoreAlgorithmException, MissingKeystoreProviderException, MissingKeyAlgorithmException, IOException, UnknownContainerException{
+	public Tuple<KeyStore, Map<String, String>> loadKeystoreAndAttributes(ObjectHandle handle, CallbackHandler handler){
 		KeystoreData keystoreData = loadKeystoreData(handle);
 		KeyStore keyStore = initKeystore(keystoreData, handle.getName(), handler);
 
@@ -104,27 +92,11 @@ public class BlobStoreKeystorePersistence implements KeystorePersistence {
 		}
 	}
 
-	private KeyStore initKeystore(KeystoreData keystoreData, String storeid, CallbackHandler handler) throws WrongKeystoreCredentialException, MissingKeystoreAlgorithmException, MissingKeystoreProviderException, MissingKeyAlgorithmException, CertificateException, IOException {
-		try {
+	private KeyStore initKeystore(KeystoreData keystoreData, String storeid, CallbackHandler handler){
 			return KeyStoreService.loadKeyStore(keystoreData.getKeystore().toByteArray(), storeid, keystoreData.getType(), handler);
-		} catch (UnrecoverableKeyException e) {
-			throw new WrongKeystoreCredentialException(e);
-		} catch (KeyStoreException e) {
-			if(e.getCause()!=null){
-				Throwable cause = e.getCause();
-				if(cause instanceof NoSuchAlgorithmException){
-					throw new MissingKeystoreAlgorithmException(cause.getMessage(), cause);
-				}
-				if(cause instanceof NoSuchProviderException){
-					throw new MissingKeystoreProviderException(cause.getMessage(), cause);
-				}
-			}
-			throw new IllegalStateException("Unidentified keystore exception", e);
-		} catch (NoSuchAlgorithmException e) {
-			throw new MissingKeyAlgorithmException(e.getMessage(), e);
-		}
 	}
-	
+
+	/*
 	public void saveKeyStore(KeyStore keystore, CallbackHandler storePassHandler, KeyStoreLocation keyStoreLocation) {
 		try {
 			// Match store type aggainst file extension
@@ -152,6 +124,7 @@ public class BlobStoreKeystorePersistence implements KeystorePersistence {
 		} catch (Exception e) {
 			throw BaseExceptionHandler.handle(e);
 		}
-	}	
+	}
+		*/
 	
 }

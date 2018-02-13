@@ -2,16 +2,13 @@
 <Configuration monitorInterval="10">
 
     <Properties>
-        <Property name="appname">documentsafe</Property>
+        <Property name="appname">cryptutils</Property>
         <Property name="pattern">TEST %d{yyyy/MM/dd HH:mm:ss,SSS} [%t] [%-5p] [%-30c{1}] %-100m %n
         </Property>
         <Property name="logpath">.</Property>
     </Properties>
 
     <Appenders>
-        <!--
-        <logFaces name="LFST" application="${appname}" protocol="tcp" remoteHost="localhost" backup="lfs-notavailable"/>
-        -->
         <RollingRandomAccessFile name="randomrollingfile" fileName="${logpath}/rr-${appname}.log" append="true"
                                  filePattern="${logpath}/rr-${appname}-%d{MM-dd-yyyy}-%i.log.gz">
             <PatternLayout pattern="${pattern}"/>
@@ -49,9 +46,6 @@
         <Root level="debug">
             <AppenderRef ref="async"/>
             <AppenderRef ref="STDOUT"/>
-            <!--
-            <AppenderRef ref="LFST"/>
-            -->
         </Root>
     </Loggers>
 

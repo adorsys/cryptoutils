@@ -1,5 +1,6 @@
 package org.adorsys.encobject.service;
 
+import org.adorsys.cryptoutils.exceptions.BaseExceptionHandler;
 import org.adorsys.encobject.domain.ObjectHandle;
 import org.adorsys.encobject.domain.Tuple;
 import org.adorsys.encobject.exceptions.ContainerExistsException;
@@ -28,122 +29,102 @@ import java.util.HashMap;
 import java.util.Map;
 
 public class KeystorePersistenceTest {
-	private static String container = KeystorePersistenceTest.class.getSimpleName();
-	private static ExtendedStoreConnection extendedStoreConnection;
-	private static KeystorePersistence keystorePersistence;
-	private static ContainerPersistence containerPersistence;
+    private static String container = KeystorePersistenceTest.class.getSimpleName();
+    private static ExtendedStoreConnection extendedStoreConnection;
+    private static KeystorePersistence keystorePersistence;
+    private static ContainerPersistence containerPersistence;
 
-	@BeforeClass
-	public static void beforeClass(){
-		TestKeyUtils.turnOffEncPolicy();
-		extendedStoreConnection = new FileSystemExtendedStorageConnection();
-		keystorePersistence = new BlobStoreKeystorePersistence(extendedStoreConnection);
-		containerPersistence = new ContainerPersistence(extendedStoreConnection);
-		
-		try {
-			containerPersistence.creteContainer(container);
-		} catch (ContainerExistsException e) {
-			Assume.assumeNoException(e);
-		}
+    @BeforeClass
+    public static void beforeClass() {
+        TestKeyUtils.turnOffEncPolicy();
+        extendedStoreConnection = new FileSystemExtendedStorageConnection();
+        keystorePersistence = new BlobStoreKeystorePersistence(extendedStoreConnection);
+        containerPersistence = new ContainerPersistence(extendedStoreConnection);
 
-	}
-	
-	@AfterClass
-	public static void afterClass(){
-		try {
-			if(containerPersistence!=null && containerPersistence.containerExists(container))
-				containerPersistence.deleteContainer(container);
-		} catch (UnknownContainerException e) {
-			Assume.assumeNoException(e);
-		}
-	} 
+        try {
+            containerPersistence.creteContainer(container);
+        } catch (ContainerExistsException e) {
+            Assume.assumeNoException(e);
+        }
 
-	@Test
-	public void testStoreKeystore() throws NoSuchAlgorithmException, CertificateException, UnknownContainerException {
-		String storeid = "sampleKeyStorePersistence";
-		char[] storePass = "aSimplePass".toCharArray();
-		KeyStore keystore = TestKeyUtils.testSecretKeystore(storeid, storePass, "mainKey", "aSimpleSecretPass".toCharArray());
-		Assume.assumeNotNull(keystore);
-		keystorePersistence.saveKeyStore(keystore, TestKeyUtils.callbackHandlerBuilder(storeid, storePass).build(), new ObjectHandle(container, storeid));
-		Assert.assertTrue(extendedStoreConnection.blobExists(new ObjectHandle(container, storeid)));
-	}
-	
-	@Test
-	public void testLoadKeystore(){
-		String container = "KeystorePersistenceTest";
-		String storeid = "sampleKeyStorePersistence";
-		char[] storePass = "aSimplePass".toCharArray();
-		KeyStore keystore = TestKeyUtils.testSecretKeystore(storeid, storePass, "mainKey", "aSimpleSecretPass".toCharArray());
-		Assume.assumeNotNull(keystore);
-		try {
-			keystorePersistence.saveKeyStore(keystore, TestKeyUtils.callbackHandlerBuilder(storeid, storePass).build(), new ObjectHandle(container, storeid));
-		} catch (NoSuchAlgorithmException | CertificateException | UnknownContainerException e) {
-			Assume.assumeNoException(e);
-		}
-		
-		KeyStore loadedKeystore = null;
-		try {
-			loadedKeystore = keystorePersistence.loadKeystore(new ObjectHandle(container, storeid), TestKeyUtils.callbackHandlerBuilder(storeid, storePass).build());
-		} catch (CertificateException | ObjectNotFoundException | WrongKeystoreCredentialException
-				| MissingKeystoreAlgorithmException | MissingKeystoreProviderException | MissingKeyAlgorithmException
-				| IOException | UnknownContainerException e) {
-			Assume.assumeNoException(e);
-		}
-		Assert.assertNotNull(loadedKeystore);
-		Key key = null;
-		try {
-			key = loadedKeystore.getKey("mainKey", "aSimpleSecretPass".toCharArray());
-		} catch (UnrecoverableKeyException | KeyStoreException | NoSuchAlgorithmException e) {
-			Assert.fail(e.getMessage());
-		}
-		Assert.assertNotNull(key);
-		
-	}
+    }
 
-	@Test
-	public void testLoadKeystoreWithAttributes(){
-		String container = "KeystorePersistenceTest";
-		String storeid = "sampleKeyStorePersistence";
-		char[] storePass = "aSimplePass".toCharArray();
-		KeyStore keystore = TestKeyUtils.testSecretKeystore(storeid, storePass, "mainKey", "aSimpleSecretPass".toCharArray());
-		Assume.assumeNotNull(keystore);
-		try {
-			HashMap<String, String> attributes = new HashMap<>();
-			attributes.put("a", "1");
-			attributes.put("b", "2");
-			attributes.put("c", "3");
+    @AfterClass
+    public static void afterClass() {
+        try {
+            if (containerPersistence != null && containerPersistence.containerExists(container))
+                containerPersistence.deleteContainer(container);
+        } catch (UnknownContainerException e) {
+            Assume.assumeNoException(e);
+        }
+    }
 
-			keystorePersistence.saveKeyStoreWithAttributes(keystore, attributes, TestKeyUtils.callbackHandlerBuilder(storeid, storePass).build(), new ObjectHandle(container, storeid));
-		} catch (NoSuchAlgorithmException | CertificateException | UnknownContainerException e) {
-			Assume.assumeNoException(e);
-		}
+    @Test
+    public void testStoreKeystore() throws NoSuchAlgorithmException, CertificateException, UnknownContainerException {
+        String storeid = "sampleKeyStorePersistence";
+        char[] storePass = "aSimplePass".toCharArray();
+        KeyStore keystore = TestKeyUtils.testSecretKeystore(storeid, storePass, "mainKey", "aSimpleSecretPass".toCharArray());
+        Assume.assumeNotNull(keystore);
+        keystorePersistence.saveKeyStore(keystore, TestKeyUtils.callbackHandlerBuilder(storeid, storePass).build(), new ObjectHandle(container, storeid));
+        Assert.assertTrue(extendedStoreConnection.blobExists(new ObjectHandle(container, storeid)));
+    }
 
-		KeyStore loadedKeystore = null;
-		Map<String, String> keyStoreAttributes = null;
+    @Test
+    public void testLoadKeystore() {
+        try {
+            String container = "KeystorePersistenceTest";
+            String storeid = "sampleKeyStorePersistence";
+            char[] storePass = "aSimplePass".toCharArray();
+            KeyStore keystore = TestKeyUtils.testSecretKeystore(storeid, storePass, "mainKey", "aSimpleSecretPass".toCharArray());
+            Assume.assumeNotNull(keystore);
+            keystorePersistence.saveKeyStore(keystore, TestKeyUtils.callbackHandlerBuilder(storeid, storePass).build(), new ObjectHandle(container, storeid));
 
-		try {
-			Tuple<KeyStore, Map<String, String>> keyStoreMapTuple = keystorePersistence.loadKeystoreAndAttributes(new ObjectHandle(container, storeid), TestKeyUtils.callbackHandlerBuilder(storeid, storePass).build());
-			loadedKeystore = keyStoreMapTuple.getX();
-			keyStoreAttributes = keyStoreMapTuple.getY();
-		} catch (CertificateException | ObjectNotFoundException | WrongKeystoreCredentialException
-				| MissingKeystoreAlgorithmException | MissingKeystoreProviderException | MissingKeyAlgorithmException
-				| IOException | UnknownContainerException e) {
-			Assume.assumeNoException(e);
-		}
+            KeyStore loadedKeystore = null;
+            loadedKeystore = keystorePersistence.loadKeystore(new ObjectHandle(container, storeid), TestKeyUtils.callbackHandlerBuilder(storeid, storePass).build());
+            Assert.assertNotNull(loadedKeystore);
+            Key key = null;
+            key = loadedKeystore.getKey("mainKey", "aSimpleSecretPass".toCharArray());
+            Assert.assertNotNull(key);
+        } catch (Exception e) {
+            throw BaseExceptionHandler.handle(e);
+        }
 
-		Assert.assertNotNull(loadedKeystore);
-		Assert.assertNotNull(keyStoreAttributes);
+    }
 
-		Assert.assertEquals(3, keyStoreAttributes.size());
+    @Test
+    public void testLoadKeystoreWithAttributes() {
+        try {
+            String container = "KeystorePersistenceTest";
+            String storeid = "sampleKeyStorePersistence";
+            char[] storePass = "aSimplePass".toCharArray();
+            KeyStore keystore = TestKeyUtils.testSecretKeystore(storeid, storePass, "mainKey", "aSimpleSecretPass".toCharArray());
+            Assume.assumeNotNull(keystore);
+            HashMap<String, String> attributes = new HashMap<>();
+            attributes.put("a", "1");
+            attributes.put("b", "2");
+            attributes.put("c", "3");
 
-		Key key = null;
-		try {
-			key = loadedKeystore.getKey("mainKey", "aSimpleSecretPass".toCharArray());
-		} catch (UnrecoverableKeyException | KeyStoreException | NoSuchAlgorithmException e) {
-			Assert.fail(e.getMessage());
-		}
-		Assert.assertNotNull(key);
+            keystorePersistence.saveKeyStoreWithAttributes(keystore, attributes, TestKeyUtils.callbackHandlerBuilder(storeid, storePass).build(), new ObjectHandle(container, storeid));
 
-	}
+            KeyStore loadedKeystore = null;
+            Map<String, String> keyStoreAttributes = null;
+
+            Tuple<KeyStore, Map<String, String>> keyStoreMapTuple = keystorePersistence.loadKeystoreAndAttributes(new ObjectHandle(container, storeid), TestKeyUtils.callbackHandlerBuilder(storeid, storePass).build());
+            loadedKeystore = keyStoreMapTuple.getX();
+            keyStoreAttributes = keyStoreMapTuple.getY();
+
+            Assert.assertNotNull(loadedKeystore);
+            Assert.assertNotNull(keyStoreAttributes);
+
+            Assert.assertEquals(3, keyStoreAttributes.size());
+
+            Key key = null;
+            key = loadedKeystore.getKey("mainKey", "aSimpleSecretPass".toCharArray());
+            Assert.assertNotNull(key);
+        } catch (Exception e) {
+            throw BaseExceptionHandler.handle(e);
+        }
+
+    }
 
 }

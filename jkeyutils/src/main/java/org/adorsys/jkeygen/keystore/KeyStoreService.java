@@ -1,5 +1,6 @@
 package org.adorsys.jkeygen.keystore;
 
+import org.adorsys.cryptoutils.exceptions.BaseExceptionHandler;
 import org.adorsys.jkeygen.keypair.CertificationResult;
 import org.adorsys.jkeygen.keypair.SelfSignedKeyPairData;
 import org.adorsys.jkeygen.pwd.PasswordCallbackHandler;
@@ -14,12 +15,24 @@ import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.security.*;
+import java.security.KeyPair;
+import java.security.KeyStore;
 import java.security.KeyStore.ProtectionParameter;
+import java.security.KeyStoreException;
+import java.security.NoSuchAlgorithmException;
+import java.security.UnrecoverableEntryException;
+import java.security.UnrecoverableKeyException;
 import java.security.cert.Certificate;
 import java.security.cert.CertificateEncodingException;
 import java.security.cert.CertificateException;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.Enumeration;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 /**
@@ -38,18 +51,16 @@ public class KeyStoreService {
      *
      * @param storeType storeType
      * @return KeyStore keyStore
-     * @throws IOException IOException
      */
-    public static KeyStore newKeyStore(String storeType) throws IOException {
-
-        // Use default type if blank.
-        if (StringUtils.isBlank(storeType)) storeType = "UBER";
+    public static KeyStore newKeyStore(String storeType) {
         try {
+            // Use default type if blank.
+            if (StringUtils.isBlank(storeType)) storeType = "UBER";
             KeyStore ks = KeyStore.getInstance(storeType);
             ks.load(null, null);
             return ks;
-        } catch (NoSuchAlgorithmException | CertificateException | KeyStoreException e) {
-            throw new IllegalStateException(e);
+        } catch (Exception e) {
+            throw BaseExceptionHandler.handle(e);
         }
     }
 
@@ -60,18 +71,15 @@ public class KeyStoreService {
      * @param storeId      storeId
      * @param storePassSrc storePassSrc
      * @return key store byte array
-     * @throws IOException              if there was an I/O problem with data
-     * @throws CertificateException     if any of the certificates included in the keystore data could not be stored
-     * @throws NoSuchAlgorithmException if the appropriate data integrity algorithm could not be found
      */
-    public static byte[] toByteArray(KeyStore keystore, String storeId, CallbackHandler storePassSrc) throws NoSuchAlgorithmException, CertificateException, IOException {
-        ByteArrayOutputStream stream = new ByteArrayOutputStream();
+    public static byte[] toByteArray(KeyStore keystore, String storeId, CallbackHandler storePassSrc) {
         try {
+            ByteArrayOutputStream stream = new ByteArrayOutputStream();
             keystore.store(stream, PasswordCallbackUtils.getPassword(storePassSrc, storeId));
-        } catch (KeyStoreException e) {
-            throw new IllegalStateException("Keystore not initialized.", e);
+            return stream.toByteArray();
+        } catch (Exception e) {
+            throw BaseExceptionHandler.handle(e);
         }
-        return stream.toByteArray();
     }
 
     /**
@@ -82,52 +90,36 @@ public class KeyStoreService {
      * @param storeType    : the type of this key store. f null, the defaut java keystore type is used.
      * @param storePassSrc : the callback handler that retrieves the store password.
      * @return KeyStore
-     * @throws KeyStoreException         either NoSuchAlgorithmException or NoSuchProviderException
-     * @throws NoSuchAlgorithmException  if the algorithm used to check the integrity of the keystore cannot be found
-     * @throws CertificateException      if any of the certificates in the keystore could not be loaded
-     * @throws UnrecoverableKeyException if a password is required but not given, or if the given password was incorrect
-     * @throws IOException               if there is an I/O or format problem with the keystore data
      */
-    public static KeyStore loadKeyStore(InputStream in, String storeId, String storeType, CallbackHandler storePassSrc) throws KeyStoreException, NoSuchAlgorithmException, CertificateException, UnrecoverableKeyException, IOException {
-
-        // Use default type if blank.
-        if (StringUtils.isBlank(storeType)) storeType = "UBER";
-
-        KeyStore ks = KeyStore.getInstance(storeType);
-
+    public static KeyStore loadKeyStore(InputStream in, String storeId, String storeType, CallbackHandler storePassSrc) {
         try {
+
+            // Use default type if blank.
+            if (StringUtils.isBlank(storeType)) storeType = "UBER";
+
+            KeyStore ks = KeyStore.getInstance(storeType);
+
             ks.load(in, PasswordCallbackUtils.getPassword(storePassSrc, storeId));
-        } catch (IOException e) {
-            // catch missing or wrong key.
-            if (e.getCause() != null && (e.getCause() instanceof UnrecoverableKeyException)) {
-                throw (UnrecoverableKeyException) e.getCause();
-            } else if (e.getCause() != null && (e.getCause() instanceof BadPaddingException)) {
-                throw new UnrecoverableKeyException(e.getMessage());
-            }
-            throw e;
+            return ks;
+
+        } catch (Exception e) {
+            throw BaseExceptionHandler.handle(e);
         }
-        return ks;
     }
 
-    public static KeyStore loadKeyStore(String storeType, KeyStore.LoadStoreParameter loadStoreParameter) throws KeyStoreException, NoSuchAlgorithmException, CertificateException, UnrecoverableKeyException, IOException {
-
-        // Use default type if blank.
-        if (StringUtils.isBlank(storeType)) storeType = "UBER";
-
-        KeyStore ks = KeyStore.getInstance(storeType);
-
+    public static KeyStore loadKeyStore(String storeType, KeyStore.LoadStoreParameter loadStoreParameter) {
         try {
+
+            // Use default type if blank.
+            if (StringUtils.isBlank(storeType)) storeType = "UBER";
+
+            KeyStore ks = KeyStore.getInstance(storeType);
+
             ks.load(loadStoreParameter);
-        } catch (IOException e) {
-            // catch missing or wrong key.
-            if (e.getCause() != null && (e.getCause() instanceof UnrecoverableKeyException)) {
-                throw (UnrecoverableKeyException) e.getCause();
-            } else if (e.getCause() != null && (e.getCause() instanceof BadPaddingException)) {
-                throw new UnrecoverableKeyException(e.getMessage());
-            }
-            throw e;
+            return ks;
+        } catch (Exception e) {
+            throw BaseExceptionHandler.handle(e);
         }
-        return ks;
     }
 
     /**
@@ -136,13 +128,8 @@ public class KeyStoreService {
      * @param storeType    : the type of this key store. f null, the defaut java keystore type is used.
      * @param storePassSrc : the callback handler that retrieves the store password.
      * @return KeyStore
-     * @throws KeyStoreException         either NoSuchAlgorithmException or NoSuchProviderException
-     * @throws NoSuchAlgorithmException  if the algorithm used to check the integrity of the keystore cannot be found
-     * @throws CertificateException      if any of the certificates in the keystore could not be loaded
-     * @throws UnrecoverableKeyException if a password is required but not given, or if the given password was incorrect
-     * @throws IOException               if there is an I/O or format problem with the keystore data
      */
-    public static KeyStore loadKeyStore(byte[] data, String storeId, String storeType, CallbackHandler storePassSrc) throws UnrecoverableKeyException, KeyStoreException, NoSuchAlgorithmException, CertificateException, IOException {
+    public static KeyStore loadKeyStore(byte[] data, String storeId, String storeType, CallbackHandler storePassSrc) {
         return loadKeyStore(new ByteArrayInputStream(data), storeId, storeType, storePassSrc);
     }
 
@@ -153,22 +140,18 @@ public class KeyStoreService {
      * @param keyEntries keyEntries
      */
     public static void fillKeyStore(final KeyStore ks, Collection<KeyEntry> keyEntries) {
-        try {
-            for (KeyEntry keyEntry : keyEntries) {
-                addToKeyStore(ks, keyEntry);
-            }
-        } catch (KeyStoreException ex) {
-            throw new IllegalStateException(ex.getMessage(), ex);
+        for (KeyEntry keyEntry : keyEntries) {
+            addToKeyStore(ks, keyEntry);
         }
     }
 
     /**
      * Put the given entry into a key store. The key store must have been initialized before.
      *
-     * @param ks         ks
+     * @param ks       ks
      * @param keyEntry keyEntry to be added
      */
-    public static void addToKeyStore(final KeyStore ks, KeyEntry keyEntry) throws KeyStoreException {
+    public static void addToKeyStore(final KeyStore ks, KeyEntry keyEntry) {
         if (keyEntry instanceof KeyPairEntry) {
             addToKeyStore(ks, (KeyPairEntry) keyEntry);
         } else if (keyEntry instanceof SecretKeyEntry) {
@@ -178,21 +161,24 @@ public class KeyStoreService {
         }
     }
 
-    private static void addToKeyStore(final KeyStore ks, KeyPairEntry keyPairHolder) throws KeyStoreException {
-
-        List<Certificate> chainList = new ArrayList<>();
-        CertificationResult certification = keyPairHolder.getCertification();
-        X509CertificateHolder subjectCert = certification != null ? certification.getSubjectCert() : keyPairHolder.getKeyPair().getSubjectCert();
-        chainList.add(V3CertificateUtils.getX509JavaCertificate(subjectCert));
-        if (certification != null) {
-            List<X509CertificateHolder> issuerChain = certification.getIssuerChain();
-            for (X509CertificateHolder x509CertificateHolder : issuerChain) {
-                chainList.add(V3CertificateUtils.getX509JavaCertificate(x509CertificateHolder));
+    private static void addToKeyStore(final KeyStore ks, KeyPairEntry keyPairHolder) {
+        try {
+            List<Certificate> chainList = new ArrayList<>();
+            CertificationResult certification = keyPairHolder.getCertification();
+            X509CertificateHolder subjectCert = certification != null ? certification.getSubjectCert() : keyPairHolder.getKeyPair().getSubjectCert();
+            chainList.add(V3CertificateUtils.getX509JavaCertificate(subjectCert));
+            if (certification != null) {
+                List<X509CertificateHolder> issuerChain = certification.getIssuerChain();
+                for (X509CertificateHolder x509CertificateHolder : issuerChain) {
+                    chainList.add(V3CertificateUtils.getX509JavaCertificate(x509CertificateHolder));
+                }
             }
+            Certificate[] chain = chainList.toArray(new Certificate[chainList.size()]);
+            ks.setKeyEntry(keyPairHolder.getAlias(), keyPairHolder.getKeyPair().getKeyPair().getPrivate(),
+                    PasswordCallbackUtils.getPassword(keyPairHolder.getPasswordSource(), keyPairHolder.getAlias()), chain);
+        } catch (Exception e) {
+            throw BaseExceptionHandler.handle(e);
         }
-        Certificate[] chain = chainList.toArray(new Certificate[chainList.size()]);
-        ks.setKeyEntry(keyPairHolder.getAlias(), keyPairHolder.getKeyPair().getKeyPair().getPrivate(),
-                PasswordCallbackUtils.getPassword(keyPairHolder.getPasswordSource(), keyPairHolder.getAlias()), chain);
     }
 
     public static void addToKeyStore(final KeyStore ks, SecretKeyEntry secretKeyData) {
@@ -210,8 +196,12 @@ public class KeyStoreService {
         return new KeyStore.PasswordProtection(PasswordCallbackUtils.getPassword(passwordSource, alias));
     }
 
-    private static void addToKeyStore(final KeyStore ks, TrustedCertEntry trustedCertHolder) throws KeyStoreException {
-        ks.setCertificateEntry(trustedCertHolder.getAlias(), V3CertificateUtils.getX509JavaCertificate(trustedCertHolder.getCertificate()));
+    private static void addToKeyStore(final KeyStore ks, TrustedCertEntry trustedCertHolder) {
+        try {
+            ks.setCertificateEntry(trustedCertHolder.getAlias(), V3CertificateUtils.getX509JavaCertificate(trustedCertHolder.getCertificate()));
+        } catch (Exception e) {
+            throw BaseExceptionHandler.handle(e);
+        }
     }
 
     public static List<KeyEntry> loadEntries(KeyStore keyStore, PasswordProvider passwordProvider) {
@@ -224,7 +214,7 @@ public class KeyStoreService {
             throw new RuntimeException(e);
         }
 
-        for(String alias : Collections.list(aliases)) {
+        for (String alias : Collections.list(aliases)) {
             KeyStore.Entry entry;
             try {
                 CallbackHandler passwordSource = passwordProvider.providePasswordCallbackHandler(alias);
@@ -250,7 +240,7 @@ public class KeyStoreService {
             throw new RuntimeException(e);
         }
 
-        for(String alias : Collections.list(aliases)) {
+        for (String alias : Collections.list(aliases)) {
             KeyStore.Entry entry;
             try {
                 CallbackHandler passwordSource = passwordProvider.providePasswordCallbackHandler(alias);
@@ -280,7 +270,7 @@ public class KeyStoreService {
                     .secretKey(secretKey)
                     .keyAlgo(secretKey.getAlgorithm())
                     .build();
-        } else if(entry instanceof KeyStore.TrustedCertificateEntry) {
+        } else if (entry instanceof KeyStore.TrustedCertificateEntry) {
             KeyStore.TrustedCertificateEntry trustedCertificateEntry = (KeyStore.TrustedCertificateEntry) entry;
 
             return TrustedCertData.builder()
@@ -342,7 +332,7 @@ public class KeyStoreService {
         public CallbackHandler providePasswordCallbackHandler(String keyAlias) {
             char[] password = passwordsForAlias.get(keyAlias);
 
-            if(password == null) {
+            if (password == null) {
                 throw new RuntimeException("Password for alias '" + keyAlias + "' not found");
             }
 

@@ -1,6 +1,5 @@
 package org.adorsys.encobject.complextypes;
 
-import org.adorsys.cryptoutils.exceptions.BaseException;
 import org.adorsys.encobject.domain.ObjectHandle;
 import org.adorsys.encobject.exceptions.BucketException;
 import org.adorsys.encobject.types.BucketName;
@@ -48,7 +47,7 @@ public class BucketPath {
      * path darf slashes enthalten
      */
     public BucketPath(String container, String path) {
-        if (container != null) {
+        if (container != null && notOnlyWhitespace(container)) {
             if (container.indexOf(BUCKET_SEPARATOR) != -1) {
                 throw new BucketException("container " + container + " must not contain " + BUCKET_SEPARATOR);
             }
@@ -56,6 +55,9 @@ public class BucketPath {
         }
         List<String> split = split(path);
         if (!split.isEmpty()) {
+            if (this.container == null) {
+                throw new BucketException("not allowed to create a bucketPath with a path but no container");
+            }
             name = split.stream().map(b -> b).collect(Collectors.joining(BucketName.BUCKET_SEPARATOR));
         }
     }
@@ -70,6 +72,13 @@ public class BucketPath {
      * the BucketPath itself keeps untuched
      */
     public BucketPath append(BucketPath bucketPath) {
+        if (container == null) {
+            if (name != null) {
+                throw new BucketException("Programming Error. BucketPath must not exist with no container but a name " + name);
+            }
+            // Anhängen nicht nötig, daher einfach...
+            return bucketPath;
+        }
         String appendedName = "";
         if (name != null) {
             appendedName = name;
@@ -90,15 +99,7 @@ public class BucketPath {
     }
 
     public BucketPath append(String path) {
-        String appendedName = name;
-        List<String> split = split(path);
-
-        if (appendedName == null) {
-            appendedName = split.stream().map(b -> b).collect(Collectors.joining(BucketName.BUCKET_SEPARATOR));
-        } else {
-            appendedName += BUCKET_SEPARATOR + split.stream().map(b -> b).collect(Collectors.joining(BucketName.BUCKET_SEPARATOR));
-        }
-        return new BucketPath(container, appendedName);
+        return append(new BucketPath(path));
     }
 
     public BucketPath add(String suffix) {
@@ -123,7 +124,7 @@ public class BucketPath {
         StringTokenizer st = new StringTokenizer(fullBucketPath, BucketName.BUCKET_SEPARATOR);
         while (st.hasMoreElements()) {
             String token = st.nextToken();
-            if (token.length() > 0) {
+            if (notOnlyWhitespace(token)) {
                 list.add(token);
             }
         }
@@ -145,7 +146,7 @@ public class BucketPath {
         BucketDirectory documentDirectory = new BucketDirectory(this.getObjectHandle().getContainer());
         String directory = getDirectoryOf(name);
         if (directory != null) {
-            documentDirectory = new BucketDirectory(documentDirectory.append(directory));
+            documentDirectory = documentDirectory.appendDirectory(directory);
         }
         LOGGER.debug("directory for path : " + documentDirectory + " for " + this);
         return documentDirectory;
@@ -157,5 +158,9 @@ public class BucketPath {
             return null;
         }
         return value.substring(0, i);
+    }
+
+    private static boolean notOnlyWhitespace(String value) {
+        return value.replaceAll(" ","").length() > 0;
     }
 }

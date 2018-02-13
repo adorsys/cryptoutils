@@ -1,6 +1,7 @@
 package org.adorsys.encobject.service;
 
 import org.adorsys.cryptoutils.exceptions.BaseException;
+import org.adorsys.encobject.complextypes.BucketDirectory;
 import org.adorsys.encobject.complextypes.BucketPath;
 import org.adorsys.encobject.domain.ContentInfoEntry;
 import org.adorsys.encobject.domain.Location;
@@ -136,7 +137,7 @@ public class BlobStoreConnection implements ExtendedStoreConnection {
     }
 
     @Override
-    public PageSet<? extends StorageMetadata> list(BucketPath bucketPath, ListRecursiveFlag listRecursiveFlag) {
+    public PageSet<? extends StorageMetadata> list(BucketDirectory bucketDirectory, ListRecursiveFlag listRecursiveFlag) {
         BlobStoreContext blobStoreContext = this.blobStoreContextFactory.alocate();
         try {
             BlobStore blobStore = blobStoreContext.getBlobStore();
@@ -144,7 +145,7 @@ public class BlobStoreConnection implements ExtendedStoreConnection {
             if (listRecursiveFlag == ListRecursiveFlag.TRUE) {
                 listContainerOptions.recursive();
             }
-            ObjectHandle objectHandle = bucketPath.getObjectHandle();
+            ObjectHandle objectHandle = bucketDirectory.getObjectHandle();
             if (objectHandle.getName() != null) {
                 String prefix = objectHandle.getName() + BucketPath.BUCKET_SEPARATOR;
                 listContainerOptions.prefix(prefix);

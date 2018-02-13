@@ -1,5 +1,6 @@
 package org.adorsys.encobject.service;
 
+import org.adorsys.encobject.complextypes.BucketDirectory;
 import org.adorsys.encobject.complextypes.BucketPath;
 import org.adorsys.encobject.domain.ContentInfoEntry;
 import org.adorsys.encobject.domain.ObjectHandle;
@@ -53,7 +54,7 @@ public interface ExtendedStoreConnection {
 
 	boolean blobExists(ObjectHandle location);
 
-	PageSet<? extends StorageMetadata> list(BucketPath bucketPath, ListRecursiveFlag listRecursiveFlag);
+	PageSet<? extends StorageMetadata> list(BucketDirectory bucketDirectory, ListRecursiveFlag listRecursiveFlag);
 
 
 }

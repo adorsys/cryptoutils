@@ -5,11 +5,7 @@ import org.adorsys.encobject.domain.ObjectHandle;
 import org.adorsys.encobject.domain.Tuple;
 import org.adorsys.encobject.domain.keystore.KeystoreData;
 import org.adorsys.encobject.exceptions.KeystoreNotFoundException;
-import org.adorsys.encobject.exceptions.MissingKeyAlgorithmException;
-import org.adorsys.encobject.exceptions.MissingKeystoreAlgorithmException;
-import org.adorsys.encobject.exceptions.MissingKeystoreProviderException;
 import org.adorsys.encobject.exceptions.UnknownContainerException;
-import org.adorsys.encobject.exceptions.WrongKeystoreCredentialException;
 import org.adorsys.jkeygen.keystore.KeyStoreService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -17,11 +13,6 @@ import org.slf4j.LoggerFactory;
 import javax.security.auth.callback.CallbackHandler;
 import java.io.IOException;
 import java.security.KeyStore;
-import java.security.KeyStoreException;
-import java.security.NoSuchAlgorithmException;
-import java.security.NoSuchProviderException;
-import java.security.UnrecoverableKeyException;
-import java.security.cert.CertificateException;
 import java.util.Map;
 
 /**

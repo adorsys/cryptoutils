@@ -7,7 +7,7 @@ import java.io.File;
 public class TestFileSystemExtendedStorageConnection extends FileSystemExtendedStorageConnection {
 	
 	public boolean existsOnFs(String container, String name){
-		File file = getAsFile(baseDir.append(container).append(name));
+		File file = getAsFile(baseDir.appendDirectory(container).appendName(name));
 		return file.exists();
 	}
 }

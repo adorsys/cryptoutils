@@ -51,7 +51,7 @@ public class FileSystemExtendedStorageConnection implements ExtendedStoreConnect
 
     @Override
     public void createContainer(String container) {
-        File file = getAsFile(baseDir.append(container));
+        File file = getAsFile(baseDir.appendDirectory(container));
         if (file.isDirectory()) {
             LOGGER.debug("directory already exists:" + file);
             return;
@@ -88,7 +88,7 @@ public class FileSystemExtendedStorageConnection implements ExtendedStoreConnect
     }
 
     public void deleteContainer(BucketDirectory container) {
-        File file = getAsFile(baseDir.append(container.getObjectHandle().getContainer()));
+        File file = getAsFile(baseDir.appendDirectory(container.getObjectHandle().getContainer()));
         if (!containerExists(container)) {
             LOGGER.debug("directory does not exist. so nothing to delete:" + file);
             return;
@@ -138,13 +138,8 @@ public class FileSystemExtendedStorageConnection implements ExtendedStoreConnect
     }
 
     @Override
-    public PageSet<? extends StorageMetadata> list(BucketPath bucketPath, ListRecursiveFlag listRecursiveFlag) {
-        return list(new BucketDirectory(bucketPath), listRecursiveFlag);
-    }
-
-
     public PageSet<? extends StorageMetadata> list(BucketDirectory bucketDirectory, ListRecursiveFlag listRecursiveFlag) {
-        File file = getAsFile(new BucketDirectory(baseDir.append(bucketDirectory)));
+        File file = getAsFile(baseDir.append(bucketDirectory));
         LOGGER.debug("List directory " + file);
         try {
             FileSystemPageSet<FileSystemMetaData> set = new FileSystemPageSet<>();
@@ -155,7 +150,7 @@ public class FileSystemExtendedStorageConnection implements ExtendedStoreConnect
                 return set;
             }
             String container = bucketDirectory.getObjectHandle().getContainer();
-            File containerPrefix = getAsFile(new BucketDirectory(baseDir.append(container)));
+            File containerPrefix = getAsFile(baseDir.appendDirectory(container));
             String knownPrefix = containerPrefix.getAbsolutePath() + BucketPath.BUCKET_SEPARATOR;
             if (listRecursiveFlag.equals(ListRecursiveFlag.FALSE)) {
                 Collection<File> files = FileUtils.listFiles(file, null, listRecursiveFlag.equals(ListRecursiveFlag.TRUE));
@@ -250,15 +245,18 @@ public class FileSystemExtendedStorageConnection implements ExtendedStoreConnect
 
 
     protected File getAsFile(BucketPath bucketPath) {
-        ObjectHandle objectHandle = bucketPath.getObjectHandle();
+        return getAsFile(bucketPath.getObjectHandle());
+    }
+
+    protected File getAsFile(BucketDirectory bucketPath) {
+        return getAsFile(bucketPath.getObjectHandle());
+    }
+
+    private File getAsFile(ObjectHandle objectHandle) {
         String container = objectHandle.getContainer();
         String name = objectHandle.getName();
         String fullpath = container + BucketPath.BUCKET_SEPARATOR + name;
         return new File(fullpath);
-    }
-
-    private BucketPath asBucketPath(ObjectHandle objectHandle) {
-        return new BucketPath(objectHandle.getContainer(), objectHandle.getName());
     }
 
     private final static class DirectoryFilenameFilter implements FilenameFilter {
@@ -283,5 +281,10 @@ public class FileSystemExtendedStorageConnection implements ExtendedStoreConnect
             set.add(new FileSystemMetaData(filename));
         }
     }
+
+    private BucketPath asBucketPath(ObjectHandle objectHandle) {
+        return new BucketPath(objectHandle.getContainer(), objectHandle.getName());
+    }
+
 
 }

@@ -69,11 +69,12 @@ public class FileSystemExtendedStorageConnectionTest {
         ExtendedStoreConnection s = new FileSystemExtendedStorageConnection();
         s.createContainer(container);
         BucketDirectory bd = new BucketDirectory(container);
-        BucketPath file = bd.append(new BucketPath("file1"));
+        BucketPath file = bd.appendName("file1");
 
         s.putBlob(file.getObjectHandle(), "Inhalt".getBytes());
         PageSet<? extends StorageMetadata> list = s.list(bd, ListRecursiveFlag.FALSE);
         Assert.assertEquals(1, list.size());
+        LOGGER.debug("found: " + list.iterator().next().getName());
     }
 
     // Ein nicht existentes Directory darf keinen Fehler verursachen
@@ -98,7 +99,7 @@ public class FileSystemExtendedStorageConnectionTest {
         ExtendedStoreConnection s = new FileSystemExtendedStorageConnection();
         s.createContainer(container);
         BucketDirectory bd = new BucketDirectory(container);
-        BucketPath file = bd.append(new BucketPath("file1"));
+        BucketDirectory file = bd.appendDirectory("file1");
         s.putBlob(file.getObjectHandle(), "Inhalt".getBytes());
         PageSet<? extends StorageMetadata> list = s.list(file, ListRecursiveFlag.FALSE);
         Assert.assertEquals(0, list.size());

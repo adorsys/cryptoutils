@@ -11,6 +11,14 @@ import javax.security.auth.callback.CallbackHandler;
 import org.adorsys.encobject.domain.ContentMetaInfo;
 import org.adorsys.encobject.domain.KeyCredentials;
 import org.adorsys.encobject.domain.ObjectHandle;
+import org.adorsys.encobject.exceptions.ContainerExistsException;
+import org.adorsys.encobject.exceptions.MissingKeyAlgorithmException;
+import org.adorsys.encobject.exceptions.MissingKeystoreAlgorithmException;
+import org.adorsys.encobject.exceptions.MissingKeystoreProviderException;
+import org.adorsys.encobject.exceptions.ObjectNotFoundException;
+import org.adorsys.encobject.exceptions.UnknownContainerException;
+import org.adorsys.encobject.exceptions.WrongKeyCredentialException;
+import org.adorsys.encobject.exceptions.WrongKeystoreCredentialException;
 import org.adorsys.encobject.params.KeyParams;
 import org.adorsys.jjwk.selector.UnsupportedEncAlgorithmException;
 import org.adorsys.jjwk.selector.UnsupportedKeyLengthException;
@@ -46,12 +54,12 @@ public class EncObjectService {
 		return containerPersistence.containerExists(container);
 	}
 
-	public void newContainer(String container) throws ContainerExistsException{
+	public void newContainer(String container) throws ContainerExistsException {
 		containerPersistence.creteContainer(container);
 	}
 	
-	public void newSecretKey(KeyCredentials keyCredentials, KeyParams keyParams) throws CertificateException, WrongKeystoreCredentialException, 
-		MissingKeystoreAlgorithmException, MissingKeystoreProviderException, MissingKeyAlgorithmException, IOException, UnknownContainerException, 
+	public void newSecretKey(KeyCredentials keyCredentials, KeyParams keyParams) throws CertificateException, WrongKeystoreCredentialException,
+			MissingKeystoreAlgorithmException, MissingKeystoreProviderException, MissingKeyAlgorithmException, IOException, UnknownContainerException,
 		NoSuchAlgorithmException{
 		CallbackHandler storePassHandler = new PasswordCallbackHandler(keyCredentials.getStorepass().toCharArray());
 		CallbackHandler secretKeyPassHandler = new PasswordCallbackHandler(keyCredentials.getKeypass().toCharArray());

@@ -1,5 +1,8 @@
 package org.adorsys.encobject.service;
 
+import org.adorsys.encobject.exceptions.ContainerExistsException;
+import org.adorsys.encobject.exceptions.UnknownContainerException;
+
 /**
  * Service in charge of creating and deleting container
  * 

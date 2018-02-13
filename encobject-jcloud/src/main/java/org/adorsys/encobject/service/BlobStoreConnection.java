@@ -1,15 +1,20 @@
 package org.adorsys.encobject.service;
 
+import org.adorsys.cryptoutils.exceptions.BaseException;
 import org.adorsys.encobject.complextypes.BucketPath;
+import org.adorsys.encobject.domain.ContentInfoEntry;
 import org.adorsys.encobject.domain.Location;
 import org.adorsys.encobject.domain.LocationImpl;
 import org.adorsys.encobject.domain.LocationScope;
 import org.adorsys.encobject.domain.ObjectHandle;
 import org.adorsys.encobject.domain.PageSet;
 import org.adorsys.encobject.domain.PageSetImpl;
+import org.adorsys.encobject.domain.Payload;
 import org.adorsys.encobject.domain.StorageMetadata;
 import org.adorsys.encobject.domain.StorageMetadataImpl;
 import org.adorsys.encobject.domain.StorageType;
+import org.adorsys.encobject.exceptions.ObjectNotFoundException;
+import org.adorsys.encobject.exceptions.UnknownContainerException;
 import org.adorsys.encobject.types.BucketName;
 import org.adorsys.encobject.types.ListRecursiveFlag;
 import org.apache.commons.io.IOUtils;
@@ -24,6 +29,7 @@ import org.slf4j.LoggerFactory;
 import java.io.IOException;
 import java.util.HashSet;
 import java.util.LinkedHashSet;
+import java.util.Map;
 import java.util.Set;
 
 /**
@@ -32,7 +38,7 @@ import java.util.Set;
  *
  * @author fpo
  */
-public class BlobStoreConnection implements StoreConnection {
+public class BlobStoreConnection implements ExtendedStoreConnection {
     private final static Logger LOGGER = LoggerFactory.getLogger(BlobStoreConnection.class);
 
     private BlobStoreContextFactory blobStoreContextFactory;
@@ -45,7 +51,7 @@ public class BlobStoreConnection implements StoreConnection {
      * Wenn der Container bereits exisitiert, wird das ignoriert.
      */
     @Override
-    public void createContainer(String container) throws ContainerExistsException {
+    public void createContainer(String container)  {
         BlobStoreContext blobStoreContext = this.blobStoreContextFactory.alocate();
 
         ObjectHandle objectHandle = new BucketPath(container).getObjectHandle();
@@ -76,7 +82,7 @@ public class BlobStoreConnection implements StoreConnection {
     }
     
     @Override
-    public void deleteContainer(String container) throws UnknownContainerException {
+    public void deleteContainer(String container) {
         BlobStoreContext blobStoreContext = this.blobStoreContextFactory.alocate();
         ObjectHandle objectHandle = new BucketPath(container).getObjectHandle();
         try {
@@ -87,7 +93,7 @@ public class BlobStoreConnection implements StoreConnection {
     }
     
     @Override
-    public void putBlob(ObjectHandle handle, byte[] bytes) throws UnknownContainerException {
+    public void putBlob(ObjectHandle handle, byte[] bytes) {
         BlobStoreContext blobStoreContext = blobStoreContextFactory.alocate();
         try {
             BlobStore blobStore = blobStoreContext.getBlobStore();
@@ -106,7 +112,7 @@ public class BlobStoreConnection implements StoreConnection {
 
 
     @Override
-    public byte[] getBlob(ObjectHandle handle) throws UnknownContainerException, ObjectNotFoundException {
+    public byte[] getBlob(ObjectHandle handle) {
         BlobStoreContext blobStoreContext = blobStoreContextFactory.alocate();
         try {
             BlobStore blobStore = blobStoreContext.getBlobStore();
@@ -183,6 +189,38 @@ public class BlobStoreConnection implements StoreConnection {
         } finally {
             this.blobStoreContextFactory.dispose(blobStoreContext);
         }
+    }
+
+
+    // TODO NYI
+    @Override
+    public void putBlob(BucketPath bucketPath, Payload payload) {
+        throw new BaseException("NYI");
+    }
+
+    @Override
+    public Map<String, ContentInfoEntry> blobMetadata(BucketPath bucketPath) {
+        throw new BaseException("NYI");
+    }
+
+    @Override
+    public Payload getBlob(BucketPath bucketPath) {
+        throw new BaseException("NYI");
+    }
+
+    @Override
+    public void removeBlob(BucketPath bucketPath) {
+        throw new BaseException("NYI");
+    }
+
+    @Override
+    public void removeBlobs(Iterable<BucketPath> bucketPaths) {
+        throw new BaseException("NYI");
+    }
+
+    @Override
+    public long countBlobs(BucketPath bucketPath, ListRecursiveFlag recursive) {
+        throw new BaseException("NYI");
     }
 
     /*

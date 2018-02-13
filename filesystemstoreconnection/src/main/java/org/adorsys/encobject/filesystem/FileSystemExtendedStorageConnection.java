@@ -41,8 +41,12 @@ public class FileSystemExtendedStorageConnection implements ExtendedStoreConnect
     protected final BucketDirectory baseDir;
 
     public FileSystemExtendedStorageConnection() {
-        baseDir = new BucketDirectory(DEFAULT_BASE);
-            createContainer("");
+        this(DEFAULT_BASE);
+    }
+
+    public FileSystemExtendedStorageConnection(String basedir) {
+        this.baseDir = new BucketDirectory(basedir);
+        createContainer("");
     }
 
     @Override

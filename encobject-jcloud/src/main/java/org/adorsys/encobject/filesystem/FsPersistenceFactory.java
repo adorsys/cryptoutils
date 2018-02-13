@@ -13,7 +13,7 @@ public class FsPersistenceFactory {
     private EncObjectService encObjectService;
 
     public FsPersistenceFactory(String baseDir) {
-        extendedStoreConnection = new FileSystemExtendedStorageConnection();
+        extendedStoreConnection = new FileSystemExtendedStorageConnection(baseDir);
     	keystorePersistence = new BlobStoreKeystorePersistence(extendedStoreConnection);
 
         containerPersistence = new ContainerPersistence(extendedStoreConnection);

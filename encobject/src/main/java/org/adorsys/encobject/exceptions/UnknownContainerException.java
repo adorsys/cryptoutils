@@ -1,4 +1,6 @@
-package org.adorsys.encobject.service;
+package org.adorsys.encobject.exceptions;
+
+import org.adorsys.cryptoutils.exceptions.BaseException;
 
 /**
  * Requested container not found
@@ -6,7 +8,7 @@ package org.adorsys.encobject.service;
  * @author fpo
  *
  */
-public class UnknownContainerException extends Exception {
+public class UnknownContainerException extends BaseException {
 	private static final long serialVersionUID = 2434653140109032234L;
 
 	public UnknownContainerException(String container) {

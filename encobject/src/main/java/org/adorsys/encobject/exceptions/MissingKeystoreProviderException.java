@@ -1,6 +1,8 @@
-package org.adorsys.encobject.service;
+package org.adorsys.encobject.exceptions;
 
-public class MissingKeystoreProviderException extends Exception {
+import org.adorsys.cryptoutils.exceptions.BaseException;
+
+public class MissingKeystoreProviderException extends BaseException {
 	private static final long serialVersionUID = 4941429144446435839L;
 	public MissingKeystoreProviderException(String message, Throwable cause) {
 		super(message, cause);

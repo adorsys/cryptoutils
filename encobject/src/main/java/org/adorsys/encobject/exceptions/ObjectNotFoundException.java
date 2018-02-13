@@ -1,4 +1,6 @@
-package org.adorsys.encobject.service;
+package org.adorsys.encobject.exceptions;
+
+import org.adorsys.cryptoutils.exceptions.BaseException;
 
 /**
  * Object with corresponding handle not found in the object storage.
@@ -6,16 +8,13 @@ package org.adorsys.encobject.service;
  * @author fpo
  *
  */
-public class ObjectNotFoundException extends Exception {
+public class ObjectNotFoundException extends BaseException {
 
 	private static final long serialVersionUID = -5566918389843503687L;
 
-	public ObjectNotFoundException() {
-	}
-
-	public ObjectNotFoundException(String message, Throwable cause, boolean enableSuppression, boolean writableStackTrace) {
-		super(message, cause, enableSuppression, writableStackTrace);
-	}
+	/*
+	Sorry für die Beseitigung der beiden Parameter enableSuppression und writableStackTrace
+	 */
 
 	public ObjectNotFoundException(String message, Throwable cause) {
 		super(message, cause);

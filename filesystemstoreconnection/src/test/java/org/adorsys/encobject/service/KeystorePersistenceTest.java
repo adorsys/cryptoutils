@@ -2,6 +2,13 @@ package org.adorsys.encobject.service;
 
 import org.adorsys.encobject.domain.ObjectHandle;
 import org.adorsys.encobject.domain.Tuple;
+import org.adorsys.encobject.exceptions.ContainerExistsException;
+import org.adorsys.encobject.exceptions.MissingKeyAlgorithmException;
+import org.adorsys.encobject.exceptions.MissingKeystoreAlgorithmException;
+import org.adorsys.encobject.exceptions.MissingKeystoreProviderException;
+import org.adorsys.encobject.exceptions.ObjectNotFoundException;
+import org.adorsys.encobject.exceptions.UnknownContainerException;
+import org.adorsys.encobject.exceptions.WrongKeystoreCredentialException;
 import org.adorsys.encobject.filesystem.FileSystemExtendedStorageConnection;
 import org.adorsys.encobject.utils.TestKeyUtils;
 import org.junit.AfterClass;

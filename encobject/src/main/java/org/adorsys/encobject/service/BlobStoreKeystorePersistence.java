@@ -7,6 +7,12 @@ import org.adorsys.encobject.domain.ObjectHandle;
 import org.adorsys.encobject.domain.Tuple;
 import org.adorsys.encobject.domain.keystore.KeystoreData;
 import org.adorsys.encobject.exceptions.ExtendedPersistenceException;
+import org.adorsys.encobject.exceptions.KeystoreNotFoundException;
+import org.adorsys.encobject.exceptions.MissingKeyAlgorithmException;
+import org.adorsys.encobject.exceptions.MissingKeystoreAlgorithmException;
+import org.adorsys.encobject.exceptions.MissingKeystoreProviderException;
+import org.adorsys.encobject.exceptions.UnknownContainerException;
+import org.adorsys.encobject.exceptions.WrongKeystoreCredentialException;
 import org.adorsys.encobject.types.KeyStoreType;
 import org.adorsys.jkeygen.keystore.KeyStoreService;
 import org.slf4j.Logger;
@@ -37,7 +43,7 @@ public class BlobStoreKeystorePersistence implements KeystorePersistence {
 		this.extendedStoreConnection = extendedStoreConnection;
 	}
 
-	public void saveKeyStore(KeyStore keystore, CallbackHandler storePassHandler, ObjectHandle handle) throws NoSuchAlgorithmException, CertificateException, UnknownContainerException{
+	public void saveKeyStore(KeyStore keystore, CallbackHandler storePassHandler, ObjectHandle handle) throws NoSuchAlgorithmException, CertificateException, UnknownContainerException {
 		try {
 			String storeType = keystore.getType();
 			byte[] bs = KeyStoreService.toByteArray(keystore, handle.getName(), storePassHandler);

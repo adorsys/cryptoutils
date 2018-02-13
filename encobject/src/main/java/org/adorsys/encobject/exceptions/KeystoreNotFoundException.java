@@ -1,4 +1,4 @@
-package org.adorsys.encobject.service;
+package org.adorsys.encobject.exceptions;
 
 public class KeystoreNotFoundException extends ObjectNotFoundException {
 

@@ -1,6 +1,8 @@
-package org.adorsys.encobject.service;
+package org.adorsys.encobject.exceptions;
 
-public class WrongKeyCredentialException extends Exception {
+import org.adorsys.cryptoutils.exceptions.BaseException;
+
+public class WrongKeyCredentialException extends BaseException {
 	private static final long serialVersionUID = 9152279184615563007L;
 	public WrongKeyCredentialException(Throwable cause) {
 		super(cause);

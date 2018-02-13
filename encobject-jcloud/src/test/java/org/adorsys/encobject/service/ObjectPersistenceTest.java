@@ -4,9 +4,8 @@ import com.nimbusds.jose.EncryptionMethod;
 import com.nimbusds.jose.JWEAlgorithm;
 import org.adorsys.encobject.domain.ContentMetaInfo;
 import org.adorsys.encobject.domain.ObjectHandle;
-import org.adorsys.encobject.filesystem.FileSystemExtendedStorageConnection;
 import org.adorsys.encobject.params.EncryptionParams;
-import org.adorsys.encobject.utils.TestFsBlobStoreFactory;
+import org.adorsys.encobject.utils.TestFileSystemExtendedStorageConnection;
 import org.adorsys.encobject.utils.TestKeyUtils;
 import org.adorsys.jjwk.selector.UnsupportedEncAlgorithmException;
 import org.adorsys.jjwk.selector.UnsupportedKeyLengthException;
@@ -25,7 +24,7 @@ import java.util.UUID;
 public class ObjectPersistenceTest {
 
 	private static String container = ObjectPersistenceTest.class.getSimpleName();
-	private static ExtendedStoreConnection extendedStoreConnection;
+	private static TestFileSystemExtendedStorageConnection extendedStoreConnection;
 	private static ObjectPersistence objectInfoPersistence;
 	private static ContainerPersistence containerPersistence;
 	private static KeyStore keyStore;
@@ -36,7 +35,7 @@ public class ObjectPersistenceTest {
 	@BeforeClass
 	public static void beforeClass(){
 		TestKeyUtils.turnOffEncPolicy();
-		extendedStoreConnection = new FileSystemExtendedStorageConnection();
+		extendedStoreConnection = new TestFileSystemExtendedStorageConnection();
 		objectInfoPersistence = new ObjectPersistence(extendedStoreConnection);
 		containerPersistence = new ContainerPersistence(extendedStoreConnection);
 		
@@ -75,7 +74,7 @@ public class ObjectPersistenceTest {
 		String name = UUID.randomUUID().toString();
 		ObjectHandle handle = new ObjectHandle(container, name);
 		objectInfoPersistence.storeObject(data, metaIno, handle, keyStore, secretKeyAlias, secretKeyPassHandler, encParams);
-		Assert.assertTrue(TestFsBlobStoreFactory.existsOnFs(container, name));
+		Assert.assertTrue(extendedStoreConnection.existsOnFs(container, name));
 	}
 
 	@Test
@@ -89,7 +88,7 @@ public class ObjectPersistenceTest {
 		} catch (UnsupportedEncodingException | UnsupportedEncAlgorithmException | WrongKeyCredentialException | UnsupportedKeyLengthException e) {
 			Assume.assumeNoException(e);
 		}
-		Assume.assumeTrue(TestFsBlobStoreFactory.existsOnFs(container, name));
+		Assume.assumeTrue(extendedStoreConnection.existsOnFs(container, name));
 		
 		try {
 			byte[] bs = objectInfoPersistence.loadObject(new ObjectHandle(container, name), keyStore, secretKeyPassHandler);
@@ -111,7 +110,7 @@ public class ObjectPersistenceTest {
 		} catch (UnsupportedEncodingException | UnsupportedEncAlgorithmException | WrongKeyCredentialException | UnsupportedKeyLengthException | UnknownContainerException e) {
 			Assume.assumeNoException(e);
 		}
-		Assume.assumeTrue(TestFsBlobStoreFactory.existsOnFs(container, name));
+		Assume.assumeTrue(extendedStoreConnection.existsOnFs(container, name));
 
 		try {
 			byte[] bs = objectInfoPersistence.loadObject(new ObjectHandle(container, name), keyStore, secretKeyPassHandler);

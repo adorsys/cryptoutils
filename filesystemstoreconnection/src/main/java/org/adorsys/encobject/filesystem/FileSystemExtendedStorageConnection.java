@@ -38,7 +38,7 @@ import java.util.Map;
 public class FileSystemExtendedStorageConnection implements ExtendedStoreConnection {
     private final static Logger LOGGER = LoggerFactory.getLogger(FileSystemExtendedStorageConnection.class);
     private final static String DEFAULT_BASE = "target/filesystemstorage";
-    private final BucketDirectory baseDir;
+    protected final BucketDirectory baseDir;
 
     public FileSystemExtendedStorageConnection() {
         baseDir = new BucketDirectory(DEFAULT_BASE);
@@ -245,7 +245,7 @@ public class FileSystemExtendedStorageConnection implements ExtendedStoreConnect
     }
 
 
-    private File getAsFile(BucketPath bucketPath) {
+    protected File getAsFile(BucketPath bucketPath) {
         ObjectHandle objectHandle = bucketPath.getObjectHandle();
         String container = objectHandle.getContainer();
         String name = objectHandle.getName();

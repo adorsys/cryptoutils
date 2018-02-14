@@ -72,7 +72,7 @@ public class BlobStoreKeystorePersistence implements KeystorePersistence {
 	}
 
 	
-	private KeystoreData loadKeystoreData(ObjectHandle handle) throws KeystoreNotFoundException, UnknownContainerException{
+	private KeystoreData loadKeystoreData(ObjectHandle handle) {
 		byte[] keyStoreBytes;
 			keyStoreBytes = extendedStoreConnection.getBlob(handle);
 

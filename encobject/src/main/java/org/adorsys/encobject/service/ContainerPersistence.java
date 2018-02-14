@@ -23,7 +23,7 @@ public class ContainerPersistence {
 	 * @param container container name
 	 * @throws ContainerExistsException if a container with the same name already exists in the blob store.
 	 */
-	public void creteContainer(String container) throws ContainerExistsException {
+	public void createContainer(String container) throws ContainerExistsException {
 		blobStoreConnection.createContainer(container);
 	}
 	

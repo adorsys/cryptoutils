@@ -6,7 +6,7 @@ import org.adorsys.cryptoutils.exceptions.BaseExceptionHandler;
 import org.adorsys.encobject.complextypes.BucketDirectory;
 import org.adorsys.encobject.complextypes.BucketPath;
 import org.adorsys.encobject.domain.ContentInfoEntry;
-import org.adorsys.encobject.domain.DocumentMetaInfo;
+import org.adorsys.encobject.domain.BlobMetaInfo;
 import org.adorsys.encobject.domain.ObjectHandle;
 import org.adorsys.encobject.domain.PageSet;
 import org.adorsys.encobject.domain.Payload;
@@ -178,7 +178,7 @@ public class FileSystemExtendedStorageConnection implements ExtendedStoreConnect
         FullDocumentData.DocumentMetaInfoData.Builder metaInfoBuilder = FullDocumentData.DocumentMetaInfoData.newBuilder();
 
         byte[] document = payload.getData();
-        DocumentMetaInfo metaInfo = payload.getMetaInfo();
+        BlobMetaInfo metaInfo = payload.getBlobMetaInfo();
         for (String key : metaInfo.keySet()) {
             ContentInfoEntry contentInfoEntry = metaInfo.get(key);
             FullDocumentData.ContentInfoEntryData contentInfoEntryData =
@@ -192,7 +192,7 @@ public class FileSystemExtendedStorageConnection implements ExtendedStoreConnect
     }
 
     @Override
-    public Map<String, ContentInfoEntry> blobMetadata(BucketPath bucketPath) {
+    public BlobMetaInfo getBlobMetaInfo(BucketPath bucketPath) {
         throw new BaseException("NYI");
     }
 
@@ -203,13 +203,13 @@ public class FileSystemExtendedStorageConnection implements ExtendedStoreConnect
             FullDocumentData fullDocumentData = FullDocumentData.parseFrom(bytes);
             byte[] document = fullDocumentData.getDocument().toByteArray();
             Map<String, FullDocumentData.ContentInfoEntryData> metaInfoDataMap = fullDocumentData.getMetaInfo().getMapMap();
-            DocumentMetaInfo documentMetaInfo = new DocumentMetaInfo();
+            BlobMetaInfo blobMetaInfo = new BlobMetaInfo();
             for (String key : metaInfoDataMap.keySet()) {
                 FullDocumentData.ContentInfoEntryData contentInfoEntryData = metaInfoDataMap.get(key);
                 ContentInfoEntry contentInfoEntry = new ContentInfoEntry(contentInfoEntryData.getType(),contentInfoEntryData.getVersion(),contentInfoEntryData.getValue());
-                documentMetaInfo.put(key, contentInfoEntry);
+                blobMetaInfo.put(key, contentInfoEntry);
             }
-            return new FileSystemPayload(document, documentMetaInfo);
+            return new FileSystemPayload(document, blobMetaInfo);
         } catch (Exception e) {
             throw BaseExceptionHandler.handle(e);
         }

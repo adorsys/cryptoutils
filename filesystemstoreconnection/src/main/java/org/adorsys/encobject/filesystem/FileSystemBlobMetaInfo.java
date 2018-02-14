@@ -1,13 +1,13 @@
 package org.adorsys.encobject.filesystem;
 
 import org.adorsys.encobject.domain.ContentInfoEntry;
-import org.adorsys.encobject.domain.DocumentMetaInfo;
+import org.adorsys.encobject.domain.BlobMetaInfo;
 
 /**
  * Created by peter on 08.02.18 at 12:10.
  */
-public class FileSystemDocumentMetaInfo extends DocumentMetaInfo {
-    public FileSystemDocumentMetaInfo() {
+public class FileSystemBlobMetaInfo extends BlobMetaInfo {
+    public FileSystemBlobMetaInfo() {
         super();
     }
 

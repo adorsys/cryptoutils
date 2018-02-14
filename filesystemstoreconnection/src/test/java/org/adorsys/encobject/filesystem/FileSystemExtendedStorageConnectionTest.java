@@ -169,7 +169,7 @@ public class FileSystemExtendedStorageConnectionTest {
         ExtendedStoreConnection s = new FileSystemExtendedStorageConnection();
         s.createContainer(container);
         BucketDirectory bd = new BucketDirectory(container);
-        FileSystemDocumentMetaInfo documentMetaInfo = new FileSystemDocumentMetaInfo();
+        FileSystemBlobMetaInfo documentMetaInfo = new FileSystemBlobMetaInfo();
         for (int i = 0; i<10; i++) {
             documentMetaInfo.putString("key" + i, "value" + i);
         }
@@ -181,6 +181,6 @@ public class FileSystemExtendedStorageConnectionTest {
         Payload loadedPayload = s.getBlob(filea);
 
         Assert.assertEquals("document", HexUtil.convertBytesToHexString(origPayload.getData()), HexUtil.convertBytesToHexString(loadedPayload.getData()));
-        Assert.assertEquals("number of metainfoentries", origPayload.getMetaInfo().keySet().size(), loadedPayload.getMetaInfo().keySet().size());
+        Assert.assertEquals("number of metainfoentries", origPayload.getBlobMetaInfo().keySet().size(), loadedPayload.getBlobMetaInfo().keySet().size());
     }
 }

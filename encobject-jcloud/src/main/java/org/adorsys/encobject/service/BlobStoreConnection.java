@@ -3,6 +3,7 @@ package org.adorsys.encobject.service;
 import org.adorsys.cryptoutils.exceptions.BaseException;
 import org.adorsys.encobject.complextypes.BucketDirectory;
 import org.adorsys.encobject.complextypes.BucketPath;
+import org.adorsys.encobject.domain.BlobMetaInfo;
 import org.adorsys.encobject.domain.ContentInfoEntry;
 import org.adorsys.encobject.domain.Location;
 import org.adorsys.encobject.domain.LocationImpl;
@@ -200,7 +201,7 @@ public class BlobStoreConnection implements ExtendedStoreConnection {
     }
 
     @Override
-    public Map<String, ContentInfoEntry> blobMetadata(BucketPath bucketPath) {
+    public BlobMetaInfo getBlobMetaInfo(BucketPath bucketPath) {
         throw new BaseException("NYI");
     }
 

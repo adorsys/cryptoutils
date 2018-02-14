@@ -1,6 +1,8 @@
-package org.adorsys.jjwk.selector;
+package org.adorsys.jjwk.exceptions;
 
-public class UnsupportedKeyLengthException extends Exception {
+import org.adorsys.cryptoutils.exceptions.BaseException;
+
+public class UnsupportedKeyLengthException extends BaseException {
 	private static final long serialVersionUID = -102550810645375099L;
 
 	public UnsupportedKeyLengthException(String message) {

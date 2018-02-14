@@ -4,12 +4,7 @@ import org.adorsys.cryptoutils.exceptions.BaseExceptionHandler;
 import org.adorsys.encobject.domain.ObjectHandle;
 import org.adorsys.encobject.domain.Tuple;
 import org.adorsys.encobject.exceptions.ContainerExistsException;
-import org.adorsys.encobject.exceptions.MissingKeyAlgorithmException;
-import org.adorsys.encobject.exceptions.MissingKeystoreAlgorithmException;
-import org.adorsys.encobject.exceptions.MissingKeystoreProviderException;
-import org.adorsys.encobject.exceptions.ObjectNotFoundException;
 import org.adorsys.encobject.exceptions.UnknownContainerException;
-import org.adorsys.encobject.exceptions.WrongKeystoreCredentialException;
 import org.adorsys.encobject.filesystem.FileSystemExtendedStorageConnection;
 import org.adorsys.encobject.utils.TestKeyUtils;
 import org.junit.AfterClass;
@@ -18,12 +13,9 @@ import org.junit.Assume;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
-import java.io.IOException;
 import java.security.Key;
 import java.security.KeyStore;
-import java.security.KeyStoreException;
 import java.security.NoSuchAlgorithmException;
-import java.security.UnrecoverableKeyException;
 import java.security.cert.CertificateException;
 import java.util.HashMap;
 import java.util.Map;
@@ -42,7 +34,7 @@ public class KeystorePersistenceTest {
         containerPersistence = new ContainerPersistence(extendedStoreConnection);
 
         try {
-            containerPersistence.creteContainer(container);
+            containerPersistence.createContainer(container);
         } catch (ContainerExistsException e) {
             Assume.assumeNoException(e);
         }

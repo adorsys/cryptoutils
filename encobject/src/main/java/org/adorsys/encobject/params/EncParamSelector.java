@@ -2,7 +2,7 @@ package org.adorsys.encobject.params;
 
 import java.security.Key;
 
-import org.adorsys.jjwk.selector.UnsupportedEncAlgorithmException;
+import org.adorsys.jjwk.exceptions.UnsupportedEncAlgorithmException;
 import org.apache.commons.lang3.StringUtils;
 
 import com.nimbusds.jose.EncryptionMethod;
@@ -16,7 +16,7 @@ import com.nimbusds.jose.JWEAlgorithm;
  *
  */
 public class EncParamSelector {
-	public static EncryptionParams selectEncryptionParams(Key key) throws UnsupportedEncAlgorithmException {
+	public static EncryptionParams selectEncryptionParams(Key key) {
 		String algorithm = key.getAlgorithm();
 		// TODO fix hack
 		if(StringUtils.equalsAnyIgnoreCase("NONE", algorithm)){

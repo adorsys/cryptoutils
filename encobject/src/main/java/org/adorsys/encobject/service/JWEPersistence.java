@@ -26,8 +26,6 @@ import org.adorsys.encobject.types.KeyID;
 import org.adorsys.encobject.types.OverwriteFlag;
 import org.adorsys.encobject.types.PersistenceLayerContentMetaInfoUtil;
 import org.adorsys.jjwk.selector.JWEEncryptedSelector;
-import org.adorsys.jjwk.selector.UnsupportedEncAlgorithmException;
-import org.adorsys.jjwk.selector.UnsupportedKeyLengthException;
 import org.adorsys.jkeygen.keystore.PasswordCallbackUtils;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -44,17 +42,17 @@ import java.text.ParseException;
 import java.util.HashMap;
 import java.util.Map;
 
-public class ObjectPersistence {
+public class JWEPersistence {
 
 	private DefaultJWEDecrypterFactory decrypterFactory = new DefaultJWEDecrypterFactory();
 	
 	private final ExtendedStoreConnection blobStoreConnection;
 
-	public ObjectPersistence(ExtendedStoreConnection blobStoreConnection) {
+	public JWEPersistence(ExtendedStoreConnection blobStoreConnection) {
 		this.blobStoreConnection = blobStoreConnection;
 	}
 
-	public void storeObject(byte[] data, ContentMetaInfo metaIno, ObjectHandle handle, KeyStore keyStore, String keyID, CallbackHandler keyPassHandler, EncryptionParams encParams) throws UnsupportedEncAlgorithmException, WrongKeyCredentialException, UnsupportedKeyLengthException, UnknownContainerException {
+	public void storeObject(byte[] data, ContentMetaInfo metaIno, ObjectHandle handle, KeyStore keyStore, String keyID, CallbackHandler keyPassHandler, EncryptionParams encParams) {
 		// We accept empty meta info
 		if(metaIno==null) metaIno=new ContentMetaInfo();
 		
@@ -118,7 +116,7 @@ public class ObjectPersistence {
 
 	}
 
-	public byte[] loadObject(ObjectHandle handle, KeyStore keyStore, CallbackHandler keyPassHandler) throws ObjectNotFoundException, WrongKeyCredentialException, UnknownContainerException{
+	public byte[] loadObject(ObjectHandle handle, KeyStore keyStore, CallbackHandler keyPassHandler) {
 
 		byte[] jweEncryptedBytes = blobStoreConnection.getBlob(handle);
 		String jweEncryptedObject;
@@ -245,7 +243,7 @@ public class ObjectPersistence {
 	 * Retrieves the key with the given keyID from the keystore. The key password will be retrieved by
 	 * calling the keyPassHandler.
 	 */
-	private Key readKey(KeyStore keyStore, String keyID, CallbackHandler keyPassHandler) throws WrongKeyCredentialException {
+	private Key readKey(KeyStore keyStore, String keyID, CallbackHandler keyPassHandler) {
 		try {
 			return keyStore.getKey(keyID, PasswordCallbackUtils.getPassword(keyPassHandler, keyID));
 		} catch (UnrecoverableKeyException e) {

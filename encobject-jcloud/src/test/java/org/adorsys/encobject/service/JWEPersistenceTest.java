@@ -11,8 +11,8 @@ import org.adorsys.encobject.exceptions.WrongKeyCredentialException;
 import org.adorsys.encobject.params.EncryptionParams;
 import org.adorsys.encobject.utils.TestFileSystemExtendedStorageConnection;
 import org.adorsys.encobject.utils.TestKeyUtils;
-import org.adorsys.jjwk.selector.UnsupportedEncAlgorithmException;
-import org.adorsys.jjwk.selector.UnsupportedKeyLengthException;
+import org.adorsys.jjwk.exceptions.UnsupportedEncAlgorithmException;
+import org.adorsys.jjwk.exceptions.UnsupportedKeyLengthException;
 import org.adorsys.jkeygen.pwd.PasswordCallbackHandler;
 import org.junit.AfterClass;
 import org.junit.Assert;
@@ -25,11 +25,11 @@ import java.io.UnsupportedEncodingException;
 import java.security.KeyStore;
 import java.util.UUID;
 
-public class ObjectPersistenceTest {
+public class JWEPersistenceTest {
 
-    private static String container = ObjectPersistenceTest.class.getSimpleName();
+    private static String container = JWEPersistenceTest.class.getSimpleName();
     private static TestFileSystemExtendedStorageConnection extendedStoreConnection;
-    private static ObjectPersistence objectInfoPersistence;
+    private static JWEPersistence objectInfoPersistence;
     private static ContainerPersistence containerPersistence;
     private static KeyStore keyStore;
     private static CallbackHandler secretKeyPassHandler;
@@ -40,11 +40,11 @@ public class ObjectPersistenceTest {
     public static void beforeClass() {
         TestKeyUtils.turnOffEncPolicy();
         extendedStoreConnection = new TestFileSystemExtendedStorageConnection();
-        objectInfoPersistence = new ObjectPersistence(extendedStoreConnection);
+        objectInfoPersistence = new JWEPersistence(extendedStoreConnection);
         containerPersistence = new ContainerPersistence(extendedStoreConnection);
 
         try {
-            containerPersistence.creteContainer(container);
+            containerPersistence.createContainer(container);
         } catch (ContainerExistsException e) {
             Assume.assumeNoException(e);
         }

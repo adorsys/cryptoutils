@@ -1,7 +1,7 @@
 package org.adorsys.encobject.filesystem;
 
 import org.adorsys.cryptoutils.exceptions.BaseException;
-import org.adorsys.encobject.domain.DocumentMetaInfo;
+import org.adorsys.encobject.domain.BlobMetaInfo;
 import org.adorsys.encobject.domain.Payload;
 
 import java.io.IOException;
@@ -12,11 +12,11 @@ import java.io.InputStream;
  */
 public class FileSystemPayload implements Payload {
     private byte[] document;
-    private DocumentMetaInfo documentMetaInfo;
+    private BlobMetaInfo blobMetaInfo;
 
-    public FileSystemPayload(byte[] document, DocumentMetaInfo documentMetaInfo) {
+    public FileSystemPayload(byte[] document, BlobMetaInfo blobMetaInfo) {
         this.document = document;
-        this.documentMetaInfo = documentMetaInfo;
+        this.blobMetaInfo = blobMetaInfo;
     }
 
     @Override
@@ -39,14 +39,12 @@ public class FileSystemPayload implements Payload {
         throw new BaseException("nyi");
     }
 
-    @Override
-    public DocumentMetaInfo getMetaInfo() {
-        return documentMetaInfo;
+    public BlobMetaInfo getBlobMetaInfo() {
+        return blobMetaInfo;
     }
 
-    @Override
-    public void setMetaInfo(DocumentMetaInfo metaInfo) {
-        this.documentMetaInfo = metaInfo;
+    public void setBlobMetaInfo(BlobMetaInfo metaInfo) {
+        this.blobMetaInfo = metaInfo;
     }
 
     @Override

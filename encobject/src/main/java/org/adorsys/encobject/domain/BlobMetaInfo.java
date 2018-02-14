@@ -7,9 +7,9 @@ import java.util.Set;
 /**
  * Created by peter on 08.02.18 at 10:26.
  */
-public class DocumentMetaInfo {
+public class BlobMetaInfo {
     private Map<String, ContentInfoEntry> map;
-    public DocumentMetaInfo() {
+    public BlobMetaInfo() {
         map = new HashMap<>();
     }
 

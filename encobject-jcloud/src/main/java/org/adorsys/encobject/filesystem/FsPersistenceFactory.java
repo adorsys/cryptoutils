@@ -20,7 +20,7 @@ public class FsPersistenceFactory {
     	serverObjectPersistence = new ServerObjectPersistence(extendedStoreConnection);
     	encObjectService = new EncObjectService(
     	        keystorePersistence,
-                new ObjectPersistence(extendedStoreConnection),
+                new JWEPersistence(extendedStoreConnection),
                 containerPersistence
         );
     }

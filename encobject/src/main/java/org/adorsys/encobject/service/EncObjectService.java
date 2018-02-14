@@ -2,7 +2,6 @@ package org.adorsys.encobject.service;
 
 import java.io.IOException;
 import java.security.KeyStore;
-import java.security.NoSuchAlgorithmException;
 import java.security.cert.CertificateException;
 
 import javax.crypto.SecretKey;
@@ -20,8 +19,8 @@ import org.adorsys.encobject.exceptions.UnknownContainerException;
 import org.adorsys.encobject.exceptions.WrongKeyCredentialException;
 import org.adorsys.encobject.exceptions.WrongKeystoreCredentialException;
 import org.adorsys.encobject.params.KeyParams;
-import org.adorsys.jjwk.selector.UnsupportedEncAlgorithmException;
-import org.adorsys.jjwk.selector.UnsupportedKeyLengthException;
+import org.adorsys.jjwk.exceptions.UnsupportedEncAlgorithmException;
+import org.adorsys.jjwk.exceptions.UnsupportedKeyLengthException;
 import org.adorsys.jkeygen.keystore.KeyStoreService;
 import org.adorsys.jkeygen.keystore.SecretKeyData;
 import org.adorsys.jkeygen.keystore.SecretKeyEntry;
@@ -31,16 +30,16 @@ import org.adorsys.jkeygen.secretkey.SecretKeyBuilder;
 public class EncObjectService {
 
 	private final KeystorePersistence keystorePersistence;
-	private final ObjectPersistence objectPersistence;
+	private final JWEPersistence JWEPersistence;
 	private final ContainerPersistence containerPersistence;
 
 	public EncObjectService(
 			KeystorePersistence keystorePersistence,
-			ObjectPersistence objectPersistence,
+			JWEPersistence JWEPersistence,
 			ContainerPersistence containerPersistence
 	) {
 		this.keystorePersistence = keystorePersistence;
-		this.objectPersistence = objectPersistence;
+		this.JWEPersistence = JWEPersistence;
 		this.containerPersistence = containerPersistence;
 	}
 
@@ -55,12 +54,10 @@ public class EncObjectService {
 	}
 
 	public void newContainer(String container) throws ContainerExistsException {
-		containerPersistence.creteContainer(container);
+		containerPersistence.createContainer(container);
 	}
 	
-	public void newSecretKey(KeyCredentials keyCredentials, KeyParams keyParams) throws CertificateException, WrongKeystoreCredentialException,
-			MissingKeystoreAlgorithmException, MissingKeystoreProviderException, MissingKeyAlgorithmException, IOException, UnknownContainerException,
-		NoSuchAlgorithmException{
+	public void newSecretKey(KeyCredentials keyCredentials, KeyParams keyParams) {
 		CallbackHandler storePassHandler = new PasswordCallbackHandler(keyCredentials.getStorepass().toCharArray());
 		CallbackHandler secretKeyPassHandler = new PasswordCallbackHandler(keyCredentials.getKeypass().toCharArray());
 		
@@ -79,13 +76,9 @@ public class EncObjectService {
 		keystorePersistence.saveKeyStore(keyStore, storePassHandler, keyCredentials.getHandle());
 	}
 
-	public byte[] readObject(KeyCredentials keyCredentials, ObjectHandle objectHandle)
-			throws ObjectNotFoundException, WrongKeystoreCredentialException, MissingKeystoreAlgorithmException,
-			MissingKeystoreProviderException, MissingKeyAlgorithmException, CertificateException, IOException,
-			WrongKeyCredentialException, UnknownContainerException {
-		
+	public byte[] readObject(KeyCredentials keyCredentials, ObjectHandle objectHandle) {
 		KeyStore keyStore = keystorePersistence.loadKeystore(keyCredentials.getHandle(), new PasswordCallbackHandler(keyCredentials.getStorepass().toCharArray()));
-		return objectPersistence.loadObject(objectHandle, keyStore, new PasswordCallbackHandler(keyCredentials.getKeypass().toCharArray()));
+		return JWEPersistence.loadObject(objectHandle, keyStore, new PasswordCallbackHandler(keyCredentials.getKeypass().toCharArray()));
 	}
 	
 	public void writeObject(byte[] data, ContentMetaInfo metaIno, ObjectHandle handle, KeyCredentials keyCredentials)
@@ -93,7 +86,7 @@ public class EncObjectService {
 			MissingKeystoreAlgorithmException, MissingKeystoreProviderException, MissingKeyAlgorithmException, IOException, 
 			UnsupportedEncAlgorithmException, WrongKeyCredentialException, UnsupportedKeyLengthException, UnknownContainerException{
 		KeyStore keyStore = keystorePersistence.loadKeystore(keyCredentials.getHandle(), new PasswordCallbackHandler(keyCredentials.getStorepass().toCharArray()));
-		objectPersistence.storeObject(data, metaIno, handle, keyStore, keyCredentials.getKeyid(), new PasswordCallbackHandler(keyCredentials.getKeypass().toCharArray()), null);
+		JWEPersistence.storeObject(data, metaIno, handle, keyStore, keyCredentials.getKeyid(), new PasswordCallbackHandler(keyCredentials.getKeypass().toCharArray()), null);
 	}
 	
 	public boolean hasKeystore(KeyCredentials keyCredentials){

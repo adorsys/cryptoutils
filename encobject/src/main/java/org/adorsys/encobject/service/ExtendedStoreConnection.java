@@ -2,14 +2,12 @@ package org.adorsys.encobject.service;
 
 import org.adorsys.encobject.complextypes.BucketDirectory;
 import org.adorsys.encobject.complextypes.BucketPath;
-import org.adorsys.encobject.domain.ContentInfoEntry;
+import org.adorsys.encobject.domain.BlobMetaInfo;
 import org.adorsys.encobject.domain.ObjectHandle;
 import org.adorsys.encobject.domain.PageSet;
 import org.adorsys.encobject.domain.Payload;
 import org.adorsys.encobject.domain.StorageMetadata;
 import org.adorsys.encobject.types.ListRecursiveFlag;
-
-import java.util.Map;
 
 public interface ExtendedStoreConnection {
 
@@ -21,7 +19,7 @@ public interface ExtendedStoreConnection {
 	 * @param bucketPath
 	 * @return a Map with blob meta information
 	 */
-	Map<String, ContentInfoEntry> blobMetadata(BucketPath bucketPath);
+	BlobMetaInfo getBlobMetaInfo(BucketPath bucketPath);
 
 	/**
 	 * Retrieve the blob at the location {@link BucketPath}
@@ -55,6 +53,4 @@ public interface ExtendedStoreConnection {
 	boolean blobExists(ObjectHandle location);
 
 	PageSet<? extends StorageMetadata> list(BucketDirectory bucketDirectory, ListRecursiveFlag listRecursiveFlag);
-
-
 }

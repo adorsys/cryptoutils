@@ -1,6 +1,8 @@
-package org.adorsys.jjwk.selector;
+package org.adorsys.jjwk.exceptions;
 
-public class UnsupportedEncAlgorithmException extends Exception {
+import org.adorsys.cryptoutils.exceptions.BaseException;
+
+public class UnsupportedEncAlgorithmException extends BaseException {
 	private static final long serialVersionUID = -102550810645375099L;
 
 	public UnsupportedEncAlgorithmException(String message) {

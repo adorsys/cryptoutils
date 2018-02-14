@@ -32,14 +32,14 @@ public interface Payload extends Closeable {
 	 * 
 	 * @return
 	 */
-	DocumentMetaInfo getMetaInfo();
+	BlobMetaInfo getBlobMetaInfo();
 
 	/**
 	 * Set the content meta info.
 	 * 
 	 * @param metaInfo
 	 */
-	void setMetaInfo(DocumentMetaInfo metaInfo);
+	void setBlobMetaInfo(BlobMetaInfo metaInfo);
 
 	/**
 	 * Sets whether the payload contains sensitive information. This is used

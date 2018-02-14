@@ -19,10 +19,13 @@ import com.nimbusds.jose.jwk.ECKey;
 import com.nimbusds.jose.jwk.JWK;
 import com.nimbusds.jose.jwk.OctetSequenceKey;
 import com.nimbusds.jose.jwk.RSAKey;
+import org.adorsys.jjwk.exceptions.KeyExtractionException;
+import org.adorsys.jjwk.exceptions.UnsupportedEncAlgorithmException;
+import org.adorsys.jjwk.exceptions.UnsupportedKeyLengthException;
 
 public class JWEEncryptedSelector {
 	
-	public static JWEEncrypter geEncrypter(Key key, JWEAlgorithm encAlgo, EncryptionMethod encMethod) throws UnsupportedEncAlgorithmException, UnsupportedKeyLengthException{
+	public static JWEEncrypter geEncrypter(Key key, JWEAlgorithm encAlgo, EncryptionMethod encMethod) throws UnsupportedEncAlgorithmException, UnsupportedKeyLengthException {
 		if(key instanceof RSAPublicKey) return new RSAEncrypter((RSAPublicKey) key);
 		if(key instanceof ECPublicKey){
 			try {

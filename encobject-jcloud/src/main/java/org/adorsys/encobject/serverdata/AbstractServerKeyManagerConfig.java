@@ -1,11 +1,8 @@
 package org.adorsys.encobject.serverdata;
 
 import java.io.ByteArrayInputStream;
-import java.io.IOException;
 import java.security.KeyPair;
 import java.security.KeyStore;
-import java.security.NoSuchAlgorithmException;
-import java.security.cert.CertificateException;
 import java.util.UUID;
 
 import javax.crypto.SecretKey;
@@ -15,12 +12,6 @@ import org.adorsys.encobject.domain.ObjectHandle;
 import org.adorsys.encobject.filesystem.FsPersistenceFactory;
 import org.adorsys.encobject.exceptions.ContainerExistsException;
 import org.adorsys.encobject.service.ContainerPersistence;
-import org.adorsys.encobject.exceptions.MissingKeyAlgorithmException;
-import org.adorsys.encobject.exceptions.MissingKeystoreAlgorithmException;
-import org.adorsys.encobject.exceptions.MissingKeystoreProviderException;
-import org.adorsys.encobject.exceptions.ObjectNotFoundException;
-import org.adorsys.encobject.exceptions.UnknownContainerException;
-import org.adorsys.encobject.exceptions.WrongKeystoreCredentialException;
 import org.adorsys.envutils.EnvProperties;
 import org.adorsys.jjwk.serverkey.KeyConverter;
 import org.adorsys.jjwk.serverkey.KeyStoreUtils;
@@ -72,7 +63,7 @@ public abstract class AbstractServerKeyManagerConfig {
         String serverKeystoreContainer = EnvProperties.getEnvOrSysProp(ServerKeyPropertiesConstants.SERVER_KEYSTORE_CONTAINER, appName + "_serverkey_container");
         if (!containerPersistence.containerExists(serverKeystoreContainer)) {
             try {
-                containerPersistence.creteContainer(serverKeystoreContainer);
+                containerPersistence.createContainer(serverKeystoreContainer);
             } catch (ContainerExistsException e) {
                 throw new IllegalStateException(e);
             }

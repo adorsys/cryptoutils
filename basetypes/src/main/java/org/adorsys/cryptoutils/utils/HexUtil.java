@@ -1,7 +1,5 @@
 package org.adorsys.cryptoutils.utils;
 
-import java.util.Arrays;
-
 /**
  * Created by peter on 03.01.18.
  */
@@ -9,133 +7,210 @@ import java.util.Arrays;
 public class HexUtil {
 
 
-    private static final char[] hexChar = {
-            '0', '1', '2', '3', '4', '5', '6',
-            '7', '8', '9', 'A', 'B', 'C', 'D', 'E', 'F'
+
+    private static final int SEG_SIZE = 16;
+
+    private static final char[] hexDigits = {
+            '0', '1', '2', '3', '4', '5', '6', '7',
+            '8', '9', 'A', 'B', 'C', 'D', 'E', 'F'
     };
 
-    /**
-     * Convert the string to hex string value.
-     *
-     * @param data is case sensitive.
-     * @return the hex string representation of string.
-     */
-    public static String convertStringToHexString(String data) {
-
-        return conventBytesToHexString(data.getBytes());
-
-    }
+    private HexUtil() {}
 
     /**
-     * Convert bytes to hex string.
+     * Creates a hex dump of a byte array which is suitable for debugging. Each
+     * byte value is converted to a string of ASCII digits represented in
+     * hexadecimal, with a leading 0. Non-printable ASCII characters are
+     * represented with the '.' character, E.g.
+     * <p>
+     * <pre>
+     * </pre>
      *
-     * @param data is the bytes.
-     * @return the hex string representation of bytes.
+     * @param	b	the source buffer.
+     * @param	off offset at which to start reading bytes.
+     * @param	len the maximum number of bytes to read.
+     * @return	a hexadecimal string in debug format.
      */
-    public static String conventBytesToHexString(byte[] data) {
+    public static String hexDump(byte[] b, int off, int len) {
+        StringBuilder builder = new StringBuilder();
+        byte[] tmp = null;
+        int idx = 0;
+        int k;
 
-        return convertBytesToHexString(data, 0, data.length);
-
-    }
-
-    //
-    /**
-     * Convert bytes to hex string value (using Big-Endian rule).
-     *
-     * @param data is the bytes.
-     * @param offset is the offset.
-     * @param length is the length.
-     * @return the hex string representation of bytes.
-     */
-    public static String convertBytesToHexString(byte[] data, int offset,
-                                                 int length) {
-
-        StringBuffer sBuf = new StringBuffer();
-        for (int i = offset; i < length; i++) {
-            sBuf.append(hexChar[(data[i] >> 4) & 0xf]);
-            sBuf.append(hexChar[data[i] & 0xf]);
-        }
-        return sBuf.toString();
-
-    }
-
-    /**
-     * Convert the hex string to string.
-     *
-     * @param hexString is the hex string.
-     * @return the string value that converted from hex string.
-     */
-    public static String convertHexStringToString(String hexString) {
-
-        String uHexString = hexString.toLowerCase();
-        StringBuffer sBuf = new StringBuffer();
-        for (int i = 0; i < uHexString.length(); i = i + 2) {
-
-            char c = (char)Integer.parseInt(uHexString.substring(i, i + 2), 16);
-            sBuf.append(c);
-
-        }
-        return sBuf.toString();
-
-    }
-
-    /**
-     * Convert the hex string to bytes.
-     *
-     * @param hexString is the hex string.
-     * @return the bytes value that converted from the hex string.
-     */
-    public static byte[] convertHexStringToBytes(String hexString) {
-
-        return convertHexStringToBytes(hexString, 0, hexString.length());
-
-    }
-
-    /**
-     * Convert the hex string to bytes.
-     *
-     * @param hexString is the hex string.
-     * @param offset is the offset.
-     * @param endIndex is the end index.
-     * @return the bytes value that converted from the hex string.
-     */
-    public static byte[] convertHexStringToBytes(String hexString, int offset,
-                                                 int endIndex) {
-
-        byte[] data;
-        String realHexString = hexString.substring(offset, endIndex)
-                .toLowerCase();
-        if ((realHexString.length() % 2) == 0)
-            data = new byte[realHexString.length() / 2];
-        else
-            data = new byte[(int)Math.ceil(realHexString.length() / 2d)];
-
-        int j = 0;
-        char[] tmp;
-        for (int i = 0; i < realHexString.length(); i += 2) {
-
-            try {
-
-                tmp = realHexString.substring(i, i + 2).toCharArray();
-
-            } catch (StringIndexOutOfBoundsException siob) {
-
-                // it only contains one character, so add "0" string
-                tmp = (realHexString.substring(i) + "0").toCharArray();
-
+        while (idx < len) {
+            for (int i=0; i<4; i++) {
+                for (int j=0; j<4; j++) {
+                    if ((idx + i*4 +j) < len) {
+                        // Print one word, e.g. A3 + space.
+                        char[] chr = new char[2];
+                        k = b[idx + i*4 +j];
+                        chr[0] = hexDigits[(k >>> 4) & 0x0f];
+                        chr[1] = hexDigits[ k		 & 0x0f];
+                        builder.append(chr).append(" ");
+                    } else {
+                        builder.append("   ");
+                    }
+                }
+                builder.append(" ");
             }
-            data[j] = (byte)((Arrays.binarySearch(hexChar, tmp[0]) & 0xf) << 4);
-            data[j++] |= (byte)(Arrays.binarySearch(hexChar, tmp[1]) & 0xf);
-
+            // Print a tab between HEX and ASCII.
+            builder.append("\t");
+            // Print 16 characters in ASCII.
+            int end = ((idx + SEG_SIZE) < len) ? SEG_SIZE : (len - idx);
+            tmp = new byte[end];
+            System.arraycopy(b, idx, tmp, 0, end);
+            tmp = fixNonPrintableAscii(tmp);
+            builder.append(new String(tmp));
+            idx += SEG_SIZE;
+            builder.append("\n");
         }
 
-        for (int i = realHexString.length(); i > 0; i -= 2) {
+        return builder.toString();
+    }
 
+    /**
+     * Creats a hex dump of a byte array suitable for debugging. Each byte value
+     * is converted to a string of ASCII digits in hexadecimal with a leading 0.
+     * Non-printable ASCII characters are represented with the '.' character.
+     *
+     * @param b	the source buffer.
+     * @return a hexidecimal string in debug format.
+     */
+    public static String hexDump(byte[] b) {
+        return hexDump(b, 0, b.length);
+    }
 
+    /**
+     * Returns a byte array wherein non-printable ASCII characters are converted
+     * to the '.' (0x2e) character.
+     * @param b
+     * @return
+     */
+    private static byte[] fixNonPrintableAscii(byte[] b) {
+        byte[] buf = new byte[b.length];
 
+        for (int i = 0; i < b.length; i++) {
+            if (Character.isISOControl((char)b[i])) {
+                buf[i] = 0x2e; // '.'
+            } else {
+                buf[i] = b[i];
+            }
         }
-        return data;
 
+        return buf;
+    }
+
+    /**
+     * Returns a string of hexadecimal digits from a byte array. Each byte is
+     * converted to 2 hex symbols.
+     * <p>
+     * If offset and length are omitted, the entire array is used.
+     *
+     * @param ba
+     * @param offset
+     * @param length
+     * @return
+     */
+    public static String toString(byte[] ba, int offset, int length) {
+        char[] buf = new char[length * 2];
+        int j = 0;
+        int k;
+
+        for (int i = offset; i < offset + length; i++) {
+            k = ba[i];
+            buf[j++] = hexDigits[(k >>> 4) & 0x0F];
+            buf[j++] = hexDigits[ k		   & 0x0F];
+        }
+
+        return new String(buf);
+    }
+
+    /**
+     * Returns a string of hexadecimal digits from a byte array. Each byte is
+     * converted to 2 hex symbols.
+     * <p>
+     * If offset and length are omitted, the entire array is used.
+     *
+     * @param ba	the source buffer.
+     * @return a hexadecimal string.
+     */
+    public static String convertBytesToHexString(byte[] ba) {
+        return toString(ba, 0, ba.length);
+    }
+
+    /**
+     * Returns a byte array from a string of hexadecimal digits.
+     *
+     * @param hex the string to convert to a byte array.
+     * @return
+     */
+    public static byte[] convertHexStringToBytes(String hex) {
+        int len = hex.length();
+        byte[] buf = new byte[((len + 1) / 2)];
+        int i = 0, j = 0;
+        if ((len % 2) == 1) {
+            buf[j++] = (byte)fromDigit(hex.charAt(i++));
+        }
+
+        while (i < len) {
+            buf[j++] = (byte)((fromDigit(hex.charAt(i++)) << 4) |
+                    fromDigit(hex.charAt(i++)));
+        }
+
+        return buf;
+    }
+
+    /**
+     * Returns the hex digit corresponding to a number <i>n</i>, from 0 to 15.
+     *
+     * @param n
+     * @return
+     */
+    public static char toDigit(int n) {
+        try {
+            return hexDigits[n];
+        } catch (ArrayIndexOutOfBoundsException e) {
+            throw new IllegalArgumentException(n
+                    + " is out of range for a hex digit");
+        }
+    }
+
+    /**
+     * Returns the number from 0 to 15 corresponding to the hex digit <i>ch</i>.
+     *
+     * @param ch
+     * @return
+     */
+    public static int fromDigit(char ch) {
+        if ((ch >= '0') && (ch <= '9'))
+            return ch - '0';
+        if ((ch >= 'A') && (ch <= 'F'))
+            return ch - 'A' + 10;
+        if ((ch >= 'a') && (ch <= 'f'))
+            return ch = 'a' + 10;
+
+        throw new IllegalArgumentException("invalid hex digit '" + ch + "'");
+    }
+
+    /**
+     * Returns a copy of the input array stripped of any leading zero bytes.
+     *
+     * @param a
+     * @return
+     */
+    public static byte[] stripLeadingZeroBytes(byte[] a) {
+        int keep;
+
+        // Find first nonzero byte.
+        for (keep=0; keep<a.length && a[keep]==0; keep++)
+            ;
+
+        // Allocate a new array and copy relevant part of input array.
+        byte[] result = new byte[a.length - keep];
+        for (int i = keep; i<a.length; i++)
+            result[i - keep] = a[i];
+
+        return result;
     }
 
 }

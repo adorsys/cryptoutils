@@ -16,7 +16,7 @@ public class BaseTypePasswordByteArray extends BaseTypeByteArray {
     }
 
     public final static String hide(byte[] bytes) {
-        String value = HexUtil.conventBytesToHexString(bytes);
+        String value = HexUtil.convertBytesToHexString(bytes);
         if (value.length() > 8) {
             return value.substring(0, 4) + "...." + value.substring(value.length() - 4);
         }

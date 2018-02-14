@@ -32,6 +32,10 @@ public class BucketDirectory {
         return append(new BucketPath(name));
     }
 
+    public BucketPath addSuffix(String suffix) {
+        return path.add(suffix);
+    }
+
     public ObjectHandle getObjectHandle() {
         return path.getObjectHandle();
     }

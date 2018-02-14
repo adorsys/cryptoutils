@@ -180,7 +180,7 @@ public class FileSystemExtendedStorageConnectionTest {
 
         Payload loadedPayload = s.getBlob(filea);
 
-        Assert.assertEquals("document", HexUtil.conventBytesToHexString(origPayload.getData()), HexUtil.conventBytesToHexString(loadedPayload.getData()));
+        Assert.assertEquals("document", HexUtil.convertBytesToHexString(origPayload.getData()), HexUtil.convertBytesToHexString(loadedPayload.getData()));
         Assert.assertEquals("number of metainfoentries", origPayload.getMetaInfo().keySet().size(), loadedPayload.getMetaInfo().keySet().size());
     }
 }

@@ -184,4 +184,14 @@ public class BucketPathTest {
         Assert.assertEquals("name", "dir2/dir3/file1",  bp.getObjectHandle().getName());
     }
 
+    @Test
+    public void test20() {
+        LOGGER.debug("START TEST " + new RuntimeException("").getStackTrace()[0].getMethodName());
+        BucketDirectory bd = new BucketDirectory("dir1");
+        BucketDirectory bd2 = bd.appendDirectory("dir2/dir3");
+        BucketPath bp = bd2.addSuffix(".file1");
+        Assert.assertEquals("bucket", "dir1",  bp.getObjectHandle().getContainer());
+        Assert.assertEquals("name", "dir2/dir3.file1",  bp.getObjectHandle().getName());
+    }
+
 }

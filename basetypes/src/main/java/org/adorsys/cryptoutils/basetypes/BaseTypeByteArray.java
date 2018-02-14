@@ -1,9 +1,9 @@
 package org.adorsys.cryptoutils.basetypes;
 
+import org.adorsys.cryptoutils.utils.HexUtil;
+
 import java.io.Serializable;
 import java.util.Arrays;
-
-import org.adorsys.cryptoutils.utils.HexUtil;
 
 /**
  * Created by peter on 23.12.17 at 17:25.
@@ -24,7 +24,7 @@ public class BaseTypeByteArray implements Serializable {
     @Override
     public String toString() {
         return this.getClass().getSimpleName() + "{" +
-                "value='" + HexUtil.conventBytesToHexString(value) + '\'' +
+                "value='" + HexUtil.convertBytesToHexString(value) + '\'' +
                 '}';
     }
 

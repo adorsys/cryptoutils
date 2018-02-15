@@ -9,6 +9,7 @@ import org.adorsys.encobject.domain.Payload;
 import org.adorsys.encobject.domain.StorageMetadata;
 import org.adorsys.encobject.service.ExtendedStoreConnection;
 import org.adorsys.encobject.types.ListRecursiveFlag;
+import org.adorsys.encobject.types.OverwriteFlag;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -183,4 +184,76 @@ public class FileSystemExtendedStorageConnectionTest {
         Assert.assertEquals("document", HexUtil.convertBytesToHexString(origPayload.getData()), HexUtil.convertBytesToHexString(loadedPayload.getData()));
         Assert.assertEquals("number of metainfoentries", origPayload.getBlobMetaInfo().keySet().size(), loadedPayload.getBlobMetaInfo().keySet().size());
     }
+
+    @Test
+    public void testList() {
+        LOGGER.debug("START TEST " + new RuntimeException("").getStackTrace()[0].getMethodName());
+        ExtendedStoreConnection s = new FileSystemExtendedStorageConnection();
+
+        BucketDirectory rootDirectory = new BucketDirectory("user1");
+        createFiles(s, rootDirectory, 3,2);
+
+        PageSet<? extends StorageMetadata> list = s.list(rootDirectory, ListRecursiveFlag.FALSE);
+        LOGGER.debug("1 einfaches listing" + show(list));
+        org.junit.Assert.assertEquals("nicht rekursiv erwartete Einträge", 5, list.size());
+
+        PageSet<? extends StorageMetadata> list2 = s.list(rootDirectory, ListRecursiveFlag.TRUE);
+        LOGGER.debug("2 recursives listing " + show(list2));
+        org.junit.Assert.assertEquals("rekursiv erwartete Einträge", 26, list2.size());
+
+        BucketDirectory bp = rootDirectory.appendDirectory("subdir1");
+        PageSet<? extends StorageMetadata> list3 = s.list(bp, ListRecursiveFlag.FALSE);
+        LOGGER.debug("3 einfaches listing " + show(list3));
+        org.junit.Assert.assertEquals("rekursiv erwartete Einträge", 5, list3.size());
+        org.junit.Assert.assertTrue("es gibt file", contains(list3, "subdir1/file0"));
+        org.junit.Assert.assertTrue("es gibt directory", contains(list3, "subdir1/subdir0/"));
+
+        PageSet<? extends StorageMetadata> list4 = s.list(bp, ListRecursiveFlag.TRUE);
+        LOGGER.debug("4 recursives listing " + show(list4));
+        org.junit.Assert.assertEquals("rekursiv erwartete Einträge", 8, list4.size());
+        org.junit.Assert.assertTrue("es gibt", contains(list4, "subdir1/file0"));
+        org.junit.Assert.assertTrue("es gibt directory", contains(list4, "subdir1/subdir0/file0"));
+    }
+
+
+
+    private void createFiles(ExtendedStoreConnection extendedStoreConnection, BucketDirectory rootDirectory, int subdirs, int subfiles) {
+        createFilesAndFoldersRecursivly(rootDirectory, subdirs, subfiles, 3, extendedStoreConnection);
+    }
+
+    private void createFilesAndFoldersRecursivly(BucketDirectory rootDirectory, int subdirs, int subfiles, int depth , ExtendedStoreConnection extendedStoreConnection) {
+        if (depth == 0) {
+            return;
+        }
+
+        for (int i = 0; i<subfiles; i++) {
+            byte[] content = ("Affe of file " + i + "").getBytes();
+            extendedStoreConnection.putBlob(rootDirectory.appendName("file" + i).getObjectHandle(), content);
+        }
+        for (int i = 0; i<subdirs; i++) {
+            createFilesAndFoldersRecursivly(rootDirectory.appendDirectory("subdir" + i), subdirs, subfiles, depth-1, extendedStoreConnection);
+        }
+    }
+
+    private boolean contains(PageSet<? extends StorageMetadata> strippedContent, String file0) {
+        for (StorageMetadata m : strippedContent) {
+            if (m.getName().equals(file0)){
+                return true;
+            }
+        }
+        return false;
+    }
+
+    private String show(PageSet<? extends StorageMetadata> list) {
+        StringBuilder sb = new StringBuilder();
+        sb.append("PageSet of StorageMetadata");
+        sb.append("\n");
+        for (StorageMetadata m : list) {
+            sb.append(m.getName());
+            sb.append(", ");
+            sb.append("\n");
+        }
+        return sb.toString();
+    }
+
 }

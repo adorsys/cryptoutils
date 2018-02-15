@@ -11,46 +11,29 @@ import org.adorsys.encobject.types.ListRecursiveFlag;
 
 public interface ExtendedStoreConnection {
 
-	void putBlob(BucketPath bucketPath, Payload payload);
+    void putBlob(BucketPath bucketPath, Payload payload);
 
-	/**
-	 * Retrieve meta information of the blob at the location {@link BucketPath}
-	 *
-	 * @param bucketPath
-	 * @return a Map with blob meta information
-	 */
-	BlobMetaInfo getBlobMetaInfo(BucketPath bucketPath);
+    BlobMetaInfo getBlobMetaInfo(BucketPath bucketPath);
 
-	/**
-	 * Retrieve the blob at the location {@link BucketPath}
-	 *
-	 * @param bucketPath
-	 * @return
-	 */
-	Payload getBlob(BucketPath bucketPath);
+    Payload getBlob(BucketPath bucketPath);
 
-	/**
-	 * Remove the blob at the location {@link BucketPath}
-	 *
-	 * @param bucketPath
-	 */
-	void removeBlob(BucketPath bucketPath);
+    void removeBlob(BucketPath bucketPath);
 
-	void removeBlobs(Iterable<BucketPath> bucketPaths);
+    void removeBlobs(Iterable<BucketPath> bucketPaths);
 
-	long countBlobs(BucketPath bucketPath, ListRecursiveFlag recursive);
+    long countBlobs(BucketPath bucketPath, ListRecursiveFlag recursive);
 
-	void createContainer(String container);
+    void createContainer(String container);
 
-	boolean containerExists(String container);
+    boolean containerExists(String container);
 
-	void deleteContainer(String container);
+    void deleteContainer(String container);
 
-	void putBlob(ObjectHandle handle, byte[] bytes);
+    void putBlob(ObjectHandle handle, byte[] bytes);
 
-	byte[] getBlob(ObjectHandle handle);
+    byte[] getBlob(ObjectHandle handle);
 
-	boolean blobExists(ObjectHandle location);
+    boolean blobExists(ObjectHandle location);
 
-	PageSet<? extends StorageMetadata> list(BucketDirectory bucketDirectory, ListRecursiveFlag listRecursiveFlag);
+    PageSet<? extends StorageMetadata> list(BucketDirectory bucketDirectory, ListRecursiveFlag listRecursiveFlag);
 }

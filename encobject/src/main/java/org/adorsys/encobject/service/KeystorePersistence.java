@@ -29,7 +29,4 @@ public interface KeystorePersistence {
 	 * @return if a keystore available for the given handle
 	 */
 	boolean hasKeystore(ObjectHandle handle);
-	
-//	public void saveKeyStore(KeyStore keystore, CallbackHandler storePassHandler, KeyStoreLocation keyStoreLocation);
-//	public KeyStore loadKeystore(KeyStoreLocation keyStoreLocation, CallbackHandler handler);
 }

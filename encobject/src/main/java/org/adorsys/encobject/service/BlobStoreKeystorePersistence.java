@@ -1,20 +1,28 @@
 package org.adorsys.encobject.service;
 
-import com.google.protobuf.ByteString;
 import org.adorsys.encobject.complextypes.BucketPath;
+import org.adorsys.encobject.domain.BlobMetaInfo;
+import org.adorsys.encobject.domain.ContentInfoEntry;
 import org.adorsys.encobject.domain.ObjectHandle;
+import org.adorsys.encobject.domain.Payload;
 import org.adorsys.encobject.domain.Tuple;
-import org.adorsys.encobject.domain.keystore.KeystoreData;
-import org.adorsys.encobject.exceptions.KeystoreNotFoundException;
-import org.adorsys.encobject.exceptions.UnknownContainerException;
+import org.adorsys.encobject.exceptions.MissingKeyAlgorithmException;
+import org.adorsys.encobject.exceptions.MissingKeystoreAlgorithmException;
+import org.adorsys.encobject.exceptions.MissingKeystoreProviderException;
+import org.adorsys.encobject.exceptions.WrongKeystoreCredentialException;
 import org.adorsys.jkeygen.keystore.KeyStoreService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.security.auth.callback.CallbackHandler;
-import java.io.IOException;
 import java.security.KeyStore;
+import java.security.KeyStoreException;
+import java.security.NoSuchAlgorithmException;
+import java.security.NoSuchProviderException;
+import java.security.UnrecoverableKeyException;
+import java.util.HashMap;
 import java.util.Map;
+import java.util.Set;
 
 /**
  * Service in charge of loading and storing user keys.
@@ -24,6 +32,7 @@ import java.util.Map;
  */
 public class BlobStoreKeystorePersistence implements KeystorePersistence {
 	private final static Logger LOGGER = LoggerFactory.getLogger(BlobStoreKeystorePersistence.class);
+	private final static String KEYSTORE_TYPE_KEY="keystore.type";
 
 	private ExtendedStoreConnection extendedStoreConnection;
 
@@ -31,40 +40,57 @@ public class BlobStoreKeystorePersistence implements KeystorePersistence {
 		this.extendedStoreConnection = extendedStoreConnection;
 	}
 
-	public void saveKeyStore(KeyStore keystore, CallbackHandler storePassHandler, ObjectHandle handle){
+	@Override
+	public void saveKeyStore(KeyStore keystore, CallbackHandler storePassHandler, ObjectHandle handle) {
 			String storeType = keystore.getType();
 			byte[] bs = KeyStoreService.toByteArray(keystore, handle.getName(), storePassHandler);
-			KeystoreData keystoreData = KeystoreData.newBuilder().setType(storeType).setKeystore(ByteString.copyFrom(bs)).build();
-			extendedStoreConnection.putBlob(new BucketPath(handle.getContainer(), handle.getName()), keystoreData.toByteArray());
+			BucketPath bucketPath = new BucketPath(handle.getContainer(), handle.getName());
+			Payload payload = ByteArrayPayload.builder(bs).putMetaInfoString(KEYSTORE_TYPE_KEY, storeType).build();
+			extendedStoreConnection.putBlob(bucketPath, payload );
 	}
 
-	public void saveKeyStoreWithAttributes(KeyStore keystore, Map<String, String> attributes, CallbackHandler storePassHandler, ObjectHandle handle){
+	@Override
+	public void saveKeyStoreWithAttributes(KeyStore keystore, Map<String, String> attributes, CallbackHandler storePassHandler, ObjectHandle handle) {
 			String storeType = keystore.getType();
 			byte[] bs = KeyStoreService.toByteArray(keystore, handle.getName(), storePassHandler);
-			KeystoreData keystoreData = KeystoreData.newBuilder()
-					.setType(storeType)
-					.setKeystore(ByteString.copyFrom(bs))
-					.putAllAttributes(attributes)
-					.build();
-			extendedStoreConnection.putBlob(new BucketPath(handle.getContainer(), handle.getName()), keystoreData.toByteArray());
+			BucketPath bucketPath = new BucketPath(handle.getContainer(), handle.getName());
+			if(attributes!=null && attributes.containsKey(KEYSTORE_TYPE_KEY))
+				throw new IllegalStateException("Can not set attribut type. This is infered from the stored keystore");
+			Payload payload = ByteArrayPayload.builder(bs)
+					.putMetaInfoString(KEYSTORE_TYPE_KEY, storeType)
+					.putAllMetaInfoStrings(attributes).build();
+			extendedStoreConnection.putBlob(bucketPath, payload );
 	}
-	
+
+	@Override
 	public KeyStore loadKeystore(ObjectHandle handle, CallbackHandler handler) {
-		KeystoreData keystoreData = loadKeystoreData(handle);
-		return initKeystore(keystoreData, handle.getName(), handler);
+		BucketPath bucketPath = new BucketPath(handle.getContainer(), handle.getName());
+		Payload payload = extendedStoreConnection.getBlob(bucketPath);
+		return initKeystore(payload, handle.getName(), handler);
 	}
 
-	public Tuple<KeyStore, Map<String, String>> loadKeystoreAndAttributes(ObjectHandle handle, CallbackHandler handler){
-		KeystoreData keystoreData = loadKeystoreData(handle);
-		KeyStore keyStore = initKeystore(keystoreData, handle.getName(), handler);
+	@Override
+	public Tuple<KeyStore, Map<String, String>> loadKeystoreAndAttributes(ObjectHandle handle, CallbackHandler handler) {
+		BucketPath bucketPath = new BucketPath(handle.getContainer(), handle.getName());
+		Payload payload = extendedStoreConnection.getBlob(bucketPath);
+		KeyStore keyStore = initKeystore(payload, handle.getName(), handler);
+		BlobMetaInfo metaInfo = payload.getBlobMetaInfo();
 
-		return new Tuple<>(keyStore, keystoreData.getAttributesMap());
+		Map<String, String> attributeMap = new HashMap<>();
+		Set<String> keySet = metaInfo.keySet();
+		for (String key : keySet) {
+			ContentInfoEntry contentInfoEntry = metaInfo.get(key);
+			String value = contentInfoEntry!=null?null:contentInfoEntry.getValue();
+			attributeMap.put(key, value);
+		}
+		attributeMap.remove(KEYSTORE_TYPE_KEY);
+		return new Tuple<>(keyStore, attributeMap);
 	}
 
 	/**
 	 * Checks if a keystore available for the given handle. This is generally true if
 	 * the container exists and the file with name "name" is in that container.
-	 * 
+	 *
 	 * @param handle handle to check
 	 * @return if a keystore available for the given handle
 	 */
@@ -72,51 +98,8 @@ public class BlobStoreKeystorePersistence implements KeystorePersistence {
 		return extendedStoreConnection.blobExists(new BucketPath(handle.getContainer(), handle.getName()));
 	}
 
-	
-	private KeystoreData loadKeystoreData(ObjectHandle handle) {
-		byte[] keyStoreBytes;
-			keyStoreBytes = extendedStoreConnection.getBlob(new BucketPath(handle.getContainer(), handle.getName())).getData();
-
-		try {
-			return KeystoreData.parseFrom(keyStoreBytes);
-		} catch (IOException e) {
-			throw new IllegalStateException("Invalid protocol buffer", e);
-		}
+	private KeyStore initKeystore(Payload payload, String storeid, CallbackHandler handler) {
+			String keyStoreType = payload.getBlobMetaInfo().get(KEYSTORE_TYPE_KEY).getValue();
+			return KeyStoreService.loadKeyStore(payload.getData(), storeid, keyStoreType, handler);
 	}
-
-	private KeyStore initKeystore(KeystoreData keystoreData, String storeid, CallbackHandler handler){
-			return KeyStoreService.loadKeyStore(keystoreData.getKeystore().toByteArray(), storeid, keystoreData.getType(), handler);
-	}
-
-	/*
-	public void saveKeyStore(KeyStore keystore, CallbackHandler storePassHandler, KeyStoreLocation keyStoreLocation) {
-		try {
-			// Match store type aggainst file extension
-			if(!keyStoreLocation.getKeyStoreType().equals(new KeyStoreType(keystore.getType())))
-					throw new ExtendedPersistenceException("Invalid store type - expected : " + keystore.getType() + " but is: " + keyStoreLocation.getKeyStoreType().getValue());
-			
-			// write keystore to byte array.
-			LOGGER.debug("write keystore at " + keyStoreLocation + " and with type " + keystore.getType());
-			byte[] bs = KeyStoreService.toByteArray(keystore, keyStoreLocation.getLocationHandle().getName(), storePassHandler);
-			
-			// write byte array to blob store.
-			extendedStoreConnection.putBlob(keyStoreLocation.getLocationHandle() , bs);
-		} catch (Exception e) {
-			BaseExceptionHandler.handle(e);
-		}
-	}
-	
-	public KeyStore loadKeystore(KeyStoreLocation keyStoreLocation, CallbackHandler handler) {
-		try {
-			// Read bytes
-			byte[] ksBytes = extendedStoreConnection.getBlob(keyStoreLocation.getLocationHandle());
-			LOGGER.debug("loaded keystore has size:" + ksBytes.length);
-			// Initialize key store
-			return KeyStoreService.loadKeyStore(ksBytes, keyStoreLocation.getLocationHandle().getName(), keyStoreLocation.getKeyStoreType().getValue(), handler);
-		} catch (Exception e) {
-			throw BaseExceptionHandler.handle(e);
-		}
-	}
-		*/
-	
 }

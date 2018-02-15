@@ -13,9 +13,13 @@ public interface ExtendedStoreConnection {
 
     void putBlob(BucketPath bucketPath, Payload payload);
 
-    BlobMetaInfo getBlobMetaInfo(BucketPath bucketPath);
+    void putBlob(BucketPath bucketPath, byte[] bytes);
 
     Payload getBlob(BucketPath bucketPath);
+
+    BlobMetaInfo getBlobMetaInfo(BucketPath bucketPath);
+
+    boolean blobExists(BucketPath bucketPath);
 
     void removeBlob(BucketPath bucketPath);
 
@@ -28,12 +32,6 @@ public interface ExtendedStoreConnection {
     boolean containerExists(String container);
 
     void deleteContainer(String container);
-
-    void putBlob(ObjectHandle handle, byte[] bytes);
-
-    byte[] getBlob(ObjectHandle handle);
-
-    boolean blobExists(ObjectHandle location);
 
     PageSet<? extends StorageMetadata> list(BucketDirectory bucketDirectory, ListRecursiveFlag listRecursiveFlag);
 }

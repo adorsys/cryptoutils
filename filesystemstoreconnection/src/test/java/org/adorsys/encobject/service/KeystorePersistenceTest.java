@@ -1,6 +1,7 @@
 package org.adorsys.encobject.service;
 
 import org.adorsys.cryptoutils.exceptions.BaseExceptionHandler;
+import org.adorsys.encobject.complextypes.BucketPath;
 import org.adorsys.encobject.domain.ObjectHandle;
 import org.adorsys.encobject.domain.Tuple;
 import org.adorsys.encobject.exceptions.ContainerExistsException;
@@ -58,7 +59,7 @@ public class KeystorePersistenceTest {
         KeyStore keystore = TestKeyUtils.testSecretKeystore(storeid, storePass, "mainKey", "aSimpleSecretPass".toCharArray());
         Assume.assumeNotNull(keystore);
         keystorePersistence.saveKeyStore(keystore, TestKeyUtils.callbackHandlerBuilder(storeid, storePass).build(), new ObjectHandle(container, storeid));
-        Assert.assertTrue(extendedStoreConnection.blobExists(new ObjectHandle(container, storeid)));
+        Assert.assertTrue(extendedStoreConnection.blobExists(new BucketPath(container, storeid)));
     }
 
     @Test

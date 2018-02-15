@@ -11,6 +11,7 @@ import org.adorsys.encobject.domain.ObjectHandle;
 import org.adorsys.encobject.domain.PageSet;
 import org.adorsys.encobject.domain.Payload;
 import org.adorsys.encobject.domain.StorageMetadata;
+import org.adorsys.encobject.domain.document.DocumentMetaInfoData;
 import org.adorsys.encobject.domain.document.FullDocumentData;
 import org.adorsys.encobject.exceptions.StorageConnectionException;
 import org.adorsys.encobject.filesystem.exceptions.CreateFolderException;
@@ -38,6 +39,7 @@ import java.util.Map;
 public class FileSystemExtendedStorageConnection implements ExtendedStoreConnection {
     private final static Logger LOGGER = LoggerFactory.getLogger(FileSystemExtendedStorageConnection.class);
     private final static String DEFAULT_BASE = "target/filesystemstorage";
+    private final static String META_INFORMATION_SUFFIX = "._META-INFORMATION_";
     protected final BucketDirectory baseDir;
 
     public FileSystemExtendedStorageConnection() {
@@ -46,7 +48,7 @@ public class FileSystemExtendedStorageConnection implements ExtendedStoreConnect
 
     public FileSystemExtendedStorageConnection(String basedir) {
         this.baseDir = new BucketDirectory(basedir);
-        createContainer("");
+//        createContainer("");
     }
 
     @Override
@@ -101,30 +103,14 @@ public class FileSystemExtendedStorageConnection implements ExtendedStoreConnect
     }
 
     @Override
-    public void putBlob(ObjectHandle handle, byte[] bytes) {
-        File file = getAsFile(baseDir.append(asBucketPath(handle)));
-        LOGGER.debug("putBlob " + file);
-        try {
-            FileUtils.writeByteArrayToFile(file, bytes);
-        } catch (IOException e) {
-            throw new WriteBlobException("can not write " + file, e);
-        }
+    public void putBlob(BucketPath bucketPath, byte[] bytes) {
+        Payload payload = new FileSystemPayload(bytes, new FileSystemBlobMetaInfo());
+        putBlob(bucketPath, payload);
     }
 
     @Override
-    public byte[] getBlob(ObjectHandle handle) {
-        File file = getAsFile(baseDir.append(asBucketPath(handle)));
-        LOGGER.debug("getBlob " + file);
-        try {
-            return FileUtils.readFileToByteArray(file);
-        } catch (IOException e) {
-            throw new FileNotFoundException("can not read file " + file, e);
-        }
-    }
-
-    @Override
-    public boolean blobExists(ObjectHandle location) {
-        File file = getAsFile(baseDir.append(asBucketPath(location)));
+    public boolean blobExists(BucketPath bucketPath) {
+        File file = getAsFile(baseDir.append(bucketPath));
         LOGGER.debug("blobExists " + file);
         if (file.isDirectory()) {
             throw new FileIsFolderException("file " + file);
@@ -175,38 +161,54 @@ public class FileSystemExtendedStorageConnection implements ExtendedStoreConnect
 
     @Override
     public void putBlob(BucketPath bucketPath, Payload payload) {
-        FullDocumentData.DocumentMetaInfoData.Builder metaInfoBuilder = FullDocumentData.DocumentMetaInfoData.newBuilder();
+        DocumentMetaInfoData.Builder metaInfoBuilder = DocumentMetaInfoData.newBuilder();
 
         byte[] document = payload.getData();
         BlobMetaInfo metaInfo = payload.getBlobMetaInfo();
         for (String key : metaInfo.keySet()) {
             ContentInfoEntry contentInfoEntry = metaInfo.get(key);
-            FullDocumentData.ContentInfoEntryData contentInfoEntryData =
-                    FullDocumentData.ContentInfoEntryData.newBuilder().setType(contentInfoEntry.getType())
+            DocumentMetaInfoData.ContentInfoEntryData contentInfoEntryData =
+                    DocumentMetaInfoData.ContentInfoEntryData.newBuilder().setType(contentInfoEntry.getType())
                             .setValue(contentInfoEntry.getValue())
                             .setVersion(contentInfoEntry.getVersion()).build();
             metaInfoBuilder.putMap(key, contentInfoEntryData);
         }
         FullDocumentData fullDocumentData = FullDocumentData.newBuilder().setDocument(ByteString.copyFrom(document)).setMetaInfo(metaInfoBuilder).build();
-        putBlob(bucketPath.getObjectHandle(), fullDocumentData.toByteArray());
+
+        BucketPath metaInfoBucketPath = bucketPath.add(META_INFORMATION_SUFFIX);
+        writeBytes(bucketPath, fullDocumentData.toByteArray());
+        writeBytes(metaInfoBucketPath, metaInfoBuilder.build().toByteArray());
     }
 
     @Override
     public BlobMetaInfo getBlobMetaInfo(BucketPath bucketPath) {
-        throw new BaseException("NYI");
+        try {
+            BucketPath metaInfoBucketPath = bucketPath.add(META_INFORMATION_SUFFIX);
+            byte[] bytes = readBytes(metaInfoBucketPath);
+            Map<String, DocumentMetaInfoData.ContentInfoEntryData> metaInfoDataMap = DocumentMetaInfoData.parseFrom(bytes).getMapMap();
+            BlobMetaInfo blobMetaInfo = new BlobMetaInfo();
+            for (String key : metaInfoDataMap.keySet()) {
+                DocumentMetaInfoData.ContentInfoEntryData contentInfoEntryData = metaInfoDataMap.get(key);
+                ContentInfoEntry contentInfoEntry = new ContentInfoEntry(contentInfoEntryData.getType(), contentInfoEntryData.getVersion(), contentInfoEntryData.getValue());
+                blobMetaInfo.put(key, contentInfoEntry);
+            }
+            return blobMetaInfo;
+        } catch (Exception e) {
+            throw BaseExceptionHandler.handle(e);
+        }
     }
 
     @Override
     public Payload getBlob(BucketPath bucketPath) {
         try {
-        byte[] bytes = getBlob(bucketPath.getObjectHandle());
+            byte[] bytes = readBytes(bucketPath);
             FullDocumentData fullDocumentData = FullDocumentData.parseFrom(bytes);
             byte[] document = fullDocumentData.getDocument().toByteArray();
-            Map<String, FullDocumentData.ContentInfoEntryData> metaInfoDataMap = fullDocumentData.getMetaInfo().getMapMap();
+            Map<String, DocumentMetaInfoData.ContentInfoEntryData> metaInfoDataMap = fullDocumentData.getMetaInfo().getMapMap();
             BlobMetaInfo blobMetaInfo = new BlobMetaInfo();
             for (String key : metaInfoDataMap.keySet()) {
-                FullDocumentData.ContentInfoEntryData contentInfoEntryData = metaInfoDataMap.get(key);
-                ContentInfoEntry contentInfoEntry = new ContentInfoEntry(contentInfoEntryData.getType(),contentInfoEntryData.getVersion(),contentInfoEntryData.getValue());
+                DocumentMetaInfoData.ContentInfoEntryData contentInfoEntryData = metaInfoDataMap.get(key);
+                ContentInfoEntry contentInfoEntry = new ContentInfoEntry(contentInfoEntryData.getType(), contentInfoEntryData.getVersion(), contentInfoEntryData.getValue());
                 blobMetaInfo.put(key, contentInfoEntry);
             }
             return new FileSystemPayload(document, blobMetaInfo);
@@ -277,14 +279,29 @@ public class FileSystemExtendedStorageConnection implements ExtendedStoreConnect
             if (!filename.startsWith(knownPrefix)) {
                 throw new BaseException("Programming Error. expected " + filename + " to start with " + knownPrefix);
             }
-            filename = filename.substring(knownPrefix.length());
-            set.add(new FileSystemMetaData(filename));
+            if (!filename.endsWith(META_INFORMATION_SUFFIX)) {
+                filename = filename.substring(knownPrefix.length());
+                set.add(new FileSystemMetaData(filename));
+            }
         }
     }
 
-    private BucketPath asBucketPath(ObjectHandle objectHandle) {
-        return new BucketPath(objectHandle.getContainer(), objectHandle.getName());
+    private void writeBytes(BucketPath bucketPath, byte[] bytes) {
+        File file = getAsFile(baseDir.append(bucketPath));
+        try {
+            FileUtils.writeByteArrayToFile(file, bytes);
+        } catch (IOException e) {
+            throw new WriteBlobException("can not write " + file, e);
+        }
+
     }
 
-
+    private byte[] readBytes(BucketPath bucketPath) {
+        File file = getAsFile(baseDir.append(bucketPath));
+        try {
+            return FileUtils.readFileToByteArray(file);
+        } catch (IOException e) {
+            throw new FileNotFoundException("can not read file " + file, e);
+        }
+    }
 }

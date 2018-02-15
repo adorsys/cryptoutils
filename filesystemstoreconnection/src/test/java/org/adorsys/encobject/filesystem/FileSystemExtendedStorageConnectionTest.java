@@ -4,6 +4,7 @@ import junit.framework.Assert;
 import org.adorsys.cryptoutils.utils.HexUtil;
 import org.adorsys.encobject.complextypes.BucketDirectory;
 import org.adorsys.encobject.complextypes.BucketPath;
+import org.adorsys.encobject.domain.BlobMetaInfo;
 import org.adorsys.encobject.domain.PageSet;
 import org.adorsys.encobject.domain.Payload;
 import org.adorsys.encobject.domain.StorageMetadata;
@@ -47,7 +48,7 @@ public class FileSystemExtendedStorageConnectionTest {
     @Test
     public void test1() {
         ExtendedStoreConnection s = new FileSystemExtendedStorageConnection();
-        PageSet<? extends StorageMetadata> list = s.list(new BucketDirectory(""), ListRecursiveFlag.FALSE);
+        PageSet<? extends StorageMetadata> list = s.list(new BucketDirectory("a"), ListRecursiveFlag.FALSE);
         LOGGER.debug("list" + list);
         Assert.assertEquals(0, list.size());
     }
@@ -72,7 +73,7 @@ public class FileSystemExtendedStorageConnectionTest {
         BucketDirectory bd = new BucketDirectory(container);
         BucketPath file = bd.appendName("file1");
 
-        s.putBlob(file.getObjectHandle(), "Inhalt".getBytes());
+        s.putBlob(file, "Inhalt".getBytes());
         PageSet<? extends StorageMetadata> list = s.list(bd, ListRecursiveFlag.FALSE);
         Assert.assertEquals(1, list.size());
         LOGGER.debug("found: " + list.iterator().next().getName());
@@ -99,10 +100,11 @@ public class FileSystemExtendedStorageConnectionTest {
         containers.add(container);
         ExtendedStoreConnection s = new FileSystemExtendedStorageConnection();
         s.createContainer(container);
-        BucketDirectory bd = new BucketDirectory(container);
-        BucketDirectory file = bd.appendDirectory("file1");
-        s.putBlob(file.getObjectHandle(), "Inhalt".getBytes());
-        PageSet<? extends StorageMetadata> list = s.list(file, ListRecursiveFlag.FALSE);
+        BucketPath bp = new BucketPath(container);
+        BucketPath file = bp.append("file1");
+        s.putBlob(file, "Inhalt".getBytes());
+        BucketDirectory bd = new BucketDirectory(file);
+        PageSet<? extends StorageMetadata> list = s.list(bd, ListRecursiveFlag.FALSE);
         Assert.assertEquals(0, list.size());
     }
 
@@ -114,10 +116,10 @@ public class FileSystemExtendedStorageConnectionTest {
         ExtendedStoreConnection s = new FileSystemExtendedStorageConnection();
         s.createContainer(container);
         BucketDirectory bd = new BucketDirectory(container);
-        s.putBlob(bd.append(new BucketPath("filea")).getObjectHandle(), "Inhalt".getBytes());
-        s.putBlob(bd.append(new BucketPath("fileb")).getObjectHandle(), "Inhalt".getBytes());
-        s.putBlob(bd.append(new BucketPath("subdir1/filec")).getObjectHandle(), "Inhalt".getBytes());
-        s.putBlob(bd.append(new BucketPath("subdir1/filed")).getObjectHandle(), "Inhalt".getBytes());
+        s.putBlob(bd.append(new BucketPath("filea")), "Inhalt".getBytes());
+        s.putBlob(bd.append(new BucketPath("fileb")), "Inhalt".getBytes());
+        s.putBlob(bd.append(new BucketPath("subdir1/filec")), "Inhalt".getBytes());
+        s.putBlob(bd.append(new BucketPath("subdir1/filed")), "Inhalt".getBytes());
         PageSet<? extends StorageMetadata> list = s.list(bd, ListRecursiveFlag.TRUE);
         Assert.assertEquals(4, list.size());
         list = s.list(bd, ListRecursiveFlag.FALSE);
@@ -133,7 +135,7 @@ public class FileSystemExtendedStorageConnectionTest {
         ExtendedStoreConnection s = new FileSystemExtendedStorageConnection();
         s.createContainer(container);
         BucketDirectory bd = new BucketDirectory(container);
-        s.putBlob(bd.append(new BucketPath("subdir1/filea")).getObjectHandle(), "Inhalt".getBytes());
+        s.putBlob(bd.append(new BucketPath("subdir1/filea")), "Inhalt".getBytes());
         PageSet<? extends StorageMetadata> list = s.list(bd, ListRecursiveFlag.TRUE);
         Assert.assertEquals(1, list.size());
         Assert.assertEquals("name has to be fullname", "1/2/3/subdir1/filea", list.iterator().next().getName());
@@ -152,7 +154,7 @@ public class FileSystemExtendedStorageConnectionTest {
         ExtendedStoreConnection s = new FileSystemExtendedStorageConnection();
         s.createContainer(container);
         BucketDirectory bd = new BucketDirectory(container);
-        s.putBlob(bd.append(new BucketPath("filea")).getObjectHandle(), "Inhalt".getBytes());
+        s.putBlob(bd.append(new BucketPath("filea")), "Inhalt".getBytes());
         PageSet<? extends StorageMetadata> list = s.list(bd, ListRecursiveFlag.TRUE);
         Assert.assertEquals(1, list.size());
         Assert.assertEquals("name has to be fullname", "1/2/3/filea", list.iterator().next().getName());
@@ -183,6 +185,27 @@ public class FileSystemExtendedStorageConnectionTest {
 
         Assert.assertEquals("document", HexUtil.convertBytesToHexString(origPayload.getData()), HexUtil.convertBytesToHexString(loadedPayload.getData()));
         Assert.assertEquals("number of metainfoentries", origPayload.getBlobMetaInfo().keySet().size(), loadedPayload.getBlobMetaInfo().keySet().size());
+    }
+
+    @Test
+    public void test10() {
+        String container = "affe10/1/2/3";
+        // containers.add(container);
+        ExtendedStoreConnection s = new FileSystemExtendedStorageConnection();
+        s.createContainer(container);
+        BucketDirectory bd = new BucketDirectory(container);
+        FileSystemBlobMetaInfo documentMetaInfo = new FileSystemBlobMetaInfo();
+        for (int i = 0; i<10; i++) {
+            documentMetaInfo.putString("key" + i, "value" + i);
+        }
+
+        BucketPath filea = bd.append(new BucketPath("filea"));
+        Payload origPayload = new FileSystemPayload("Inhalt".getBytes(), documentMetaInfo);
+        s.putBlob(filea, origPayload);
+
+        BlobMetaInfo blobMetaInfo  = s.getBlobMetaInfo(filea);
+
+        Assert.assertEquals("number of metainfoentries", origPayload.getBlobMetaInfo().keySet().size(), blobMetaInfo.keySet().size());
     }
 
     @Test
@@ -228,7 +251,7 @@ public class FileSystemExtendedStorageConnectionTest {
 
         for (int i = 0; i<subfiles; i++) {
             byte[] content = ("Affe of file " + i + "").getBytes();
-            extendedStoreConnection.putBlob(rootDirectory.appendName("file" + i).getObjectHandle(), content);
+            extendedStoreConnection.putBlob(rootDirectory.appendName("file" + i), content);
         }
         for (int i = 0; i<subdirs; i++) {
             createFilesAndFoldersRecursivly(rootDirectory.appendDirectory("subdir" + i), subdirs, subfiles, depth-1, extendedStoreConnection);

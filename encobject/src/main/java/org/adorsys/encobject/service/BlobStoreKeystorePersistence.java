@@ -1,6 +1,7 @@
 package org.adorsys.encobject.service;
 
 import com.google.protobuf.ByteString;
+import org.adorsys.encobject.complextypes.BucketPath;
 import org.adorsys.encobject.domain.ObjectHandle;
 import org.adorsys.encobject.domain.Tuple;
 import org.adorsys.encobject.domain.keystore.KeystoreData;
@@ -34,7 +35,7 @@ public class BlobStoreKeystorePersistence implements KeystorePersistence {
 			String storeType = keystore.getType();
 			byte[] bs = KeyStoreService.toByteArray(keystore, handle.getName(), storePassHandler);
 			KeystoreData keystoreData = KeystoreData.newBuilder().setType(storeType).setKeystore(ByteString.copyFrom(bs)).build();
-			extendedStoreConnection.putBlob(handle, keystoreData.toByteArray());
+			extendedStoreConnection.putBlob(new BucketPath(handle.getContainer(), handle.getName()), keystoreData.toByteArray());
 	}
 
 	public void saveKeyStoreWithAttributes(KeyStore keystore, Map<String, String> attributes, CallbackHandler storePassHandler, ObjectHandle handle){
@@ -45,7 +46,7 @@ public class BlobStoreKeystorePersistence implements KeystorePersistence {
 					.setKeystore(ByteString.copyFrom(bs))
 					.putAllAttributes(attributes)
 					.build();
-			extendedStoreConnection.putBlob(handle, keystoreData.toByteArray());
+			extendedStoreConnection.putBlob(new BucketPath(handle.getContainer(), handle.getName()), keystoreData.toByteArray());
 	}
 	
 	public KeyStore loadKeystore(ObjectHandle handle, CallbackHandler handler) {
@@ -68,13 +69,13 @@ public class BlobStoreKeystorePersistence implements KeystorePersistence {
 	 * @return if a keystore available for the given handle
 	 */
 	public boolean hasKeystore(ObjectHandle handle) {
-			return extendedStoreConnection.getBlob(handle)!=null;
+		return extendedStoreConnection.blobExists(new BucketPath(handle.getContainer(), handle.getName()));
 	}
 
 	
 	private KeystoreData loadKeystoreData(ObjectHandle handle) {
 		byte[] keyStoreBytes;
-			keyStoreBytes = extendedStoreConnection.getBlob(handle);
+			keyStoreBytes = extendedStoreConnection.getBlob(new BucketPath(handle.getContainer(), handle.getName())).getData();
 
 		try {
 			return KeystoreData.parseFrom(keyStoreBytes);

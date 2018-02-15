@@ -9,6 +9,7 @@ import com.nimbusds.jose.JWEHeader.Builder;
 import com.nimbusds.jose.JWEObject;
 import com.nimbusds.jose.Payload;
 import com.nimbusds.jose.crypto.factories.DefaultJWEDecrypterFactory;
+import org.adorsys.encobject.complextypes.BucketPath;
 import org.adorsys.encobject.domain.ContentMetaInfo;
 import org.adorsys.encobject.domain.ObjectHandle;
 import org.adorsys.encobject.params.EncParamSelector;
@@ -126,7 +127,7 @@ public class ServerObjectPersistence {
 		} catch (UnsupportedEncodingException e) {
 			throw new IllegalStateException("Unsupported content type", e);
 		}
-		blobStoreConnection.putBlob(handle, bytesToStore);
+		blobStoreConnection.putBlob(new BucketPath(handle.getContainer(), handle.getName()), bytesToStore);
 	}
 
 	/**
@@ -140,7 +141,7 @@ public class ServerObjectPersistence {
 	 * @throws UnknownContainerException UnknownContainerException
 	 */
 	public byte[] loadObject(ObjectHandle handle, ServerKeyMapProvider keyMapProvider) throws UnknownContainerException, ObjectNotFoundException, WrongKeyCredentialException {
-		byte[] jweEncryptedBytes = blobStoreConnection.getBlob(handle);
+		byte[] jweEncryptedBytes = blobStoreConnection.getBlob(new BucketPath(handle.getContainer(), handle.getName())).getData();
 		String jweEncryptedObject;
 		try {
 			jweEncryptedObject = IOUtils.toString(jweEncryptedBytes, "UTF-8");

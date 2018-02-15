@@ -1,6 +1,7 @@
 package org.adorsys.encobject.service;
 
 import org.adorsys.cryptoutils.exceptions.BaseException;
+import org.adorsys.cryptoutils.exceptions.NYIException;
 import org.adorsys.encobject.complextypes.BucketDirectory;
 import org.adorsys.encobject.complextypes.BucketPath;
 import org.adorsys.encobject.domain.BlobMetaInfo;
@@ -95,7 +96,8 @@ public class BlobStoreConnection implements ExtendedStoreConnection {
     }
     
     @Override
-    public void putBlob(ObjectHandle handle, byte[] bytes) {
+    public void putBlob(BucketPath bucketPath, byte[] bytes) {
+        ObjectHandle handle = bucketPath.getObjectHandle();
         BlobStoreContext blobStoreContext = blobStoreContextFactory.alocate();
         try {
             BlobStore blobStore = blobStoreContext.getBlobStore();
@@ -114,7 +116,8 @@ public class BlobStoreConnection implements ExtendedStoreConnection {
 
 
     @Override
-    public byte[] getBlob(ObjectHandle handle) {
+    public Payload getBlob(BucketPath bucketPath) {
+        ObjectHandle handle = bucketPath.getObjectHandle();
         BlobStoreContext blobStoreContext = blobStoreContextFactory.alocate();
         try {
             BlobStore blobStore = blobStoreContext.getBlobStore();
@@ -127,7 +130,7 @@ public class BlobStoreConnection implements ExtendedStoreConnection {
             }
 
             try {
-                return IOUtils.toByteArray(blob.getPayload().openStream());
+                return new BlobStoreConnectionPayload(IOUtils.toByteArray(blob.getPayload().openStream()));
             } catch (IOException e) {
                 throw new IllegalStateException(e);
             }
@@ -176,7 +179,8 @@ public class BlobStoreConnection implements ExtendedStoreConnection {
     }
 
     @Override
-    public boolean blobExists(ObjectHandle location) {
+    public boolean blobExists(BucketPath bucketPath) {
+        ObjectHandle location = bucketPath.getObjectHandle();
         BlobStoreContext blobStoreContext = this.blobStoreContextFactory.alocate();
         try {
             BlobStore blobStore = blobStoreContext.getBlobStore();
@@ -197,32 +201,27 @@ public class BlobStoreConnection implements ExtendedStoreConnection {
     // TODO NYI
     @Override
     public void putBlob(BucketPath bucketPath, Payload payload) {
-        throw new BaseException("NYI");
+        throw new NYIException();
     }
 
     @Override
     public BlobMetaInfo getBlobMetaInfo(BucketPath bucketPath) {
-        throw new BaseException("NYI");
-    }
-
-    @Override
-    public Payload getBlob(BucketPath bucketPath) {
-        throw new BaseException("NYI");
+        throw new NYIException();
     }
 
     @Override
     public void removeBlob(BucketPath bucketPath) {
-        throw new BaseException("NYI");
+        throw new NYIException();
     }
 
     @Override
     public void removeBlobs(Iterable<BucketPath> bucketPaths) {
-        throw new BaseException("NYI");
+        throw new NYIException();
     }
 
     @Override
     public long countBlobs(BucketPath bucketPath, ListRecursiveFlag recursive) {
-        throw new BaseException("NYI");
+        throw new NYIException();
     }
 
     /*

@@ -7,18 +7,17 @@ option java_package = "org.adorsys.encobject.domain.document";
 option java_multiple_files = true;
 option optimize_for = SPEED;
 
-message FullDocumentData {
+
+message DocumentMetaInfoData {
     message ContentInfoEntryData {
         string type = 1;
         string version = 2;
         string value = 3;
     }
+    map<string, ContentInfoEntryData> map = 1;
+}
 
-    message DocumentMetaInfoData {
-        map<string, ContentInfoEntryData> map = 1;
-    }
-
-
+message FullDocumentData {
     DocumentMetaInfoData metaInfo = 1;
     bytes document = 2;
 }

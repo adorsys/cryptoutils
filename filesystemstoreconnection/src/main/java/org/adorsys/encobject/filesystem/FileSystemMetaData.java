@@ -1,6 +1,7 @@
 package org.adorsys.encobject.filesystem;
 
 import org.adorsys.cryptoutils.exceptions.BaseException;
+import org.adorsys.cryptoutils.exceptions.NYIException;
 import org.adorsys.encobject.domain.Location;
 import org.adorsys.encobject.domain.ResourceMetadata;
 import org.adorsys.encobject.domain.StorageMetadata;
@@ -22,12 +23,12 @@ public class FileSystemMetaData implements StorageMetadata {
 
     @Override
     public StorageType getType() {
-        throw new BaseException("NYI");
+        throw new NYIException();
     }
 
     @Override
     public String getProviderId() {
-        throw new BaseException("NYI");
+        throw new NYIException();
     }
 
     @Override
@@ -37,37 +38,37 @@ public class FileSystemMetaData implements StorageMetadata {
 
     @Override
     public Location getLocation() {
-        throw new BaseException("NYI");
+        throw new NYIException();
     }
 
     @Override
     public URI getUri() {
-        throw new BaseException("NYI");
+        throw new NYIException();
     }
 
     @Override
     public Map<String, String> getUserMetadata() {
-        throw new BaseException("NYI");
+        throw new NYIException();
     }
 
     @Override
     public String getETag() {
-        throw new BaseException("NYI");
+        throw new NYIException();
     }
 
     @Override
     public Date getCreationDate() {
-        throw new BaseException("NYI");
+        throw new NYIException();
     }
 
     @Override
     public Date getLastModified() {
-        throw new BaseException("NYI");
+        throw new NYIException();
     }
 
     @Override
     public Long getSize() {
-        throw new BaseException("NYI");
+        throw new NYIException();
     }
 
     @Override

@@ -25,9 +25,6 @@ public class BucketPath {
     String container = null;
     String name = null;
 
-    public BucketPath() {
-    }
-
     /**
      * Wenn path einen Slash enthält, dann ist der Teil vor dem ersten Slash der Container und der Rest der Name
      * Wenn path keinen Slash enthält, dann ist alles der Container und der Name leer
@@ -39,6 +36,8 @@ public class BucketPath {
             if (!split.isEmpty()) {
                 name = split.stream().map(b -> b).collect(Collectors.joining(BucketName.BUCKET_SEPARATOR));
             }
+        } else {
+            throw new BucketException("container must not be null");
         }
     }
 

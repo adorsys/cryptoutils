@@ -127,12 +127,10 @@ public class BucketPathTest {
         Assert.assertEquals("name  ", "affe",  bp.getObjectHandle().getName());
     }
 
-    @Test
+    @Test (expected = BucketException.class)
     public void test14() {
         LOGGER.debug("START TEST " + new RuntimeException("").getStackTrace()[0].getMethodName());
         BucketPath bp=new BucketPath((String) null);
-        Assert.assertEquals("bucket", null,  bp.getObjectHandle().getContainer());
-        Assert.assertEquals("name  ", null,  bp.getObjectHandle().getName());
     }
 
     @Test
@@ -157,10 +155,10 @@ public class BucketPathTest {
     @Test
     public void test17() {
         LOGGER.debug("START TEST " + new RuntimeException("").getStackTrace()[0].getMethodName());
-        BucketPath bp = new BucketPath("");
+        BucketPath bp = new BucketPath("a");
         BucketPath bp2 = bp.append("dir1/dir2");
-        Assert.assertEquals("bucket", "dir1",  bp2.getObjectHandle().getContainer());
-        Assert.assertEquals("name", "dir2",  bp2.getObjectHandle().getName());
+        Assert.assertEquals("bucket", "a",  bp2.getObjectHandle().getContainer());
+        Assert.assertEquals("name", "dir1/dir2",  bp2.getObjectHandle().getName());
 
     }
 

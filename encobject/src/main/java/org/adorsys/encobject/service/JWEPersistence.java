@@ -11,6 +11,7 @@ import com.nimbusds.jose.Payload;
 import com.nimbusds.jose.crypto.factories.DefaultJWEDecrypterFactory;
 import org.adorsys.cryptoutils.exceptions.BaseException;
 import org.adorsys.cryptoutils.exceptions.BaseExceptionHandler;
+import org.adorsys.encobject.complextypes.BucketPath;
 import org.adorsys.encobject.domain.ContentMetaInfo;
 import org.adorsys.encobject.domain.ObjectHandle;
 import org.adorsys.encobject.exceptions.ExtendedPersistenceException;
@@ -112,13 +113,13 @@ public class JWEPersistence {
 		} catch (UnsupportedEncodingException e) {
 			throw new IllegalStateException("Unsupported content type", e);
 		}
-		blobStoreConnection.putBlob(handle, bytesToStore);
+		blobStoreConnection.putBlob(new BucketPath(handle.getContainer(), handle.getName()), bytesToStore);
 
 	}
 
 	public byte[] loadObject(ObjectHandle handle, KeyStore keyStore, CallbackHandler keyPassHandler) {
 
-		byte[] jweEncryptedBytes = blobStoreConnection.getBlob(handle);
+		byte[] jweEncryptedBytes = blobStoreConnection.getBlob(new BucketPath(handle.getContainer(), handle.getName())).getData();
 		String jweEncryptedObject;
 		try {
 			jweEncryptedObject = IOUtils.toString(jweEncryptedBytes, "UTF-8");
@@ -192,12 +193,12 @@ public class JWEPersistence {
             byte[] bytesToStore = jweEncryptedObject.getBytes("UTF-8");
 
             if (overwrite == OverwriteFlag.FALSE) {
-            	boolean blobExists = blobStoreConnection.blobExists(location);
+            	boolean blobExists = blobStoreConnection.blobExists(new BucketPath(location.getContainer(), location.getName()));
             	if (blobExists) {
             		throw new FileExistsException("File " + location.getContainer() + " " + location.getName() + " already exists");
             	}
             }
-            blobStoreConnection.putBlob(location, bytesToStore);
+            blobStoreConnection.putBlob(new BucketPath(location.getContainer(), location.getName()), bytesToStore);
         } catch (Exception e) {
             BaseExceptionHandler.handle(e);
         }
@@ -209,7 +210,7 @@ public class JWEPersistence {
             if (location == null)
                 throw new ExtendedPersistenceException("Location for Object must not be null.");
 
-            byte[] jweEncryptedBytes = blobStoreConnection.getBlob(location);
+            byte[] jweEncryptedBytes = blobStoreConnection.getBlob(new BucketPath(location.getContainer(), location.getName())).getData();
             String jweEncryptedObject = IOUtils.toString(jweEncryptedBytes, "UTF-8");
 
             JWEObject jweObject = JWEObject.parse(jweEncryptedObject);

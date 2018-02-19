@@ -1,11 +1,9 @@
 package org.adorsys.encobject.service;
 
-import org.adorsys.cryptoutils.exceptions.BaseException;
 import org.adorsys.cryptoutils.exceptions.NYIException;
 import org.adorsys.encobject.complextypes.BucketDirectory;
 import org.adorsys.encobject.complextypes.BucketPath;
 import org.adorsys.encobject.domain.BlobMetaInfo;
-import org.adorsys.encobject.domain.ContentInfoEntry;
 import org.adorsys.encobject.domain.Location;
 import org.adorsys.encobject.domain.LocationImpl;
 import org.adorsys.encobject.domain.LocationScope;
@@ -32,7 +30,6 @@ import org.slf4j.LoggerFactory;
 import java.io.IOException;
 import java.util.HashSet;
 import java.util.LinkedHashSet;
-import java.util.Map;
 import java.util.Set;
 
 /**

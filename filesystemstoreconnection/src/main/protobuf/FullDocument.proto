@@ -9,15 +9,10 @@ option optimize_for = SPEED;
 
 
 message DocumentMetaInfoData {
-    message ContentInfoEntryData {
-        string type = 1;
-        string version = 2;
-        string value = 3;
-    }
-    map<string, ContentInfoEntryData> map = 1;
+    map<string, string> map = 1;
 }
 
 message FullDocumentData {
-    DocumentMetaInfoData metaInfo = 1;
+    DocumentMetaInfoData blobMetaInfo = 1;
     bytes document = 2;
 }

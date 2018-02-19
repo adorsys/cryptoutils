@@ -6,19 +6,6 @@ option java_package = "org.adorsys.encobject.domain.pbf";
 option java_multiple_files = true;
 option optimize_for = SPEED;
 
-message ContentInfoEntry {
-	// The Version of the entry. Type might change.
-	string version = 1;
-	// The type of this entry. This is used to discover the factory
-	// used to load the value in the hosp process.
-	string type = 2;
-	// The String representation of the entry. Complex entries might
-	// by stored as base64 encoded byte representation of the object.
-	// Type information shall allow detailed description of the
-	// Structure of this string.
-	string value = 3;
-}
-
 // Add meta info to an object. Storage layer will decide on how to
 // keep this information. A file System that does not support
 // user attribute will just store the persistent object as a single byte
@@ -27,6 +14,6 @@ message ContentInfoEntry {
 // the blob meta data. Offering the advantage of being able to load
 // meta data without loading the encrypted content.
 message Payload {
-	map<string, ContentInfoEntry> metaInfo = 1;
+	map<string, string> metaInfo = 1;
 	bytes data = 2;
 }

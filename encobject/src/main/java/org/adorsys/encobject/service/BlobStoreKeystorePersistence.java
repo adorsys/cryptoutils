@@ -2,24 +2,15 @@ package org.adorsys.encobject.service;
 
 import org.adorsys.encobject.complextypes.BucketPath;
 import org.adorsys.encobject.domain.BlobMetaInfo;
-import org.adorsys.encobject.domain.ContentInfoEntry;
 import org.adorsys.encobject.domain.ObjectHandle;
 import org.adorsys.encobject.domain.Payload;
 import org.adorsys.encobject.domain.Tuple;
-import org.adorsys.encobject.exceptions.MissingKeyAlgorithmException;
-import org.adorsys.encobject.exceptions.MissingKeystoreAlgorithmException;
-import org.adorsys.encobject.exceptions.MissingKeystoreProviderException;
-import org.adorsys.encobject.exceptions.WrongKeystoreCredentialException;
 import org.adorsys.jkeygen.keystore.KeyStoreService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.security.auth.callback.CallbackHandler;
 import java.security.KeyStore;
-import java.security.KeyStoreException;
-import java.security.NoSuchAlgorithmException;
-import java.security.NoSuchProviderException;
-import java.security.UnrecoverableKeyException;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
@@ -45,7 +36,7 @@ public class BlobStoreKeystorePersistence implements KeystorePersistence {
 			String storeType = keystore.getType();
 			byte[] bs = KeyStoreService.toByteArray(keystore, handle.getName(), storePassHandler);
 			BucketPath bucketPath = new BucketPath(handle.getContainer(), handle.getName());
-			Payload payload = ByteArrayPayload.builder(bs).putMetaInfoString(KEYSTORE_TYPE_KEY, storeType).build();
+			Payload payload = ByteArrayPayload.builder(bs).putMetaInfo(KEYSTORE_TYPE_KEY, storeType).build();
 			extendedStoreConnection.putBlob(bucketPath, payload );
 	}
 
@@ -57,8 +48,8 @@ public class BlobStoreKeystorePersistence implements KeystorePersistence {
 			if(attributes!=null && attributes.containsKey(KEYSTORE_TYPE_KEY))
 				throw new IllegalStateException("Can not set attribut type. This is infered from the stored keystore");
 			Payload payload = ByteArrayPayload.builder(bs)
-					.putMetaInfoString(KEYSTORE_TYPE_KEY, storeType)
-					.putAllMetaInfoStrings(attributes).build();
+					.putMetaInfo(KEYSTORE_TYPE_KEY, storeType)
+					.putAllMetaInfo(attributes).build();
 			extendedStoreConnection.putBlob(bucketPath, payload );
 	}
 
@@ -79,9 +70,7 @@ public class BlobStoreKeystorePersistence implements KeystorePersistence {
 		Map<String, String> attributeMap = new HashMap<>();
 		Set<String> keySet = metaInfo.keySet();
 		for (String key : keySet) {
-			ContentInfoEntry contentInfoEntry = metaInfo.get(key);
-			String value = contentInfoEntry!=null?null:contentInfoEntry.getValue();
-			attributeMap.put(key, value);
+			attributeMap.put(key, metaInfo.get(key));
 		}
 		attributeMap.remove(KEYSTORE_TYPE_KEY);
 		return new Tuple<>(keyStore, attributeMap);
@@ -99,7 +88,7 @@ public class BlobStoreKeystorePersistence implements KeystorePersistence {
 	}
 
 	private KeyStore initKeystore(Payload payload, String storeid, CallbackHandler handler) {
-			String keyStoreType = payload.getBlobMetaInfo().get(KEYSTORE_TYPE_KEY).getValue();
+			String keyStoreType = payload.getBlobMetaInfo().get(KEYSTORE_TYPE_KEY);
 			return KeyStoreService.loadKeyStore(payload.getData(), storeid, keyStoreType, handler);
 	}
 }

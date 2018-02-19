@@ -1,6 +1,5 @@
 package org.adorsys.encobject.filesystem;
 
-import org.adorsys.encobject.domain.ContentInfoEntry;
 import org.adorsys.encobject.domain.BlobMetaInfo;
 
 /**
@@ -12,10 +11,10 @@ public class FileSystemBlobMetaInfo extends BlobMetaInfo {
     }
 
     public void putString(String key, String value) {
-        super.put(key, new ContentInfoEntry("String", "1", value));
+        super.put(key,value);
     }
 
-    public String getString(String key) {
-        return super.get(key).getValue();
+    public String get(String key) {
+        return super.get(key);
     }
 }

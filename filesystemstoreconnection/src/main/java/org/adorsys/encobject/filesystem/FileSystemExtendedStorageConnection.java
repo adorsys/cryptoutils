@@ -5,7 +5,6 @@ import org.adorsys.cryptoutils.exceptions.BaseException;
 import org.adorsys.cryptoutils.exceptions.BaseExceptionHandler;
 import org.adorsys.encobject.complextypes.BucketDirectory;
 import org.adorsys.encobject.complextypes.BucketPath;
-import org.adorsys.encobject.domain.ContentInfoEntry;
 import org.adorsys.encobject.domain.BlobMetaInfo;
 import org.adorsys.encobject.domain.ObjectHandle;
 import org.adorsys.encobject.domain.PageSet;
@@ -31,6 +30,7 @@ import java.io.File;
 import java.io.FilenameFilter;
 import java.io.IOException;
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.Map;
 
 /**
@@ -161,19 +161,16 @@ public class FileSystemExtendedStorageConnection implements ExtendedStoreConnect
 
     @Override
     public void putBlob(BucketPath bucketPath, Payload payload) {
-        DocumentMetaInfoData.Builder metaInfoBuilder = DocumentMetaInfoData.newBuilder();
-
         byte[] document = payload.getData();
+
         BlobMetaInfo metaInfo = payload.getBlobMetaInfo();
+        Map<String, String> map = new HashMap<>();
         for (String key : metaInfo.keySet()) {
-            ContentInfoEntry contentInfoEntry = metaInfo.get(key);
-            DocumentMetaInfoData.ContentInfoEntryData contentInfoEntryData =
-                    DocumentMetaInfoData.ContentInfoEntryData.newBuilder().setType(contentInfoEntry.getType())
-                            .setValue(contentInfoEntry.getValue())
-                            .setVersion(contentInfoEntry.getVersion()).build();
-            metaInfoBuilder.putMap(key, contentInfoEntryData);
+            map.put(key, metaInfo.get(key));
         }
-        FullDocumentData fullDocumentData = FullDocumentData.newBuilder().setDocument(ByteString.copyFrom(document)).setMetaInfo(metaInfoBuilder).build();
+        LOGGER.debug("PUT metaInfo map size " + map.keySet().size());
+        DocumentMetaInfoData.Builder metaInfoBuilder = DocumentMetaInfoData.newBuilder().putAllMap(map);
+        FullDocumentData fullDocumentData = FullDocumentData.newBuilder().setDocument(ByteString.copyFrom(document)).setBlobMetaInfo(metaInfoBuilder).build();
 
         BucketPath metaInfoBucketPath = bucketPath.add(META_INFORMATION_SUFFIX);
         writeBytes(bucketPath, fullDocumentData.toByteArray());
@@ -185,12 +182,11 @@ public class FileSystemExtendedStorageConnection implements ExtendedStoreConnect
         try {
             BucketPath metaInfoBucketPath = bucketPath.add(META_INFORMATION_SUFFIX);
             byte[] bytes = readBytes(metaInfoBucketPath);
-            Map<String, DocumentMetaInfoData.ContentInfoEntryData> metaInfoDataMap = DocumentMetaInfoData.parseFrom(bytes).getMapMap();
+            Map<String, String> metaInfo = DocumentMetaInfoData.parseFrom(bytes).getMapMap();
+            LOGGER.debug("GET1 metaInfo map size " + metaInfo.keySet().size());
             BlobMetaInfo blobMetaInfo = new BlobMetaInfo();
-            for (String key : metaInfoDataMap.keySet()) {
-                DocumentMetaInfoData.ContentInfoEntryData contentInfoEntryData = metaInfoDataMap.get(key);
-                ContentInfoEntry contentInfoEntry = new ContentInfoEntry(contentInfoEntryData.getType(), contentInfoEntryData.getVersion(), contentInfoEntryData.getValue());
-                blobMetaInfo.put(key, contentInfoEntry);
+            for (String key : metaInfo.keySet()) {
+                blobMetaInfo.put(key, metaInfo.get(key));
             }
             return blobMetaInfo;
         } catch (Exception e) {
@@ -204,12 +200,11 @@ public class FileSystemExtendedStorageConnection implements ExtendedStoreConnect
             byte[] bytes = readBytes(bucketPath);
             FullDocumentData fullDocumentData = FullDocumentData.parseFrom(bytes);
             byte[] document = fullDocumentData.getDocument().toByteArray();
-            Map<String, DocumentMetaInfoData.ContentInfoEntryData> metaInfoDataMap = fullDocumentData.getMetaInfo().getMapMap();
+            Map<String, String> metaInfo = fullDocumentData.getBlobMetaInfo().getMapMap();
+            LOGGER.debug("GET2 metaInfo map size " + metaInfo.keySet().size());
             BlobMetaInfo blobMetaInfo = new BlobMetaInfo();
-            for (String key : metaInfoDataMap.keySet()) {
-                DocumentMetaInfoData.ContentInfoEntryData contentInfoEntryData = metaInfoDataMap.get(key);
-                ContentInfoEntry contentInfoEntry = new ContentInfoEntry(contentInfoEntryData.getType(), contentInfoEntryData.getVersion(), contentInfoEntryData.getValue());
-                blobMetaInfo.put(key, contentInfoEntry);
+            for (String key : metaInfo.keySet()) {
+                blobMetaInfo.put(key, metaInfo.get(key));
             }
             return new FileSystemPayload(document, blobMetaInfo);
         } catch (Exception e) {

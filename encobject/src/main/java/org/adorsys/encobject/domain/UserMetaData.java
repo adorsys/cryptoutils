@@ -9,9 +9,9 @@ import java.util.Set;
 /**
  * Created by peter on 08.02.18 at 10:26.
  */
-public class BlobMetaInfo {
+public class UserMetaData {
     private Map<String, String> map;
-    public BlobMetaInfo() {
+    public UserMetaData() {
         map = new HashMap<>();
     }
 
@@ -21,7 +21,7 @@ public class BlobMetaInfo {
     public String get(String key) {
         String value = map.get(key);
         if (value == null) {
-            throw new BaseException("Key " + key + " not found in BlobMetaInfo. Known Keys are " + map.keySet());
+            throw new BaseException("Key " + key + " not found in UserMetaData. Known Keys are " + map.keySet());
         }
         return value;
     }
@@ -33,7 +33,13 @@ public class BlobMetaInfo {
         return map.get(key);
     }
 
+    /**
+     * Setzt einen key. Wenn dieser bereits gesetzt ist, ist das ein Fehler
+     */
     public void put(String key, String value) {
+        if (map.containsKey(key)) {
+            throw new BaseException("key must not be set twice: " + key);
+        }
         map.put(key, value);
     }
 

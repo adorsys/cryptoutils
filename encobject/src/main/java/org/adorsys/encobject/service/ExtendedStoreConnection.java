@@ -2,12 +2,11 @@ package org.adorsys.encobject.service;
 
 import org.adorsys.encobject.complextypes.BucketDirectory;
 import org.adorsys.encobject.complextypes.BucketPath;
-import org.adorsys.encobject.domain.BlobMetaInfo;
-import org.adorsys.encobject.domain.ObjectHandle;
-import org.adorsys.encobject.domain.PageSet;
 import org.adorsys.encobject.domain.Payload;
 import org.adorsys.encobject.domain.StorageMetadata;
 import org.adorsys.encobject.types.ListRecursiveFlag;
+
+import java.util.List;
 
 public interface ExtendedStoreConnection {
 
@@ -17,7 +16,7 @@ public interface ExtendedStoreConnection {
 
     Payload getBlob(BucketPath bucketPath);
 
-    BlobMetaInfo getBlobMetaInfo(BucketPath bucketPath);
+    StorageMetadata getStorageMetadata(BucketPath bucketPath);
 
     boolean blobExists(BucketPath bucketPath);
 
@@ -25,7 +24,7 @@ public interface ExtendedStoreConnection {
 
     void removeBlobs(Iterable<BucketPath> bucketPaths);
 
-    long countBlobs(BucketPath bucketPath, ListRecursiveFlag recursive);
+    long countBlobs(BucketDirectory bucketDirectory, ListRecursiveFlag recursive);
 
     void createContainer(String container);
 
@@ -33,5 +32,5 @@ public interface ExtendedStoreConnection {
 
     void deleteContainer(String container);
 
-    PageSet<? extends StorageMetadata> list(BucketDirectory bucketDirectory, ListRecursiveFlag listRecursiveFlag);
+    List<StorageMetadata> list(BucketDirectory bucketDirectory, ListRecursiveFlag listRecursiveFlag);
 }

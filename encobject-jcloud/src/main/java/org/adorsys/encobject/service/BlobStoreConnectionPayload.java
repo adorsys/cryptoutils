@@ -1,11 +1,10 @@
 package org.adorsys.encobject.service;
 
-import org.adorsys.cryptoutils.exceptions.BaseException;
 import org.adorsys.cryptoutils.exceptions.NYIException;
-import org.adorsys.encobject.domain.BlobMetaInfo;
 import org.adorsys.encobject.domain.Payload;
+import org.adorsys.encobject.domain.StorageMetadata;
+import org.adorsys.encobject.domain.UserMetaData;
 
-import java.io.IOException;
 import java.io.InputStream;
 
 /**
@@ -18,7 +17,7 @@ public class BlobStoreConnectionPayload implements Payload {
         this.data = data;
     }
     @Override
-    public InputStream openStream() throws IOException {
+    public InputStream openStream() {
         throw new NYIException();
     }
 
@@ -32,23 +31,11 @@ public class BlobStoreConnectionPayload implements Payload {
         throw new NYIException();
     }
 
-    @Override
-    public void release() {
+    public StorageMetadata getStorageMetadata() {
         throw new NYIException();
     }
 
-    @Override
-    public BlobMetaInfo getBlobMetaInfo() {
-        throw new NYIException();
-    }
-
-    @Override
-    public void setBlobMetaInfo(BlobMetaInfo metaInfo) {
-        throw new NYIException();
-    }
-
-    @Override
-    public void setSensitive(boolean isSensitive) {
+    public void setUserMetaData(UserMetaData metaInfo) {
         throw new NYIException();
     }
 
@@ -57,8 +44,4 @@ public class BlobStoreConnectionPayload implements Payload {
         throw new NYIException();
     }
 
-    @Override
-    public void close() throws IOException {
-        throw new NYIException();
-    }
 }

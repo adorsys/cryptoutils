@@ -39,4 +39,27 @@ public class BucketDirectory {
     public ObjectHandle getObjectHandle() {
         return path.getObjectHandle();
     }
+
+    @Override
+    public String toString() {
+        return "BucketDirectory{" +
+                "path=" + path +
+                '}';
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (!(o instanceof BucketDirectory)) return false;
+
+        BucketDirectory that = (BucketDirectory) o;
+
+        return path.equals(that.path);
+
+    }
+
+    @Override
+    public int hashCode() {
+        return path.hashCode();
+    }
 }

@@ -1,52 +1,24 @@
 package org.adorsys.encobject.domain;
 
-import java.io.Closeable;
-import java.io.IOException;
 import java.io.InputStream;
 
-public interface Payload extends Closeable {
+public interface Payload {
 
 	/**
-	 * Creates a new InputStream object of the payload.
+	 * returns the inputstream of the data. The receiver is responsible for closing the stream
 	 */
-	InputStream openStream() throws IOException;
+	InputStream openStream();
 
 	/**
-	 * Payload in its original form.
+	 * conveniance Method. Delivers the whole input stream, as long as its size
+	 * is below the THRESH_HOLD
 	 */
 	byte[] getData();
 
 	/**
-	 * Tells if the payload is capable of producing its data more than once.
+	 * Tells if the stream is capable of producing its data more than once.
 	 */
 	boolean isRepeatable();
-
-	/**
-	 * release resources used by this entity. This should be called when data is
-	 * discarded.
-	 */
-	void release();
-
-	/**
-	 * Get The content meta info
-	 * 
-	 * @return
-	 */
-	BlobMetaInfo getBlobMetaInfo();
-
-	/**
-	 * Set the content meta info.
-	 * 
-	 * @param metaInfo
-	 */
-	void setBlobMetaInfo(BlobMetaInfo metaInfo);
-
-	/**
-	 * Sets whether the payload contains sensitive information. This is used
-	 * when trying to decide whether to print out the payload information or not
-	 * in logs
-	 */
-	void setSensitive(boolean isSensitive);
 
 	/**
 	 * Returns whether the payload contains sensitive information. This is used
@@ -55,4 +27,5 @@ public interface Payload extends Closeable {
 	 */
 	boolean isSensitive();
 
+	StorageMetadata getStorageMetadata();
 }

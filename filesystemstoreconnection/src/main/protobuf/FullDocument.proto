@@ -8,11 +8,23 @@ option java_multiple_files = true;
 option optimize_for = SPEED;
 
 
-message DocumentMetaInfoData {
+message UserMetaDataData {
     map<string, string> map = 1;
 }
 
+message StorageMetadataData {
+    string type = 1;
+    string providerid = 2;
+    string name = 3;
+    string uri = 4;
+    string etag = 5;
+    int64 creationDate = 6;
+    int64 modifiedDate = 7;
+    int64 size = 8;
+    UserMetaDataData userMetaDataData = 9;
+}
+
 message FullDocumentData {
-    DocumentMetaInfoData blobMetaInfo = 1;
+    StorageMetadataData storageMetadataData = 1;
     bytes document = 2;
 }

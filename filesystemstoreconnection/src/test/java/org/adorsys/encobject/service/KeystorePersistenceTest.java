@@ -4,6 +4,7 @@ import org.adorsys.cryptoutils.exceptions.BaseExceptionHandler;
 import org.adorsys.encobject.complextypes.BucketPath;
 import org.adorsys.encobject.domain.ObjectHandle;
 import org.adorsys.encobject.domain.Tuple;
+import org.adorsys.encobject.domain.UserMetaData;
 import org.adorsys.encobject.exceptions.ContainerExistsException;
 import org.adorsys.encobject.exceptions.UnknownContainerException;
 import org.adorsys.encobject.filesystem.FileSystemExtendedStorageConnection;
@@ -92,7 +93,7 @@ public class KeystorePersistenceTest {
             char[] storePass = "aSimplePass".toCharArray();
             KeyStore keystore = TestKeyUtils.testSecretKeystore(storeid, storePass, "mainKey", "aSimpleSecretPass".toCharArray());
             Assume.assumeNotNull(keystore);
-            HashMap<String, String> attributes = new HashMap<>();
+            UserMetaData attributes = new UserMetaData();
             attributes.put("a", "1");
             attributes.put("b", "2");
             attributes.put("c", "3");

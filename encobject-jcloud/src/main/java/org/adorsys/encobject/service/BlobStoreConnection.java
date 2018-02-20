@@ -3,16 +3,11 @@ package org.adorsys.encobject.service;
 import org.adorsys.cryptoutils.exceptions.NYIException;
 import org.adorsys.encobject.complextypes.BucketDirectory;
 import org.adorsys.encobject.complextypes.BucketPath;
-import org.adorsys.encobject.domain.BlobMetaInfo;
 import org.adorsys.encobject.domain.Location;
-import org.adorsys.encobject.domain.LocationImpl;
 import org.adorsys.encobject.domain.LocationScope;
 import org.adorsys.encobject.domain.ObjectHandle;
-import org.adorsys.encobject.domain.PageSet;
-import org.adorsys.encobject.domain.PageSetImpl;
 import org.adorsys.encobject.domain.Payload;
 import org.adorsys.encobject.domain.StorageMetadata;
-import org.adorsys.encobject.domain.StorageMetadataImpl;
 import org.adorsys.encobject.domain.StorageType;
 import org.adorsys.encobject.exceptions.ObjectNotFoundException;
 import org.adorsys.encobject.exceptions.UnknownContainerException;
@@ -28,8 +23,10 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.LinkedHashSet;
+import java.util.List;
 import java.util.Set;
 
 /**
@@ -138,9 +135,10 @@ public class BlobStoreConnection implements ExtendedStoreConnection {
     }
 
     @Override
-    public PageSet<? extends StorageMetadata> list(BucketDirectory bucketDirectory, ListRecursiveFlag listRecursiveFlag) {
+    public List<StorageMetadata> list(BucketDirectory bucketDirectory, ListRecursiveFlag listRecursiveFlag) {
         BlobStoreContext blobStoreContext = this.blobStoreContextFactory.alocate();
         try {
+            List<StorageMetadata> result = new ArrayList<>();
             BlobStore blobStore = blobStoreContext.getBlobStore();
             ListContainerOptions listContainerOptions = new ListContainerOptions();
             if (listRecursiveFlag == ListRecursiveFlag.TRUE) {
@@ -161,12 +159,22 @@ public class BlobStoreConnection implements ExtendedStoreConnection {
             for (org.jclouds.blobstore.domain.StorageMetadata s : ps) {
                 StorageType type =  s.getType()==null?null:StorageType.valueOf(s.getType().name());
                 Location location = copyLocation(new HashSet<String>(), s.getLocation());
-                StorageMetadata e = new StorageMetadataImpl(type, s.getProviderId(),
-                        s.getName(), location, s.getUri(), s.getETag(), s.getCreationDate(), s.getLastModified(),
-                        s.getUserMetadata(), s.getSize());
-                set.add(e);
+                SimpleStorageMetadataImpl e = new SimpleStorageMetadataImpl();
+                result.add(e);
+                e.setType(type);
+                e.setLocation(location);
+                e.setProviderID(s.getProviderId());
+                e.setName(s.getName());
+                e.setUri(s.getUri());
+                e.setETag(s.getETag());
+                e.setCreationDate(s.getCreationDate());
+                e.setLastModified(s.getLastModified());
+                for (String key : s.getUserMetadata().keySet()) {
+                    e.getUserMetadata().put(key, s.getUserMetadata().get(key));
+                }
+                e.setSize(s.getSize());
             }
-            return new PageSetImpl<>(set, ps.getNextMarker());
+            return result;
 
         } finally
 
@@ -202,7 +210,7 @@ public class BlobStoreConnection implements ExtendedStoreConnection {
     }
 
     @Override
-    public BlobMetaInfo getBlobMetaInfo(BucketPath bucketPath) {
+    public StorageMetadata getStorageMetadata(BucketPath bucketPath) {
         throw new NYIException();
     }
 
@@ -217,7 +225,7 @@ public class BlobStoreConnection implements ExtendedStoreConnection {
     }
 
     @Override
-    public long countBlobs(BucketPath bucketPath, ListRecursiveFlag recursive) {
+    public long countBlobs(BucketDirectory bucketDirectory, ListRecursiveFlag recursive) {
         throw new NYIException();
     }
 
@@ -286,6 +294,12 @@ public class BlobStoreConnection implements ExtendedStoreConnection {
     	ids.add(l.getId());
 		LocationScope scope = l.getScope()==null?null:LocationScope.valueOf(l.getScope().name());
 		Location parent = copyLocation(ids, l.getParent());
-		return new LocationImpl(scope, l.getId(), l.getDescription(), parent, l.getIso3166Codes(), l.getMetadata());    	
+        SimpleLocationImpl current = new SimpleLocationImpl();
+        current.setLocationScope(scope);
+        current.setId(l.getId());
+        current.setDescription(l.getDescription());
+        current.setParent(parent);
+        current.setIso3166Codes(l.getIso3166Codes());
+        return current;
     }
 }

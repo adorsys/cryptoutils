@@ -2,18 +2,17 @@ package org.adorsys.encobject.domain;
 
 import java.net.URI;
 import java.util.Date;
-import java.util.Map;
 
 public interface StorageMetadata extends ResourceMetadata<StorageType> {
 	public abstract StorageType getType();
 
-	public abstract String getProviderId();
+	public abstract String getProviderID();
 
 	public abstract String getName();
 
 	public abstract URI getUri();
 
-	public abstract Map<String, String> getUserMetadata();
+	public abstract UserMetaData getUserMetadata();
 
 	public abstract String getETag();
 
@@ -22,4 +21,12 @@ public interface StorageMetadata extends ResourceMetadata<StorageType> {
 	public abstract Date getLastModified();
 
 	public abstract Long getSize();
+
+	// diese setter werden von jeder Implementierung einer ExtendedStoreConnection benötigt
+	public abstract void setSize(Long size);
+
+	public abstract void setType(StorageType type);
+
+	public abstract void setName(String name);
 }
+

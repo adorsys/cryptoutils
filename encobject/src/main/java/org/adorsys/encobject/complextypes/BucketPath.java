@@ -131,6 +131,8 @@ public class BucketPath {
     }
 
 
+
+
     @Override
     public String toString() {
         return "BucketPath{" + container + " - " + name + '}';
@@ -161,5 +163,24 @@ public class BucketPath {
 
     private static boolean notOnlyWhitespace(String value) {
         return value.replaceAll(" ","").length() > 0;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (!(o instanceof BucketPath)) return false;
+
+        BucketPath that = (BucketPath) o;
+
+        if (!container.equals(that.container)) return false;
+        return name != null ? name.equals(that.name) : that.name == null;
+
+    }
+
+    @Override
+    public int hashCode() {
+        int result = container.hashCode();
+        result = 31 * result + (name != null ? name.hashCode() : 0);
+        return result;
     }
 }

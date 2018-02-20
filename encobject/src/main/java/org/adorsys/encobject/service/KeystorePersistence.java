@@ -2,6 +2,7 @@ package org.adorsys.encobject.service;
 
 import org.adorsys.encobject.domain.ObjectHandle;
 import org.adorsys.encobject.domain.Tuple;
+import org.adorsys.encobject.domain.UserMetaData;
 
 import javax.security.auth.callback.CallbackHandler;
 import java.security.KeyStore;
@@ -16,7 +17,7 @@ import java.util.Map;
 public interface KeystorePersistence {
 
 	void saveKeyStore(KeyStore keystore, CallbackHandler storePassHandler, ObjectHandle handle);
-	void saveKeyStoreWithAttributes(KeyStore keystore, Map<String, String> attributes, CallbackHandler storePassHandler, ObjectHandle handle);
+	void saveKeyStoreWithAttributes(KeyStore keystore, UserMetaData attributes, CallbackHandler storePassHandler, ObjectHandle handle);
 
 	KeyStore loadKeystore(ObjectHandle handle, CallbackHandler handler);
 	Tuple<KeyStore, Map<String, String>> loadKeystoreAndAttributes(ObjectHandle handle, CallbackHandler handler);

@@ -135,6 +135,13 @@ public class FileSystemExtendedStorageConnection implements ExtendedStoreConnect
     @Override
     public List<StorageMetadata> list(BucketDirectory bucketDirectory, ListRecursiveFlag listRecursiveFlag) {
         List<StorageMetadata> result = new ArrayList<>();
+        File file = getAsFile(baseDir.append(bucketDirectory));
+        if (!file.exists()) {
+            return result;
+        }
+        if (!file.isDirectory()) {
+            return result;
+        }
         ExtendedStorageConnectionDirectoryContent content = listContent(bucketDirectory, listRecursiveFlag);
         addStorageMetaData(result, content);
         return result;

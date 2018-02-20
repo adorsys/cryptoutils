@@ -91,6 +91,8 @@ public class FileSystemExtendedStorageConnectionTest {
 
         List<BucketPath> list = getFilesOnly(s.list(bd, ListRecursiveFlag.FALSE));
         Assert.assertEquals(0, list.size());
+        List<BucketDirectory> dirs = getDirectoresOnly(s.list(bd, ListRecursiveFlag.FALSE));
+        Assert.assertEquals(0, dirs.size());
     }
 
     // Wenn als Verzeichnis eine Datei angegeben wird, dann muss eine leere Liste

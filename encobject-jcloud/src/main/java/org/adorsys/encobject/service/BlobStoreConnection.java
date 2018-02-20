@@ -295,7 +295,7 @@ public class BlobStoreConnection implements ExtendedStoreConnection {
 		LocationScope scope = l.getScope()==null?null:LocationScope.valueOf(l.getScope().name());
 		Location parent = copyLocation(ids, l.getParent());
         SimpleLocationImpl current = new SimpleLocationImpl();
-        current.setLocationScope(scope);
+        current.setScope(scope);
         current.setId(l.getId());
         current.setDescription(l.getDescription());
         current.setParent(parent);

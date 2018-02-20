@@ -7,21 +7,29 @@ option java_package = "org.adorsys.encobject.domain.document";
 option java_multiple_files = true;
 option optimize_for = SPEED;
 
+message LocationData {
+    string scope = 1;
+    string id = 2;
+    string description = 3;
+    LocationData parent = 4;
+    repeated string is3166codes = 5;
+}
 
 message UserMetaDataData {
     map<string, string> map = 1;
 }
 
 message StorageMetadataData {
-    string type = 1;
-    string providerid = 2;
-    string name = 3;
-    string uri = 4;
-    string etag = 5;
-    int64 creationDate = 6;
-    int64 modifiedDate = 7;
-    int64 size = 8;
-    UserMetaDataData userMetaDataData = 9;
+    string name = 1;
+    string type = 2;
+    string providerid = 3;
+    LocationData locationData = 4;
+    string uri = 5;
+    UserMetaDataData userMetaDataData = 6;
+    string etag = 7;
+    int64 creationDate = 8;
+    int64 modifiedDate = 9;
+    int64 size = 10;
 }
 
 message FullDocumentData {

@@ -21,6 +21,10 @@ public class SimpleLocationImpl implements Location {
         return locationScope;
     }
 
+    public void setScope(LocationScope locationScope) {
+        this.locationScope = locationScope;
+    }
+
     @Override
     public String getID() {
         return id;
@@ -39,10 +43,6 @@ public class SimpleLocationImpl implements Location {
     @Override
     public Set<String> getIso3166Codes() {
         return iso3166Codes;
-    }
-
-    public void setLocationScope(LocationScope locationScope) {
-        this.locationScope = locationScope;
     }
 
     public void setId(String id) {

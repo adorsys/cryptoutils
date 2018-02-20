@@ -46,26 +46,40 @@ public class FileSystemExtendedStorageConnectionTest {
         }
     }
 
+    /**
+     * Suche in einem nicht vorhandenem Bucket sollte einfach eine leere Liste zurückgeben
+     */
     @Test
-    public void test1() {
+    public void testList1() {
         ExtendedStoreConnection s = new FileSystemExtendedStorageConnection();
-        List<BucketPath> list = getFilesOnly(s.list(new BucketDirectory("a"), ListRecursiveFlag.FALSE));
-        LOGGER.debug("list" + list);
-        Assert.assertEquals(0, list.size());
+        List<StorageMetadata> content = s.list(new BucketDirectory("a"), ListRecursiveFlag.FALSE);
+        List<BucketPath> files = getFilesOnly(content);
+        Assert.assertEquals(0, files.size());
+        List<BucketDirectory> dirs = getDirectoresOnly(content);
+        Assert.assertEquals(0, dirs.size());
     }
 
+    /**
+     * Liste eines echten Containers sollte genau ein Directory zurückliefern
+     */
     @Test
-    public void test2() {
+    public void testList2() {
         String container = "affe2";
         containers.add(container);
         ExtendedStoreConnection s = new FileSystemExtendedStorageConnection();
         s.createContainer(container);
-        List<BucketPath> list = getFilesOnly(s.list(new BucketDirectory(container), ListRecursiveFlag.FALSE));
-        Assert.assertEquals(0, list.size());
+        List<StorageMetadata> content = s.list(new BucketDirectory(container), ListRecursiveFlag.FALSE);
+        List<BucketPath> files = getFilesOnly(content);
+        Assert.assertEquals(0, files.size());
+        List<BucketDirectory> dirs = getDirectoresOnly(content);
+        Assert.assertEquals(1, dirs.size());
     }
 
+    /**
+     * Liste einer Datei sollte genau diese mit zurückliefern
+     */
     @Test
-    public void test3() {
+    public void testList3() {
         String container = "affe3";
         containers.add(container);
         ExtendedStoreConnection s = new FileSystemExtendedStorageConnection();
@@ -74,31 +88,38 @@ public class FileSystemExtendedStorageConnectionTest {
         BucketPath file = bd.appendName("file1");
 
         s.putBlob(file, "Inhalt".getBytes());
-        List<BucketPath> list = getFilesOnly(s.list(bd, ListRecursiveFlag.FALSE));
-        LOGGER.info(showBucketPath(list));
-        Assert.assertEquals(1, list.size());
-        LOGGER.debug("found: " + list.iterator().next().toString());
+        List<StorageMetadata> content = s.list(bd, ListRecursiveFlag.FALSE);
+        List<BucketPath> files = getFilesOnly(content);
+        Assert.assertEquals(1, files.size());
+        List<BucketDirectory> dirs = getDirectoresOnly(content);
+        Assert.assertEquals(1, dirs.size());
     }
 
-    // Ein nicht existentes Directory darf keinen Fehler verursachen
-    // so ist es zumindes bei der jclouldFilesystem umsetzung
+    /**
+     * Kein Unterverzeichnis, nur der Bucket.
+     * Ein nicht existentes Directory darf keinen Fehler verursachen
+     * so ist es zumindes bei der jclouldFilesystem umsetzung
+     */
     @Test
-    public void test4() {
+    public void testList4() {
         String container = "affe4";
         containers.add(container);
         ExtendedStoreConnection s = new FileSystemExtendedStorageConnection();
         BucketDirectory bd = new BucketDirectory(container);
 
-        List<BucketPath> list = getFilesOnly(s.list(bd, ListRecursiveFlag.FALSE));
-        Assert.assertEquals(0, list.size());
-        List<BucketDirectory> dirs = getDirectoresOnly(s.list(bd, ListRecursiveFlag.FALSE));
+        List<StorageMetadata> content = s.list(bd, ListRecursiveFlag.FALSE);
+        List<BucketPath> files = getFilesOnly(content);
+        Assert.assertEquals(0, files.size());
+        List<BucketDirectory> dirs = getDirectoresOnly(content);
         Assert.assertEquals(0, dirs.size());
     }
 
-    // Wenn als Verzeichnis eine Datei angegeben wird, dann muss eine leere Liste
-    // zurückkommen, so zuindest verhält sich jcloud
+    /**
+     * Wenn als Verzeichnis eine Datei angegeben wird, dann muss eine leere Liste
+     * zurückkommen, so zuindest verhält sich jcloud
+     */
     @Test
-    public void test5() {
+    public void testList5() {
         String container = "affe5";
         containers.add(container);
         ExtendedStoreConnection s = new FileSystemExtendedStorageConnection();
@@ -107,13 +128,20 @@ public class FileSystemExtendedStorageConnectionTest {
         BucketPath file = bp.append("file1");
         s.putBlob(file, "Inhalt".getBytes());
         BucketDirectory bd = new BucketDirectory(file);
-        List<BucketPath> list = getFilesOnly(s.list(bd, ListRecursiveFlag.FALSE));
-        Assert.assertEquals(0, list.size());
+        List<StorageMetadata> content = s.list(bd, ListRecursiveFlag.FALSE);
+        List<BucketPath> files = getFilesOnly(content);
+        Assert.assertEquals(0, files.size());
+        List<BucketDirectory> dirs = getDirectoresOnly(content);
+        Assert.assertEquals(0, dirs.size());
     }
 
 
+    /**
+     * bei recursiver Suche muss alles gefunden werden, bei nicht rekursiver nur das
+     * aktuelle Verzeichnis
+     */
     @Test
-    public void test6() {
+    public void testList6() {
         String container = "affe6/1/2/3";
         containers.add(container);
         ExtendedStoreConnection s = new FileSystemExtendedStorageConnection();
@@ -124,15 +152,32 @@ public class FileSystemExtendedStorageConnectionTest {
         s.putBlob(bd.append(new BucketPath("subdir1/filec")), "Inhalt".getBytes());
         s.putBlob(bd.append(new BucketPath("subdir1/filed")), "Inhalt".getBytes());
         List<StorageMetadata> content = s.list(bd, ListRecursiveFlag.TRUE);
-
+        LOGGER.debug("recursive " + show(content));
         Assert.assertEquals("Anzahl Einträge", 6, content.size());
+        {
+            List<BucketPath> files = getFilesOnly(content);
+            Assert.assertEquals(4, files.size());
+            List<BucketDirectory> dirs = getDirectoresOnly(content);
+            Assert.assertEquals(2, dirs.size());
+        }
+
 
         content = s.list(bd, ListRecursiveFlag.FALSE);
+        LOGGER.debug("plain " + content.toString());
         Assert.assertEquals("Anzahl Einträge", 4, content.size());
+        {
+            List<BucketPath> files = getFilesOnly(content);
+            Assert.assertEquals(2, files.size());
+            List<BucketDirectory> dirs = getDirectoresOnly(content);
+            Assert.assertEquals(2, dirs.size());
+        }
     }
 
+    /**
+     * Nun mit Prüfung, dass auch wirklich die vorhandenen Dateien gefunden werden
+     */
     @Test
-    public void test7() {
+    public void testList7() {
         String container = "affe7/1/2/3";
         containers.add(container);
         ExtendedStoreConnection s = new FileSystemExtendedStorageConnection();
@@ -158,81 +203,16 @@ public class FileSystemExtendedStorageConnectionTest {
         Assert.assertEquals(0, files.size());
     }
 
+    /**
+     * Anlegen einer tieferen Verzeichnisstruktur
+     */
     @Test
-    public void test8() {
-        String container = "affe8/1/2/3";
-        containers.add(container);
-        ExtendedStoreConnection s = new FileSystemExtendedStorageConnection();
-        s.createContainer(container);
-        BucketDirectory bd = new BucketDirectory(container);
-        s.putBlob(bd.append(new BucketPath("filea")), "Inhalt".getBytes());
-        List<StorageMetadata> list = s.list(bd, ListRecursiveFlag.TRUE);
-        LOGGER.debug(show(list));
-        List<BucketPath> files = getFilesOnly(list);
-        List<BucketDirectory> dirs = getDirectoresOnly(list);
-        Assert.assertEquals(1, dirs.size());
-        Assert.assertEquals(1, files.size());
-        Assert.assertEquals("name has to be fullname", new BucketPath("affe8/1/2/3/filea"), files.iterator().next());
-
-        list = s.list(bd, ListRecursiveFlag.FALSE);
-        LOGGER.debug(show(list));
-        files = getFilesOnly(list);
-        dirs = getDirectoresOnly(list);
-        Assert.assertEquals(1, dirs.size());
-        Assert.assertEquals(1, files.size());
-        Assert.assertEquals("name has to be fullname", new BucketPath("affe8/1/2/3/filea"), files.iterator().next());
-    }
-
-    @Test
-    public void test9() {
-        String container = "affe9/1/2/3";
-        containers.add(container);
-        ExtendedStoreConnection s = new FileSystemExtendedStorageConnection();
-        s.createContainer(container);
-        BucketDirectory bd = new BucketDirectory(container);
-        StorageMetadata storageMetadata = new SimpleStorageMetadataImpl();
-        for (int i = 0; i<10; i++) {
-            storageMetadata.getUserMetadata().put("key" + i, "value" + i);
-        }
-
-        BucketPath filea = bd.append(new BucketPath("filea"));
-        Payload origPayload = new SimplePayloadImpl(storageMetadata, "Inhalt".getBytes());
-        s.putBlob(filea, origPayload);
-
-        Payload loadedPayload = s.getBlob(filea);
-
-        Assert.assertEquals("document", HexUtil.convertBytesToHexString(origPayload.getData()), HexUtil.convertBytesToHexString(loadedPayload.getData()));
-        Assert.assertEquals("number of metainfoentries", origPayload.getStorageMetadata().getUserMetadata().keySet().size(), loadedPayload.getStorageMetadata().getUserMetadata().keySet().size());
-    }
-
-    @Test
-    public void test10() {
-        String container = "affe10/1/2/3";
-        // containers.add(container);
-        ExtendedStoreConnection s = new FileSystemExtendedStorageConnection();
-        s.createContainer(container);
-        BucketDirectory bd = new BucketDirectory(container);
-        StorageMetadata storageMetadata = new SimpleStorageMetadataImpl();
-        for (int i = 0; i<10; i++) {
-            storageMetadata.getUserMetadata().put("key" + i, "value" + i);
-        }
-
-        BucketPath filea = bd.append(new BucketPath("filea"));
-        Payload origPayload = new SimplePayloadImpl(storageMetadata, "Inhalt".getBytes());
-        s.putBlob(filea, origPayload);
-
-        StorageMetadata loadedStorageMetadata  = s.getStorageMetadata(filea);
-
-        Assert.assertEquals("number of metainfoentries", origPayload.getStorageMetadata().getUserMetadata().keySet().size(), loadedStorageMetadata.getUserMetadata().keySet().size());
-    }
-
-    @Test
-    public void testList() {
+    public void testList8() {
         LOGGER.debug("START TEST " + new RuntimeException("").getStackTrace()[0].getMethodName());
         ExtendedStoreConnection s = new FileSystemExtendedStorageConnection();
 
         BucketDirectory rootDirectory = new BucketDirectory("user1");
-        createFiles(s, rootDirectory, 3,2);
+        createFiles(s, rootDirectory, 3, 2);
 
         {
             List<StorageMetadata> list = s.list(rootDirectory, ListRecursiveFlag.FALSE);
@@ -280,7 +260,59 @@ public class FileSystemExtendedStorageConnectionTest {
         }
     }
 
-    private boolean contains(List<ExtendedStorageConnectionDirectoryContent> subidrs, BucketDirectory bucketDirectory) {
+    /**
+     * Laden der StorageMetaData über Payload
+     */
+    @Test
+    public void testStorageMetaData1() {
+        String container = "affe9/1/2/3";
+        containers.add(container);
+        ExtendedStoreConnection s = new FileSystemExtendedStorageConnection();
+        s.createContainer(container);
+        BucketDirectory bd = new BucketDirectory(container);
+        StorageMetadata storageMetadata = new SimpleStorageMetadataImpl();
+        for (int i = 0; i < 10; i++) {
+            storageMetadata.getUserMetadata().put("key" + i, "value" + i);
+        }
+
+        BucketPath filea = bd.append(new BucketPath("filea"));
+        Payload origPayload = new SimplePayloadImpl(storageMetadata, "Inhalt".getBytes());
+        s.putBlob(filea, origPayload);
+
+        Payload loadedPayload = s.getBlob(filea);
+
+        Assert.assertEquals("document", HexUtil.convertBytesToHexString(origPayload.getData()), HexUtil.convertBytesToHexString(loadedPayload.getData()));
+        Assert.assertEquals("number of metainfoentries", origPayload.getStorageMetadata().getUserMetadata().keySet().size(), loadedPayload.getStorageMetadata().getUserMetadata().keySet().size());
+    }
+
+    /**
+     * Laden der StorageMetaData direkt
+     */
+    @Test
+    public void testStorageMetaData2() {
+        String container = "affe10/1/2/3";
+        // containers.add(container);
+        ExtendedStoreConnection s = new FileSystemExtendedStorageConnection();
+        s.createContainer(container);
+        BucketDirectory bd = new BucketDirectory(container);
+        StorageMetadata storageMetadata = new SimpleStorageMetadataImpl();
+        for (int i = 0; i < 10; i++) {
+            storageMetadata.getUserMetadata().put("key" + i, "value" + i);
+        }
+
+        BucketPath filea = bd.append(new BucketPath("filea"));
+        Payload origPayload = new SimplePayloadImpl(storageMetadata, "Inhalt".getBytes());
+        s.putBlob(filea, origPayload);
+
+        StorageMetadata loadedStorageMetadata = s.getStorageMetadata(filea);
+
+        Assert.assertEquals("number of metainfoentries", origPayload.getStorageMetadata().getUserMetadata().keySet().size(), loadedStorageMetadata.getUserMetadata().keySet().size());
+    }
+
+    /* =========================================================================================================== */
+
+    private boolean contains(List<ExtendedStorageConnectionDirectoryContent> subidrs, BucketDirectory
+            bucketDirectory) {
         for (ExtendedStorageConnectionDirectoryContent content : subidrs) {
             LOGGER.debug(content.getDirectory().toString());
             if (content.getDirectory().equals(bucketDirectory)) {
@@ -291,21 +323,23 @@ public class FileSystemExtendedStorageConnectionTest {
     }
 
 
-    private void createFiles(ExtendedStoreConnection extendedStoreConnection, BucketDirectory rootDirectory, int subdirs, int subfiles) {
+    private void createFiles(ExtendedStoreConnection extendedStoreConnection, BucketDirectory rootDirectory,
+                             int subdirs, int subfiles) {
         createFilesAndFoldersRecursivly(rootDirectory, subdirs, subfiles, 3, extendedStoreConnection);
     }
 
-    private void createFilesAndFoldersRecursivly(BucketDirectory rootDirectory, int subdirs, int subfiles, int depth , ExtendedStoreConnection extendedStoreConnection) {
+    private void createFilesAndFoldersRecursivly(BucketDirectory rootDirectory, int subdirs, int subfiles,
+                                                 int depth, ExtendedStoreConnection extendedStoreConnection) {
         if (depth == 0) {
             return;
         }
 
-        for (int i = 0; i<subfiles; i++) {
+        for (int i = 0; i < subfiles; i++) {
             byte[] content = ("Affe of file " + i + "").getBytes();
             extendedStoreConnection.putBlob(rootDirectory.appendName("file" + i), content);
         }
-        for (int i = 0; i<subdirs; i++) {
-            createFilesAndFoldersRecursivly(rootDirectory.appendDirectory("subdir" + i), subdirs, subfiles, depth-1, extendedStoreConnection);
+        for (int i = 0; i < subdirs; i++) {
+            createFilesAndFoldersRecursivly(rootDirectory.appendDirectory("subdir" + i), subdirs, subfiles, depth - 1, extendedStoreConnection);
         }
     }
 

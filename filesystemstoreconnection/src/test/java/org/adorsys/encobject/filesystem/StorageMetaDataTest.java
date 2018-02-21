@@ -1,5 +1,7 @@
 package org.adorsys.encobject.filesystem;
 
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
 import junit.framework.Assert;
 import org.adorsys.cryptoutils.exceptions.BaseExceptionHandler;
 import org.adorsys.encobject.complextypes.BucketDirectory;
@@ -50,7 +52,23 @@ public class StorageMetaDataTest {
     }
 
 
+    @Test
+    public void jsonTest() {
+        try {
+            StorageMetadata storageMetadata = createStorageMetadata();
+            Gson gson = new GsonBuilder().setPrettyPrinting()
+                    .registerTypeAdapter(Location.class, new InterfaceAdapter<SimpleLocationImpl>())
+                    .create();
+            String jsonString = gson.toJson(storageMetadata);
+            LOGGER.debug(jsonString);
+            SimpleStorageMetadataImpl reloadedStorageMetadata = gson.fromJson(jsonString, SimpleStorageMetadataImpl.class);
+            int fehler = compareStorageMetadata(storageMetadata, reloadedStorageMetadata);
+            Assert.assertEquals("number of fehlers", 0, fehler);
 
+        } catch (Exception e) {
+            throw BaseExceptionHandler.handle(e);
+        }
+    }
 
 
     public static final String PATTERN = "yyyy-MM-dd-HH:mm:ss";
@@ -158,22 +176,27 @@ public class StorageMetaDataTest {
                     {
                         l1 = l1.getParent();
                         l2 = l2.getParent();
-                        {
-                            LocationScope lsc1 = l1.getScope();
-                            LocationScope lsc2 = l2.getScope();
-                            if (!lsc1.equals(lsc2) || !lsc1.equals(LocationScope.valueOf(LOCATION_0_SCOPE))) {
-                                LOGGER.debug("Parent Location Scope nicht korrekt");
-                                fehler += 1;
+                        if (l2 == null) {
+                            LOGGER.debug("Parent Location ist nicht gesetzt.");
+                            fehler += 1;
+                        } else {
+                            {
+                                LocationScope lsc1 = l1.getScope();
+                                LocationScope lsc2 = l2.getScope();
+                                if (!lsc1.equals(lsc2) || !lsc1.equals(LocationScope.valueOf(LOCATION_0_SCOPE))) {
+                                    LOGGER.debug("Parent Location Scope nicht korrekt");
+                                    fehler += 1;
+                                }
                             }
-                        }
-                        fehler += compareStrings(l1.getID(), l2.getID(), LOCATION_ID_0, "Parent Location ID");
-                        fehler += compareStrings(l1.getDescription(), l2.getDescription(), LOCATION_0_DESCRIPTION, "Parent Location Description");
-                        {
-                            if (l1.getIso3166Codes().size() != l2.getIso3166Codes().size() || l1.getIso3166Codes().size() != 0) {
-                                LOGGER.debug("Anzahl der Iso4166 Codecs in Parent Location falsch: " + l1.getIso3166Codes().size() + " "
-                                + l2.getIso3166Codes().size() + " "
-                                + 0);
-                                fehler += 1;
+                            fehler += compareStrings(l1.getID(), l2.getID(), LOCATION_ID_0, "Parent Location ID");
+                            fehler += compareStrings(l1.getDescription(), l2.getDescription(), LOCATION_0_DESCRIPTION, "Parent Location Description");
+                            {
+                                if (l1.getIso3166Codes().size() != l2.getIso3166Codes().size() || l1.getIso3166Codes().size() != 0) {
+                                    LOGGER.debug("Anzahl der Iso4166 Codecs in Parent Location falsch: " + l1.getIso3166Codes().size() + " "
+                                            + l2.getIso3166Codes().size() + " "
+                                            + 0);
+                                    fehler += 1;
+                                }
                             }
                         }
                     }

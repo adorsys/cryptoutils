@@ -16,6 +16,10 @@ public class SimpleLocationImpl implements Location {
     private String description = null;
     private Set<String> iso3166Codes = new HashSet<>();
 
+    public SimpleLocationImpl() {
+
+    }
+
     @Override
     public LocationScope getScope() {
         return locationScope;

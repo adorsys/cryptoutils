@@ -29,7 +29,7 @@ public class JWEPersistenceTest {
 
     private static String container = JWEPersistenceTest.class.getSimpleName();
     private static TestFileSystemExtendedStorageConnection extendedStoreConnection;
-    private static JWEPersistence objectInfoPersistence;
+    private static JWEPersistence jwePersistence;
     private static ContainerPersistence containerPersistence;
     private static KeyStore keyStore;
     private static CallbackHandler secretKeyPassHandler;
@@ -40,7 +40,7 @@ public class JWEPersistenceTest {
     public static void beforeClass() {
         TestKeyUtils.turnOffEncPolicy();
         extendedStoreConnection = new TestFileSystemExtendedStorageConnection();
-        objectInfoPersistence = new JWEPersistence(extendedStoreConnection);
+        jwePersistence = new JWEPersistence(extendedStoreConnection);
         containerPersistence = new ContainerPersistence(extendedStoreConnection);
 
         try {
@@ -77,7 +77,7 @@ public class JWEPersistenceTest {
         ContentMetaInfo metaIno = null;
         String name = UUID.randomUUID().toString();
         ObjectHandle handle = new ObjectHandle(container, name);
-        objectInfoPersistence.storeObject(data, metaIno, handle, keyStore, secretKeyAlias, secretKeyPassHandler, encParams);
+        jwePersistence.storeObject(data, metaIno, handle, keyStore, secretKeyAlias, secretKeyPassHandler, encParams);
         Assert.assertTrue(extendedStoreConnection.existsOnFs(container, name));
     }
 
@@ -88,14 +88,14 @@ public class JWEPersistenceTest {
         String name = UUID.randomUUID().toString();
         ObjectHandle handle = new ObjectHandle(container, name);
         try {
-            objectInfoPersistence.storeObject(dataStr.getBytes("UTF-8"), metaIno, handle, keyStore, secretKeyAlias, secretKeyPassHandler, encParams);
+            jwePersistence.storeObject(dataStr.getBytes("UTF-8"), metaIno, handle, keyStore, secretKeyAlias, secretKeyPassHandler, encParams);
         } catch (UnsupportedEncodingException | UnsupportedEncAlgorithmException | WrongKeyCredentialException | UnsupportedKeyLengthException e) {
             Assume.assumeNoException(e);
         }
         Assume.assumeTrue(extendedStoreConnection.existsOnFs(container, name));
 
         try {
-            byte[] bs = objectInfoPersistence.loadObject(new ObjectHandle(container, name), keyStore, secretKeyPassHandler);
+            byte[] bs = jwePersistence.loadObject(new ObjectHandle(container, name), keyStore, secretKeyPassHandler);
             String byteStr = new String(bs, "UTF-8");
             Assert.assertEquals(dataStr, byteStr);
         } catch (ObjectNotFoundException | WrongKeyCredentialException | UnsupportedEncodingException e) {
@@ -110,14 +110,14 @@ public class JWEPersistenceTest {
         String name = UUID.randomUUID().toString();
         ObjectHandle handle = new ObjectHandle(container, name);
         try {
-            objectInfoPersistence.storeObject(dataStr.getBytes("UTF-8"), metaIno, handle, keyStore, secretKeyAlias, secretKeyPassHandler, encParams);
+            jwePersistence.storeObject(dataStr.getBytes("UTF-8"), metaIno, handle, keyStore, secretKeyAlias, secretKeyPassHandler, encParams);
         } catch (UnsupportedEncodingException | UnsupportedEncAlgorithmException | WrongKeyCredentialException | UnsupportedKeyLengthException | UnknownContainerException e) {
             Assume.assumeNoException(e);
         }
         Assume.assumeTrue(extendedStoreConnection.existsOnFs(container, name));
 
         try {
-            byte[] bs = objectInfoPersistence.loadObject(new ObjectHandle(container, name), keyStore, secretKeyPassHandler);
+            byte[] bs = jwePersistence.loadObject(new ObjectHandle(container, name), keyStore, secretKeyPassHandler);
             String byteStr = new String(bs, "UTF-8");
             Assert.assertEquals(dataStr, byteStr);
         } catch (ObjectNotFoundException | WrongKeyCredentialException | UnsupportedEncodingException | UnknownContainerException e) {
@@ -129,7 +129,7 @@ public class JWEPersistenceTest {
         CallbackHandler secondSecretKeyPassHandler = new PasswordCallbackHandler(wrongKeyPass);
         KeyStore ks = TestKeyUtils.testSecretKeystore("wrongStore", "wrongStorePass".toCharArray(), secretKeyAlias, wrongKeyPass);
 
-        objectInfoPersistence.loadObject(new ObjectHandle(container, name), ks, secondSecretKeyPassHandler);
+        jwePersistence.loadObject(new ObjectHandle(container, name), ks, secondSecretKeyPassHandler);
         org.junit.Assert.fail("Expecting a security exception");
     }
 }

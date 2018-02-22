@@ -46,4 +46,8 @@ public class UserMetaData {
     public Set<String> keySet() {
         return map.keySet();
     }
+
+    public void remove(String key) {
+        map.remove(key);
+    }
 }

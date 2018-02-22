@@ -14,13 +14,15 @@ import org.apache.commons.io.IOUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.nio.file.FileSystemException;
 import java.util.UUID;
 import java.util.zip.ZipEntry;
-import java.util.zip.ZipFile;
+import java.util.zip.ZipInputStream;
 import java.util.zip.ZipOutputStream;
 
 /**
@@ -95,9 +97,19 @@ public class ZipFileHelper {
             StorageMetadata storageMetadata = readZipMetadataOnly(bucketPath);
 
             File file = BucketPathFileHelper.getAsFile(baseDir.append(bucketPath.add(ZIP_SUFFIX)));
-            ZipFile zipFile = new ZipFile(file, ZipFile.OPEN_READ);
-            ZipEntry entry = zipFile.getEntry(ZIP_CONTENT_BINARY);
-            Payload payload = new SimplePayloadImpl(storageMetadata, IOUtils.toByteArray(zipFile.getInputStream(entry)));
+            ZipInputStream zis = new ZipInputStream(new BufferedInputStream(new FileInputStream(file)));
+            ZipEntry entry;
+            byte[] data = null;
+            while ((entry = zis.getNextEntry()) != null) {
+                if (entry.getName().equals(ZIP_CONTENT_BINARY)) {
+                    data = IOUtils.toByteArray(zis);
+                }
+                zis.closeEntry();
+            }
+            if (data == null) {
+                throw new StorageConnectionException("Zipfile " + bucketPath + " does not have entry for " + ZIP_CONTENT_BINARY);
+            }
+            Payload payload = new SimplePayloadImpl(storageMetadata, data);
             return payload;
         } catch (Exception e) {
             throw BaseExceptionHandler.handle(e);
@@ -110,13 +122,21 @@ public class ZipFileHelper {
             if (!file.exists()) {
                 throw new FileSystemException("File does not exist" + bucketPath);
             }
-            ZipFile zipFile = new ZipFile(file, ZipFile.OPEN_READ);
-            ZipEntry entry = zipFile.getEntry(ZIP_STORAGE_METADATA_JSON);
-            if (entry == null) {
+
+            ZipInputStream zis = new ZipInputStream(new BufferedInputStream(new FileInputStream(file)));
+            ZipEntry entry;
+            String jsonString = null;
+            while ((entry = zis.getNextEntry()) != null) {
+                if (entry.getName().equals(ZIP_STORAGE_METADATA_JSON)) {
+                    jsonString = new String(IOUtils.toByteArray(zis));
+                }
+                zis.closeEntry();
+            }
+            if (jsonString == null) {
                 throw new StorageConnectionException("Zipfile " + bucketPath + " does not have entry for " + ZIP_STORAGE_METADATA_JSON);
             }
 
-            return gsonHelper.fromJson(new String(IOUtils.toByteArray(zipFile.getInputStream(entry))));
+            return gsonHelper.fromJson(jsonString);
         } catch (Exception e) {
             throw new RuntimeException(e);
         }

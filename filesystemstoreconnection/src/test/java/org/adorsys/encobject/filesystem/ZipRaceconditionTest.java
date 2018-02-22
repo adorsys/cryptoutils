@@ -4,7 +4,6 @@ import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import junit.framework.Assert;
 import org.adorsys.cryptoutils.exceptions.BaseException;
-import org.adorsys.cryptoutils.exceptions.BaseExceptionHandler;
 import org.adorsys.encobject.complextypes.BucketDirectory;
 import org.adorsys.encobject.complextypes.BucketPath;
 import org.adorsys.encobject.domain.Payload;
@@ -79,7 +78,6 @@ public class ZipRaceconditionTest {
             LOGGER.debug("size of payload is " + loadedPayload.getStorageMetadata().getSize());
             Assert.assertTrue(Arrays.equals(data1, loadedPayload.getData()));
         }
-        sleep(2000);
         {
             Payload origPayload = new SimplePayloadImpl(data2);
             s.putBlob(filea, origPayload);
@@ -119,7 +117,6 @@ public class ZipRaceconditionTest {
             LOGGER.debug("size of payload is " + loadedPayload.getStorageMetadata().getSize());
             Assert.assertEquals(origPayload.getStorageMetadata().getUserMetadata().get("KEY"), loadedPayload.getStorageMetadata().getUserMetadata().get("KEY"));
         }
-        sleep(2000);
         {
             Payload origPayload = new SimplePayloadImpl(data2);
             origPayload.getStorageMetadata().getUserMetadata().put("KEY", "SECOND-USER-METADATAENTRY");
@@ -153,7 +150,6 @@ public class ZipRaceconditionTest {
             Payload origPayload = new SimplePayloadImpl(storageMetadata, jsonString.getBytes());
             s.putBlob(filea, origPayload);
         }
-        sleep(2000);
         {
             Gson gson = new GsonBuilder().setPrettyPrinting().create();
             Payload payload = s.getBlob(filea);
@@ -201,19 +197,6 @@ public class ZipRaceconditionTest {
             }
             throw new BaseException("user " + user + " not found");
         }
-    }
-
-    private void sleep(int millis) {
-        if (millis > 0) {
-        }
-        try {
-            LOGGER.debug("sleep " + millis + " millis");
-            Thread.currentThread().sleep(millis);
-            LOGGER.debug("continue");
-        } catch(Exception e) {
-            throw BaseExceptionHandler.handle(e);
-        }
-
     }
 
 }

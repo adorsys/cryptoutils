@@ -24,6 +24,8 @@ public class SimpleStorageMetadataImpl implements StorageMetadata {
     private Date creationDate = null;
     private Date lastModified = null;
     private Long size = null;
+    private Boolean shouldBeCompressed = null;
+    private String contentType = null;
 
     public void addUserMetadata(UserMetaData userMetaData) {
         for (String key : userMetaData.keySet()) {
@@ -113,6 +115,25 @@ public class SimpleStorageMetadataImpl implements StorageMetadata {
     @Override
     public Long getSize() {
         return size;
+    }
+
+    public void setContentType(String contentType) {
+        this.contentType = contentType;
+    }
+
+    @Override
+    public Boolean getShouldBeCompressed() {
+        return shouldBeCompressed;
+    }
+
+    public void setShouldBeCompressed(Boolean shouldBeCompressed) {
+        this.shouldBeCompressed = shouldBeCompressed;
+    }
+
+
+    @Override
+    public String getContentType() {
+        return contentType;
     }
 
     @Override

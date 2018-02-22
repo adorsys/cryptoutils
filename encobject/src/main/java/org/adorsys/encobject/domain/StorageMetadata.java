@@ -15,6 +15,11 @@ public interface StorageMetadata extends ResourceMetadata<StorageType> {
 
     public abstract Long getSize();
 
+    public abstract Boolean getShouldBeCompressed();
+
+    public abstract String getContentType();
+
+
     // diese setter werden vom PersistenzLayer benötigt
 
     public abstract void setSize(Long size);

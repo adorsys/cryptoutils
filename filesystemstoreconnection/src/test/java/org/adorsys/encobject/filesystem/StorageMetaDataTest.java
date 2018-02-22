@@ -29,7 +29,6 @@ import java.util.List;
  */
 public class StorageMetaDataTest {
     private final static Logger LOGGER = LoggerFactory.getLogger(StorageMetaDataTest.class);
-    public static final int NUMBER_OF_ISOCODECS = 5;
     private List<String> containers = new ArrayList<>();
 
     @Before
@@ -101,6 +100,10 @@ public class StorageMetaDataTest {
     public static final String CREATION_DATE = "2018-02-20-14:54:18";
     public static final String MODIFIED_DATE = "2018-02-20-14:54:41";
     public static final String ISO3166_CODE = "Iso3166Code";
+    public static final int NUMBER_OF_ISOCODECS = 5;
+    public static final String SHOULD_BE_COMPRESSED = "true";
+    public static final String CONTENT_TYPE = "application/xml";
+
 
     private StorageMetadata createStorageMetadata() {
 
@@ -141,6 +144,8 @@ public class StorageMetaDataTest {
             storageMetadata.setCreationDate(sdf.parse(CREATION_DATE));
             storageMetadata.setLastModified(sdf.parse(MODIFIED_DATE));
             storageMetadata.setSize(new Long(1111));
+            storageMetadata.setContentType(CONTENT_TYPE);
+            storageMetadata.setShouldBeCompressed(new Boolean(SHOULD_BE_COMPRESSED));
             return storageMetadata;
         } catch (Exception e) {
             throw BaseExceptionHandler.handle(e);
@@ -240,6 +245,8 @@ public class StorageMetaDataTest {
             fehler += compareStrings(sdf.format(m1.getCreationDate()), sdf.format(m2.getCreationDate()), CREATION_DATE, "Creation Date");
             fehler += compareStrings(sdf.format(m1.getLastModified()), sdf.format(m2.getLastModified()), MODIFIED_DATE, "Creation Date");
             fehler += compareStrings(m1.getSize().toString(), m2.getSize().toString(), "1111", "Size");
+            fehler += compareStrings(m1.getShouldBeCompressed().toString(), m2.getShouldBeCompressed().toString(), SHOULD_BE_COMPRESSED, "should be compressed");
+            fehler += compareStrings(m1.getContentType(), m2.getContentType(), CONTENT_TYPE, "content type");
             return fehler;
         } catch (
                 Exception e) {

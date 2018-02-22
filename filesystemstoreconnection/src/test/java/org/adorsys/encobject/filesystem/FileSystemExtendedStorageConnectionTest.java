@@ -7,7 +7,6 @@ import org.adorsys.encobject.complextypes.BucketPath;
 import org.adorsys.encobject.domain.Payload;
 import org.adorsys.encobject.domain.StorageMetadata;
 import org.adorsys.encobject.domain.StorageType;
-import org.adorsys.encobject.service.ExtendedStorageConnectionDirectoryContent;
 import org.adorsys.encobject.service.ExtendedStoreConnection;
 import org.adorsys.encobject.service.SimplePayloadImpl;
 import org.adorsys.encobject.service.SimpleStorageMetadataImpl;
@@ -69,6 +68,7 @@ public class FileSystemExtendedStorageConnectionTest {
         ExtendedStoreConnection s = new FileSystemExtendedStorageConnection();
         s.createContainer(container);
         List<StorageMetadata> content = s.list(new BucketDirectory(container), ListRecursiveFlag.FALSE);
+        LOGGER.debug(show(content));
         List<BucketPath> files = getFilesOnly(content);
         Assert.assertEquals(0, files.size());
         List<BucketDirectory> dirs = getDirectoresOnly(content);
@@ -88,6 +88,7 @@ public class FileSystemExtendedStorageConnectionTest {
         BucketPath file = bd.appendName("file1");
 
         s.putBlob(file, "Inhalt".getBytes());
+
         List<StorageMetadata> content = s.list(bd, ListRecursiveFlag.FALSE);
         List<BucketPath> files = getFilesOnly(content);
         Assert.assertEquals(1, files.size());
@@ -211,7 +212,9 @@ public class FileSystemExtendedStorageConnectionTest {
         LOGGER.debug("START TEST " + new RuntimeException("").getStackTrace()[0].getMethodName());
         ExtendedStoreConnection s = new FileSystemExtendedStorageConnection();
 
-        BucketDirectory rootDirectory = new BucketDirectory("user1");
+        String container = "user1";
+        BucketDirectory rootDirectory = new BucketDirectory(container);
+        containers.add(container);
         createFiles(s, rootDirectory, 3, 2);
 
         {
@@ -261,59 +264,34 @@ public class FileSystemExtendedStorageConnectionTest {
     }
 
     /**
-     * Laden der StorageMetaData über Payload
+     * Überschreiben einer Datei
      */
     @Test
-    public void testStorageMetaData1() {
-        String container = "affe9/1/2/3";
+    public void testOverwrite() {
+        String container = "affe10/1/2/3";
         containers.add(container);
         ExtendedStoreConnection s = new FileSystemExtendedStorageConnection();
         s.createContainer(container);
         BucketDirectory bd = new BucketDirectory(container);
         StorageMetadata storageMetadata = new SimpleStorageMetadataImpl();
-        for (int i = 0; i < 10; i++) {
-            storageMetadata.getUserMetadata().put("key" + i, "value" + i);
-        }
-
+        storageMetadata.getUserMetadata().put("myinfo", "first time");
         BucketPath filea = bd.append(new BucketPath("filea"));
-        Payload origPayload = new SimplePayloadImpl(storageMetadata, "Inhalt".getBytes());
+        Payload origPayload = new SimplePayloadImpl(storageMetadata, "1".getBytes());
         s.putBlob(filea, origPayload);
-
-        Payload loadedPayload = s.getBlob(filea);
-
-        Assert.assertEquals("document", HexUtil.convertBytesToHexString(origPayload.getData()), HexUtil.convertBytesToHexString(loadedPayload.getData()));
-        Assert.assertEquals("number of metainfoentries", origPayload.getStorageMetadata().getUserMetadata().keySet().size(), loadedPayload.getStorageMetadata().getUserMetadata().keySet().size());
+        Payload payload = s.getBlob(filea);
+        Assert.assertEquals("1", new String(payload.getData()));
+        LOGGER.info("ok, inhalt nach dem ersten Schreiben ok");
+        Payload newPayload = new SimplePayloadImpl(storageMetadata, "2".getBytes());
+        s.putBlob(filea, newPayload);
+        Assert.assertEquals("2", new String(newPayload.getData()));
+        LOGGER.info("ok, inhalt nach dem zweiten Schreiben auch ok");
     }
 
-    /**
-     * Laden der StorageMetaData direkt
-     */
-    @Test
-    public void testStorageMetaData2() {
-        String container = "affe10/1/2/3";
-        // containers.add(container);
-        ExtendedStoreConnection s = new FileSystemExtendedStorageConnection();
-        s.createContainer(container);
-        BucketDirectory bd = new BucketDirectory(container);
-        StorageMetadata storageMetadata = new SimpleStorageMetadataImpl();
-        for (int i = 0; i < 10; i++) {
-            storageMetadata.getUserMetadata().put("key" + i, "value" + i);
-        }
+   /* =========================================================================================================== */
 
-        BucketPath filea = bd.append(new BucketPath("filea"));
-        Payload origPayload = new SimplePayloadImpl(storageMetadata, "Inhalt".getBytes());
-        s.putBlob(filea, origPayload);
-
-        StorageMetadata loadedStorageMetadata = s.getStorageMetadata(filea);
-
-        Assert.assertEquals("number of metainfoentries", origPayload.getStorageMetadata().getUserMetadata().keySet().size(), loadedStorageMetadata.getUserMetadata().keySet().size());
-    }
-
-    /* =========================================================================================================== */
-
-    private boolean contains(List<ExtendedStorageConnectionDirectoryContent> subidrs, BucketDirectory
+    private boolean contains(List<DirectoryContent> subidrs, BucketDirectory
             bucketDirectory) {
-        for (ExtendedStorageConnectionDirectoryContent content : subidrs) {
+        for (DirectoryContent content : subidrs) {
             LOGGER.debug(content.getDirectory().toString());
             if (content.getDirectory().equals(bucketDirectory)) {
                 return true;

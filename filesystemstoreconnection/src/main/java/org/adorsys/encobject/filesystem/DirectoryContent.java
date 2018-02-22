@@ -1,4 +1,4 @@
-package org.adorsys.encobject.service;
+package org.adorsys.encobject.filesystem;
 
 import org.adorsys.encobject.complextypes.BucketDirectory;
 import org.adorsys.encobject.complextypes.BucketPath;
@@ -9,12 +9,12 @@ import java.util.List;
 /**
  * Created by peter on 19.02.18 at 14:04.
  */
-public class ExtendedStorageConnectionDirectoryContent {
+class DirectoryContent {
     private BucketDirectory directory;
     private List<BucketPath> files = new ArrayList<>();
-    private List<ExtendedStorageConnectionDirectoryContent> subidrs = new ArrayList<>();
+    private List<DirectoryContent> subidrs = new ArrayList<>();
 
-    public ExtendedStorageConnectionDirectoryContent(BucketDirectory directory) {
+    public DirectoryContent(BucketDirectory directory) {
         this.directory = directory;
     }
 
@@ -26,13 +26,13 @@ public class ExtendedStorageConnectionDirectoryContent {
         return files;
     }
 
-    public List<ExtendedStorageConnectionDirectoryContent> getSubidrs() {
+    public List<DirectoryContent> getSubidrs() {
         return subidrs;
     }
 
     @Override
     public String toString() {
-        return "ExtendedStorageConnectionDirectoryContent{" +
+        return "DirectoryContent{" +
                 "directory=" + directory.toString() +
                 ", files=" + showFile(files) +
                 ", subidrs=" + showDir(subidrs) +
@@ -51,10 +51,10 @@ public class ExtendedStorageConnectionDirectoryContent {
     }
 
 
-    private static String showDir(List<ExtendedStorageConnectionDirectoryContent> dirs) {
+    private static String showDir(List<DirectoryContent> dirs) {
         StringBuilder sb = new StringBuilder();
         sb.append("[");
-        for (ExtendedStorageConnectionDirectoryContent d : dirs) {
+        for (DirectoryContent d : dirs) {
             sb.append(d.toString());
             sb.append(" ");
         }

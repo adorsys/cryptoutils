@@ -1,7 +1,5 @@
 package org.adorsys.encobject.filesystem;
 
-import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
 import junit.framework.Assert;
 import org.adorsys.cryptoutils.exceptions.BaseExceptionHandler;
 import org.adorsys.encobject.complextypes.BucketDirectory;
@@ -15,12 +13,16 @@ import org.adorsys.encobject.service.ExtendedStoreConnection;
 import org.adorsys.encobject.service.SimpleLocationImpl;
 import org.adorsys.encobject.service.SimplePayloadImpl;
 import org.adorsys.encobject.service.SimpleStorageMetadataImpl;
+import org.junit.After;
+import org.junit.Before;
 import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.net.URI;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * Created by peter on 20.02.18 at 16:53.
@@ -28,6 +30,25 @@ import java.text.SimpleDateFormat;
 public class StorageMetaDataTest {
     private final static Logger LOGGER = LoggerFactory.getLogger(StorageMetaDataTest.class);
     public static final int NUMBER_OF_ISOCODECS = 5;
+    private List<String> containers = new ArrayList<>();
+
+    @Before
+    public void before() {
+        containers.clear();
+    }
+
+    @After
+    public void after() {
+        ExtendedStoreConnection s = new FileSystemExtendedStorageConnection();
+        for (String c : containers) {
+            try {
+                LOGGER.debug("AFTER TEST DELETE CONTAINER " + c);
+                s.deleteContainer(c);
+            } catch (Exception e) {
+                // ignore
+            }
+        }
+    }
 
     /**
      * Laden der StorageMetaData direkt
@@ -35,7 +56,7 @@ public class StorageMetaDataTest {
     @Test
     public void testStorageMetaData() {
         String container = "storageMetaData/1";
-        // containers.add(container);
+        containers.add(container);
         ExtendedStoreConnection s = new FileSystemExtendedStorageConnection();
         s.createContainer(container);
         BucketDirectory bd = new BucketDirectory(container);
@@ -54,20 +75,13 @@ public class StorageMetaDataTest {
 
     @Test
     public void jsonTest() {
-        try {
-            StorageMetadata storageMetadata = createStorageMetadata();
-            Gson gson = new GsonBuilder().setPrettyPrinting()
-                    .registerTypeAdapter(Location.class, new InterfaceAdapter<SimpleLocationImpl>())
-                    .create();
-            String jsonString = gson.toJson(storageMetadata);
-            LOGGER.debug(jsonString);
-            SimpleStorageMetadataImpl reloadedStorageMetadata = gson.fromJson(jsonString, SimpleStorageMetadataImpl.class);
-            int fehler = compareStorageMetadata(storageMetadata, reloadedStorageMetadata);
-            Assert.assertEquals("number of fehlers", 0, fehler);
-
-        } catch (Exception e) {
-            throw BaseExceptionHandler.handle(e);
-        }
+        StorageMetadataFlattenerGSON gsonHelper = new StorageMetadataFlattenerGSON();
+        StorageMetadata storageMetadata = createStorageMetadata();
+        String jsonString = gsonHelper.toJson(storageMetadata);
+        LOGGER.debug(jsonString);
+        StorageMetadata reloadedStorageMetadata = gsonHelper.fromJson(jsonString);
+        int fehler = compareStorageMetadata(storageMetadata, reloadedStorageMetadata);
+        Assert.assertEquals("number of fehler", 0, fehler);
     }
 
 

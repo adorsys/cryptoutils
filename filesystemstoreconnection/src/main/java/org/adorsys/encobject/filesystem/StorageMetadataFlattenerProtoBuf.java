@@ -20,7 +20,7 @@ import java.util.Map;
 /**
  * Created by peter on 21.02.18 at 09:12.
  */
-public class StorageMetadataFlattener {
+public class StorageMetadataFlattenerProtoBuf {
     public static StorageMetadataData fromJavaToProtoBuf(StorageMetadata javaMeta) {
         StorageMetadataData.Builder protoBufBuilder = StorageMetadataData.newBuilder();
         {

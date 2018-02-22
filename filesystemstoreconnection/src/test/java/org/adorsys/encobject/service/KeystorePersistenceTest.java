@@ -14,15 +14,18 @@ import org.junit.Assert;
 import org.junit.Assume;
 import org.junit.BeforeClass;
 import org.junit.Test;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.security.Key;
 import java.security.KeyStore;
 import java.security.NoSuchAlgorithmException;
 import java.security.cert.CertificateException;
-import java.util.HashMap;
 import java.util.Map;
 
 public class KeystorePersistenceTest {
+    private final static Logger LOGGER = LoggerFactory.getLogger(KeystorePersistenceTest.class);
+
     private static String container = KeystorePersistenceTest.class.getSimpleName();
     private static ExtendedStoreConnection extendedStoreConnection;
     private static KeystorePersistence keystorePersistence;
@@ -66,7 +69,7 @@ public class KeystorePersistenceTest {
     @Test
     public void testLoadKeystore() {
         try {
-            String container = "KeystorePersistenceTest";
+            String container = "KeystorePersistenceTest1";
             String storeid = "sampleKeyStorePersistence";
             char[] storePass = "aSimplePass".toCharArray();
             KeyStore keystore = TestKeyUtils.testSecretKeystore(storeid, storePass, "mainKey", "aSimpleSecretPass".toCharArray());
@@ -88,7 +91,7 @@ public class KeystorePersistenceTest {
     @Test
     public void testLoadKeystoreWithAttributes() {
         try {
-            String container = "KeystorePersistenceTest";
+            String container = "KeystorePersistenceTest2";
             String storeid = "sampleKeyStorePersistence";
             char[] storePass = "aSimplePass".toCharArray();
             KeyStore keystore = TestKeyUtils.testSecretKeystore(storeid, storePass, "mainKey", "aSimpleSecretPass".toCharArray());

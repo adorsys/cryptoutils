@@ -6,6 +6,7 @@ platforms/
 plugins/
 www/*.*
 npm-debug.log
+bin/
 
 # Intellij
 ###################

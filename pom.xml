@@ -39,7 +39,6 @@
 
 		<envutils.version>0.2</envutils.version>
 		<version.swagger>1.5.5</version.swagger>
-		<jclouds.version>2.0.3</jclouds.version>
 	</properties>
 
 	<modules>
@@ -48,18 +47,8 @@
         <module>encobject</module>
 		<module>jtstamp</module>
 		<module>jkeyutils</module>
-		<module>encobject-jcloud</module>
 		<module>filesystemstoreconnection</module>
 	</modules>
-	<repositories>
-		<repository>
-			<id>jclouds-snapshots</id>
-			<url>https://repository.apache.org/content/repositories/snapshots</url>
-			<snapshots>
-				<enabled>true</enabled>
-			</snapshots>
-		</repository>
-	</repositories>
 
 	<dependencyManagement>
 		<dependencies>
@@ -121,20 +110,6 @@
 			    <artifactId>bcpkix-jdk15on</artifactId>
 			    <version>1.58</version>
 			</dependency>
-
-			<!-- https://mvnrepository.com/artifact/com.google.protobuf/protobuf-java -->
-			<dependency>
-				<groupId>com.google.protobuf</groupId>
-				<artifactId>protobuf-java</artifactId>
-				<version>3.2.0</version>
-			</dependency>
-
-			<dependency>
-				<groupId>org.apache.jclouds.api</groupId>
-				<artifactId>filesystem</artifactId>
-				<version>${jclouds.version}</version>
-			</dependency>
-
 			<!-- Env -->
 			<dependency>
 				<groupId>de.adorsys.envutils</groupId>

@@ -9,13 +9,13 @@ import org.adorsys.encobject.types.KeyID;
 /**
  * Created by peter on 22.02.18 at 18:51.
  */
-public class EncryptedPersistenceUtil {
+public class EncryptedPersistenceService {
     public static final String ENCRYPTION_SERVICE = "ENCRYPTION_SERVICE";
 
     ExtendedStoreConnection extendedStoreConnection;
     EncryptionService encryptionService;
 
-    public EncryptedPersistenceUtil(ExtendedStoreConnection extendedStoreConnection, EncryptionService encryptionService) {
+    public EncryptedPersistenceService(ExtendedStoreConnection extendedStoreConnection, EncryptionService encryptionService) {
         this.extendedStoreConnection = extendedStoreConnection;
         this.encryptionService = encryptionService;
     }

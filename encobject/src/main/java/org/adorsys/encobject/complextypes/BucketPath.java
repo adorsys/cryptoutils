@@ -129,6 +129,10 @@ public class BucketPath {
         }
         return list;
     }
+    
+    public static BucketPath fromHandle(ObjectHandle objectHandle){
+    	return new BucketPath(objectHandle.getContainer(), objectHandle.getName());
+    }
 
 
 

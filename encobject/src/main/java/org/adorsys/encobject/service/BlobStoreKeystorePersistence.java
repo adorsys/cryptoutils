@@ -6,6 +6,7 @@ import org.adorsys.encobject.domain.ObjectHandle;
 import org.adorsys.encobject.domain.Payload;
 import org.adorsys.encobject.domain.Tuple;
 import org.adorsys.jkeygen.keystore.KeyStoreService;
+import org.adorsys.jkeygen.keystore.KeyStoreType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -89,7 +90,7 @@ public class BlobStoreKeystorePersistence implements KeystorePersistence {
     }
 
     private KeyStore initKeystore(Payload payload, String storeid, CallbackHandler handler) {
-        String keyStoreType = payload.getStorageMetadata().getUserMetadata().get(KEYSTORE_TYPE_KEY);
+        KeyStoreType keyStoreType = new KeyStoreType(payload.getStorageMetadata().getUserMetadata().get(KEYSTORE_TYPE_KEY));
         return KeyStoreService.loadKeyStore(payload.getData(), storeid, keyStoreType, handler);
     }
 }

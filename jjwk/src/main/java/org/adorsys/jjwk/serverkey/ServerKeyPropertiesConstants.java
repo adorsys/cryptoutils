@@ -11,7 +11,9 @@ public class ServerKeyPropertiesConstants {
 
 	public static final String SERVER_KEYSTORE_KEYPAIR_SIZE = "SERVER_KEYSTORE_KEYPAIR_SIZE";// 2048
 	public static final String SERVER_KEYSTORE_KEYPAIR_ALGO = "SERVER_KEYSTORE_KEYPAIR_ALGO";// RSA
-	public static final String SERVER_KEYSTORE_TYPE = "SERVER_KEYSTORE_TYPE";// UBER
+
+	// Please use KeyStoreType.DEFAULT
+	// public static final String SERVER_KEYSTORE_TYPE = "SERVER_KEYSTORE_TYPE";
 
 	public static final String SERVER_SECRET_KEY_COUNT = "SERVER_SECRET_KEY_COUNT";// 5
 	public static final String SERVER_ENCRYPT_KEY_COUNT = "SERVER_ENCRYPT_KEY_COUNT";// 5

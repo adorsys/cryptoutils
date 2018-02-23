@@ -10,11 +10,11 @@ import java.util.Map;
 import javax.security.auth.callback.CallbackHandler;
 
 public class KeystoreBuilder {
-	private String storeType;
+	private KeyStoreType storeType;
 	private String storeId;
 	private Map<String, KeyEntry> keyEntries = new HashMap<>();
 	
-	public KeystoreBuilder withStoreType(String storeType) {
+	public KeystoreBuilder withStoreType(KeyStoreType storeType) {
 		this.storeType = storeType;
 		return this;
 	}

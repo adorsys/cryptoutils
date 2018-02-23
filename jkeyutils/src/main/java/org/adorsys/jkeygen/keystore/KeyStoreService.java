@@ -49,14 +49,15 @@ public class KeyStoreService {
     /**
      * Create an initializes a new key store. The key store is not yet password protected.
      *
-     * @param storeType storeType
+     * @param keyStoreType storeType
      * @return KeyStore keyStore
      */
-    public static KeyStore newKeyStore(String storeType) {
+    public static KeyStore newKeyStore(KeyStoreType keyStoreType) {
         try {
-            // Use default type if blank.
-            if (StringUtils.isBlank(storeType)) storeType = "UBER";
-            KeyStore ks = KeyStore.getInstance(storeType);
+            if (keyStoreType == null) {
+                keyStoreType = KeyStoreType.DEFAULT;
+            }
+            KeyStore ks = KeyStore.getInstance(keyStoreType.getValue());
             ks.load(null, null);
             return ks;
         } catch (Exception e) {
@@ -91,13 +92,13 @@ public class KeyStoreService {
      * @param storePassSrc : the callback handler that retrieves the store password.
      * @return KeyStore
      */
-    public static KeyStore loadKeyStore(InputStream in, String storeId, String storeType, CallbackHandler storePassSrc) {
+    public static KeyStore loadKeyStore(InputStream in, String storeId, KeyStoreType storeType, CallbackHandler storePassSrc) {
         try {
 
             // Use default type if blank.
-            if (StringUtils.isBlank(storeType)) storeType = "UBER";
+            if (storeType == null) storeType = KeyStoreType.DEFAULT;
 
-            KeyStore ks = KeyStore.getInstance(storeType);
+            KeyStore ks = KeyStore.getInstance(storeType.getValue());
 
             ks.load(in, PasswordCallbackUtils.getPassword(storePassSrc, storeId));
             return ks;
@@ -107,13 +108,15 @@ public class KeyStoreService {
         }
     }
 
-    public static KeyStore loadKeyStore(String storeType, KeyStore.LoadStoreParameter loadStoreParameter) {
+    public static KeyStore loadKeyStore(KeyStoreType keyStoreType, KeyStore.LoadStoreParameter loadStoreParameter) {
         try {
 
             // Use default type if blank.
-            if (StringUtils.isBlank(storeType)) storeType = "UBER";
+            if (keyStoreType == null) {
+                keyStoreType = KeyStoreType.DEFAULT;
+            }
 
-            KeyStore ks = KeyStore.getInstance(storeType);
+            KeyStore ks = KeyStore.getInstance(keyStoreType.getValue());
 
             ks.load(loadStoreParameter);
             return ks;
@@ -125,12 +128,12 @@ public class KeyStoreService {
     /**
      * @param data         : the byte array containing key store data.
      * @param storeId      : The store id. This is passed to the callback handler to identify the requested password record.
-     * @param storeType    : the type of this key store. f null, the defaut java keystore type is used.
+     * @param keyStoreType    : the type of this key store. f null, the defaut java keystore type is used.
      * @param storePassSrc : the callback handler that retrieves the store password.
      * @return KeyStore
      */
-    public static KeyStore loadKeyStore(byte[] data, String storeId, String storeType, CallbackHandler storePassSrc) {
-        return loadKeyStore(new ByteArrayInputStream(data), storeId, storeType, storePassSrc);
+    public static KeyStore loadKeyStore(byte[] data, String storeId, KeyStoreType keyStoreType, CallbackHandler storePassSrc) {
+        return loadKeyStore(new ByteArrayInputStream(data), storeId, keyStoreType, storePassSrc);
     }
 
     /**

@@ -36,7 +36,6 @@ public class KeyStoreUtils {
     public static KeyStore loadKeyStore(InputStream in, String storeId, String storeType, CallbackHandler storePassSrc) throws KeyStoreException, NoSuchAlgorithmException, CertificateException, UnrecoverableKeyException, IOException {
 
         // Use default type if blank.
-//        if (StringUtils.isBlank(storeType))storeType = "UBER";
     	if(StringUtils.isBlank(storeType)) throw new IllegalArgumentException("Missing keystore type");
 
     	KeyStore ks = null; 

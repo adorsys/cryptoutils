@@ -1,4 +1,4 @@
-package org.adorsys.encobject.types;
+package org.adorsys.jkeygen.keystore;
 
 import org.adorsys.cryptoutils.basetypes.BaseTypeString;
 import org.apache.commons.lang3.StringUtils;
@@ -7,6 +7,7 @@ import org.apache.commons.lang3.StringUtils;
  * Created by peter on 29.12.2017 at 14:11:52.
  */
 public class KeyStoreType extends BaseTypeString {
+    public static KeyStoreType DEFAULT = getDefaultKeyStoreType();
 
 	public KeyStoreType() {}
 
@@ -22,6 +23,14 @@ public class KeyStoreType extends BaseTypeString {
         BaseTypeString that = (BaseTypeString) o;
 
         return StringUtils.equalsAnyIgnoreCase(getValue(), that.getValue());
+    }
+
+    private static KeyStoreType getDefaultKeyStoreType() {
+        String server_keystore_type = System.getProperty("SERVER_KEYSTORE_TYPE");
+        if (!StringUtils.isBlank(server_keystore_type )) {
+            return new KeyStoreType(server_keystore_type);
+        }
+        return new KeyStoreType("UBER");
     }
     
     

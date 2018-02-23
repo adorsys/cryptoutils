@@ -13,7 +13,7 @@ public interface EncryptionService {
      * @param keyID die ID, des Schlüssels, mit dem verschlüsselt werden soll
      * @return daten, die aus einem unverschlüsseltem Header bestehen,
      */
-    byte[] encrypt(byte[] data, KeySource keySource, KeyID keyID);
+    byte[] encrypt(byte[] data, KeySource keySource, KeyID keyID, Boolean compress);
     byte[] decrypt(byte[] data, KeySource keySource);
 }
 

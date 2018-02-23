@@ -21,7 +21,7 @@ public class EncryptedPersistenceService {
     }
 
     public void encryptAndPersist(BucketPath bucketPath, Payload payload, KeySource keySource, KeyID keyID) {
-        byte[] encryptedData = encryptionService.encrypt(payload.getData(), keySource, keyID);
+        byte[] encryptedData = encryptionService.encrypt(payload.getData(), keySource, keyID, payload.getStorageMetadata().getShouldBeCompressed());
         payload.getStorageMetadata().getUserMetadata().put(ENCRYPTION_SERVICE, encryptionService.getClass().toString());
         SimplePayloadImpl newPayload = new SimplePayloadImpl(payload.getStorageMetadata(), encryptedData);
         extendedStoreConnection.putBlob(bucketPath, newPayload);

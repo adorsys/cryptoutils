@@ -1,5 +1,6 @@
 package org.adorsys.encobject.service;
 
+import com.nimbusds.jose.CompressionAlgorithm;
 import com.nimbusds.jose.JWEDecrypter;
 import com.nimbusds.jose.JWEEncrypter;
 import com.nimbusds.jose.JWEHeader;
@@ -28,7 +29,7 @@ public class JWEncryptionService implements EncryptionService {
     private DefaultJWEDecrypterFactory decrypterFactory = new DefaultJWEDecrypterFactory();
 
     @Override
-    public byte[] encrypt(byte[] data, KeySource keySource, KeyID keyID) {
+    public byte[] encrypt(byte[] data, KeySource keySource, KeyID keyID, Boolean compress) {
         try {
             ContentMetaInfo metaInfo = new ContentMetaInfo();
             Key key = keySource.readKey(keyID);
@@ -39,6 +40,10 @@ public class JWEncryptionService implements EncryptionService {
 
             JWEHeader.Builder headerBuilder = new JWEHeader.Builder(encParams.getEncAlgo(), encParams.getEncMethod()).keyID(keyID.getValue());
             ContentMetaInfoUtils.metaInfo2Header(metaInfo, headerBuilder);
+
+            if (compress != null && compress) {
+                headerBuilder = headerBuilder.compressionAlgorithm(CompressionAlgorithm.DEF);
+            }
 
             JWEHeader header = headerBuilder.build();
             JWEEncrypter jweEncrypter = JWEEncryptedSelector.geEncrypter(key, encParams.getEncAlgo(), encParams.getEncMethod());

@@ -34,7 +34,7 @@ public class BlobStoreKeystorePersistence implements KeystorePersistence {
     public void saveKeyStore(KeyStore keystore, CallbackHandler storePassHandler, ObjectHandle handle) {
         String storeType = keystore.getType();
         byte[] bs = KeyStoreService.toByteArray(keystore, handle.getName(), storePassHandler);
-        BucketPath bucketPath = new BucketPath(handle.getContainer(), handle.getName());
+        BucketPath bucketPath = BucketPath.fromHandle(handle);
         Payload payload = new SimplePayloadImpl(bs);
         payload.getStorageMetadata().getUserMetadata().put(KEYSTORE_TYPE_KEY, storeType);
         extendedStoreConnection.putBlob(bucketPath, payload);
@@ -44,7 +44,7 @@ public class BlobStoreKeystorePersistence implements KeystorePersistence {
     public void saveKeyStoreWithAttributes(KeyStore keystore, UserMetaData userMetaData, CallbackHandler storePassHandler, ObjectHandle handle) {
         String storeType = keystore.getType();
         byte[] bs = KeyStoreService.toByteArray(keystore, handle.getName(), storePassHandler);
-        BucketPath bucketPath = new BucketPath(handle.getContainer(), handle.getName());
+        BucketPath bucketPath = BucketPath.fromHandle(handle);
 
         SimpleStorageMetadataImpl simpleStorageMetadataImpl = new SimpleStorageMetadataImpl();
         simpleStorageMetadataImpl.getUserMetadata().put(KEYSTORE_TYPE_KEY, storeType);
@@ -56,14 +56,14 @@ public class BlobStoreKeystorePersistence implements KeystorePersistence {
 
     @Override
     public KeyStore loadKeystore(ObjectHandle handle, CallbackHandler handler) {
-        BucketPath bucketPath = new BucketPath(handle.getContainer(), handle.getName());
+        BucketPath bucketPath = BucketPath.fromHandle(handle);
         Payload payload = extendedStoreConnection.getBlob(bucketPath);
         return initKeystore(payload, handle.getName(), handler);
     }
 
     @Override
     public Tuple<KeyStore, Map<String, String>> loadKeystoreAndAttributes(ObjectHandle handle, CallbackHandler handler) {
-        BucketPath bucketPath = new BucketPath(handle.getContainer(), handle.getName());
+        BucketPath bucketPath = BucketPath.fromHandle(handle);
         Payload payload = extendedStoreConnection.getBlob(bucketPath);
         KeyStore keyStore = initKeystore(payload, handle.getName(), handler);
         UserMetaData metaInfo = payload.getStorageMetadata().getUserMetadata();
@@ -85,7 +85,7 @@ public class BlobStoreKeystorePersistence implements KeystorePersistence {
      * @return if a keystore available for the given handle
      */
     public boolean hasKeystore(ObjectHandle handle) {
-        return extendedStoreConnection.blobExists(new BucketPath(handle.getContainer(), handle.getName()));
+        return extendedStoreConnection.blobExists(BucketPath.fromHandle(handle));
     }
 
     private KeyStore initKeystore(Payload payload, String storeid, CallbackHandler handler) {

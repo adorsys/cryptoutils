@@ -19,14 +19,5 @@ public interface StorageMetadata extends ResourceMetadata<StorageType> {
 
     public abstract String getContentType();
 
-
-    // diese setter werden vom PersistenzLayer benötigt
-
-    public abstract void setSize(Long size);
-
-    public abstract void setName(String name);
-
-    public abstract void setType(StorageType type);
-
 }
 

@@ -4,6 +4,7 @@ import org.adorsys.encobject.domain.Location;
 import org.adorsys.encobject.domain.LocationScope;
 
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.Set;
 
 /**
@@ -18,6 +19,19 @@ public class SimpleLocationImpl implements Location {
 
     public SimpleLocationImpl() {
 
+    }
+
+    public SimpleLocationImpl(Location location) {
+        if (location.getParent() != null) {
+            parent = new SimpleLocationImpl(location.getParent());
+        }
+        locationScope = location.getScope();
+        id = location.getID();
+        description = location.getDescription();
+        Iterator<String> iterator = location.getIso3166Codes().iterator();
+        while (iterator.hasNext()) {
+            getIso3166Codes().add(iterator.next());
+        }
     }
 
     @Override

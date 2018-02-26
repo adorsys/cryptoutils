@@ -11,7 +11,7 @@ import java.io.InputStream;
 public class SimplePayloadImpl implements Payload {
     public static final String SENSITIVE = "Sensitive";
     private long THREASH_HOLD = 2000;
-    private StorageMetadata storageMetadata = null;
+    private SimpleStorageMetadataImpl storageMetadata = null;
     private Boolean sensitive = null;
     private Boolean repeatable = null;
 
@@ -21,6 +21,10 @@ public class SimplePayloadImpl implements Payload {
 
     public SimplePayloadImpl(byte[] data) {
         this(new SimpleStorageMetadataImpl(), data);
+    }
+
+    public SimplePayloadImpl(Payload payload) {
+        this(payload.getStorageMetadata(),payload.isSensitive(), payload.isRepeatable(), payload.getData());
     }
 
     public SimplePayloadImpl(StorageMetadata storageMetadata, byte[] data) {
@@ -43,7 +47,7 @@ public class SimplePayloadImpl implements Payload {
         if (data == null || data.length < 1) {
             throw new BaseException("Programming error, size must not be null or < 1");
         }
-        this.storageMetadata = storageMetadata;
+        this.storageMetadata = new SimpleStorageMetadataImpl(storageMetadata);
         this.storageMetadata.setSize(new Long(data.length));
         this.sensitive = sensitive;
         this.repeatable = repeatable;
@@ -90,7 +94,7 @@ public class SimplePayloadImpl implements Payload {
     }
 
     @Override
-    public StorageMetadata getStorageMetadata() {
+    public SimpleStorageMetadataImpl getStorageMetadata() {
         return storageMetadata;
     }
 

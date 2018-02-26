@@ -135,7 +135,7 @@ public class FileSystemExtendedStorageConnection implements ExtendedStoreConnect
 
     @Override
     public void putBlob(BucketPath bucketPath, Payload payload) {
-        zipFileHelper.writeZip(bucketPath, payload);
+        zipFileHelper.writeZip(bucketPath, new SimplePayloadImpl(payload));
     }
 
     @Override
@@ -283,7 +283,7 @@ public class FileSystemExtendedStorageConnection implements ExtendedStoreConnect
     }
 
     private StorageMetadata createStorageMetadataForDirectory(DirectoryContent content) {
-        StorageMetadata storageMetadata = new SimpleStorageMetadataImpl();
+        SimpleStorageMetadataImpl storageMetadata = new SimpleStorageMetadataImpl();
         storageMetadata.setType(StorageType.FOLDER);
         storageMetadata.setSize(new Long(content.getFiles().size() + content.getSubidrs().size()));
 

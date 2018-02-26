@@ -30,13 +30,14 @@ import java.util.zip.ZipOutputStream;
  */
 public class ZipFileHelper {
     private static final Logger LOGGER = LoggerFactory.getLogger(ZipFileHelper.class);
-    private static final String ZIP_STORAGE_METADATA_JSON = "StorageMetadata.json";
-    private static final String ZIP_CONTENT_BINARY = "Content.binary";
-    public static final String ZIP_SUFFIX = ".zip";
+    protected static final String ZIP_STORAGE_METADATA_JSON = "StorageMetadata.json";
+    protected static final String ZIP_CONTENT_BINARY = "Content.binary";
+    protected static final String ZIP_SUFFIX = ".zip";
+    protected static final String FINAL_SIZE = "FINAL_SIZE";
 
 
-    private BucketDirectory baseDir;
-    private StorageMetadataFlattenerGSON gsonHelper = new StorageMetadataFlattenerGSON();
+    protected BucketDirectory baseDir;
+    protected StorageMetadataFlattenerGSON gsonHelper = new StorageMetadataFlattenerGSON();
     
     public ZipFileHelper(BucketDirectory bucketDirectory) {
         this.baseDir = bucketDirectory;
@@ -45,11 +46,12 @@ public class ZipFileHelper {
     /**
      * https://stackoverflow.com/questions/14462371/preferred-way-to-use-java-zipoutputstream-and-bufferedoutputstream
      */
-    public void writeZip(BucketPath bucketPath, Payload payload) {
+    public void writeZip(BucketPath bucketPath, SimplePayloadImpl payload) {
         payload.getStorageMetadata().setType(StorageType.BLOB);
         payload.getStorageMetadata().setName(BucketPathUtil.getAsString(bucketPath));
-        byte[] storageMetadata = gsonHelper.toJson(payload.getStorageMetadata()).getBytes();
         byte[] content = payload.getData();
+        payload.getStorageMetadata().getUserMetadata().put(FINAL_SIZE, "" + content.length);
+        byte[] storageMetadata = gsonHelper.toJson(payload.getStorageMetadata()).getBytes();
 
         ZipOutputStream zos = null;
         try {
@@ -136,7 +138,9 @@ public class ZipFileHelper {
                 throw new StorageConnectionException("Zipfile " + bucketPath + " does not have entry for " + ZIP_STORAGE_METADATA_JSON);
             }
 
-            return gsonHelper.fromJson(jsonString);
+            StorageMetadata storageMetadata = gsonHelper.fromJson(jsonString);
+            storageMetadata.getUserMetadata().remove(FINAL_SIZE);
+            return storageMetadata;
         } catch (Exception e) {
             throw new RuntimeException(e);
         }

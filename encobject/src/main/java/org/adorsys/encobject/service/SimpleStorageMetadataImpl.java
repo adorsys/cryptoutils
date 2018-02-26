@@ -17,7 +17,7 @@ public class SimpleStorageMetadataImpl implements StorageMetadata {
     private StorageType storageType = null;
     private String providerID = null;
     private String name = null;
-    private Location location = null;
+    private SimpleLocationImpl location = null;
     private URI uri = null;
     private UserMetaData userMetaData = new UserMetaData();
     private String eTag = null;
@@ -33,6 +33,31 @@ public class SimpleStorageMetadataImpl implements StorageMetadata {
         }
     }
 
+    public SimpleStorageMetadataImpl() {
+
+    }
+
+    public SimpleStorageMetadataImpl(StorageMetadata storageMetadata) {
+        setType(storageMetadata.getType());
+        setProviderID(storageMetadata.getProviderID());
+        setName(storageMetadata.getName());
+        if (storageMetadata.getLocation() != null) {
+            setLocation(storageMetadata.getLocation()); // deepcopy wird beim setLocation gemacht
+        }
+        if (storageMetadata.getUri() != null) {
+            setUri(URI.create(storageMetadata.getUri().toString()));
+        }
+        for (String key : storageMetadata.getUserMetadata().keySet()) {
+            getUserMetadata().put(key, storageMetadata.getUserMetadata().get(key));
+        }
+        setETag(storageMetadata.getETag());
+        setCreationDate(storageMetadata.getCreationDate());
+        setLastModified(storageMetadata.getLastModified());
+        setSize(storageMetadata.getSize());
+        setShouldBeCompressed(storageMetadata.getShouldBeCompressed());
+        setContentType(storageMetadata.getContentType());
+    }
+
     @Override
     public UserMetaData getUserMetadata() {
         return this.userMetaData;
@@ -43,7 +68,6 @@ public class SimpleStorageMetadataImpl implements StorageMetadata {
         return storageType;
     }
 
-    @Override
     public void setType(StorageType storageType) {
         this.storageType = storageType;
     }
@@ -62,18 +86,17 @@ public class SimpleStorageMetadataImpl implements StorageMetadata {
         return name;
     }
 
-    @Override
     public void setName(String name) {
         this.name = name;
     }
 
     @Override
-    public Location getLocation() {
+    public SimpleLocationImpl getLocation() {
         return location;
     }
 
     public void setLocation(Location location) {
-        this.location = location;
+        this.location = new SimpleLocationImpl(location);
     }
 
     @Override
@@ -136,7 +159,6 @@ public class SimpleStorageMetadataImpl implements StorageMetadata {
         return contentType;
     }
 
-    @Override
     public void setSize(Long size) {
         this.size = size;
     }

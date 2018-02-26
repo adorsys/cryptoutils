@@ -63,6 +63,19 @@ public class KeyStore2KeySourceHelper {
      * @param keyStoreAccess bei Passworte muessen gesetzt sein
      * @return
      */
+    public static KeySource getForPrivateKey(KeystorePersistence keystorePersistence, KeyStoreAccess keyStoreAccess) {
+        LOGGER.info("get keysource for private key of " + keyStoreAccess.getKeyStorePath());
+        KeyStore userKeystore = keystorePersistence.loadKeystore(keyStoreAccess.getKeyStorePath().getObjectHandle(), keyStoreAccess.getKeyStoreAuth().getReadStoreHandler());
+        KeySource keySource = new KeyStoreBasedPrivateKeySourceImpl(userKeystore, keyStoreAccess.getKeyStoreAuth().getReadKeyPassword());
+        return keySource;
+    }
+
+    /**
+     *
+     * @param keystorePersistence
+     * @param keyStoreAccess bei Passworte muessen gesetzt sein
+     * @return
+     */
     public static KeySourceAndKeyID getForSecretKey(KeystorePersistence keystorePersistence, KeyStoreAccess keyStoreAccess) {
         LOGGER.info("get keysource for secret key of " + keyStoreAccess.getKeyStorePath());
         // KeyStore laden

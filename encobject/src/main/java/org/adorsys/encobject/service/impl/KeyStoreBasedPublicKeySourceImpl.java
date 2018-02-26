@@ -1,4 +1,4 @@
-package org.adorsys.encobject.keysource;
+package org.adorsys.encobject.service.impl;
 
 import com.nimbusds.jose.JOSEException;
 import com.nimbusds.jose.jwk.AssymetricJWK;
@@ -6,6 +6,7 @@ import com.nimbusds.jose.jwk.JWK;
 import com.nimbusds.jose.jwk.JWKSet;
 import org.adorsys.cryptoutils.exceptions.BaseExceptionHandler;
 import org.adorsys.encobject.exceptions.KeySourceException;
+import org.adorsys.encobject.service.api.KeySource;
 import org.adorsys.encobject.types.KeyID;
 import org.adorsys.jjwk.keystore.JwkExport;
 

@@ -1,14 +1,15 @@
-package org.adorsys.encobject.keysource;
+package org.adorsys.encobject.service.impl;
 
-import java.security.Key;
-
+import org.adorsys.encobject.service.api.KeySource;
 import org.adorsys.encobject.types.KeyID;
 import org.adorsys.jjwk.serverkey.ServerKeyMapProvider;
 
-public class KeyMapProviderBasedKeySource implements KeySource {
+import java.security.Key;
+
+public class KeyMapProviderBasedKeySourceImpl implements KeySource {
 	private final ServerKeyMapProvider keyMapProvider;
 	
-	public KeyMapProviderBasedKeySource(ServerKeyMapProvider keyMapProvider) {
+	public KeyMapProviderBasedKeySourceImpl(ServerKeyMapProvider keyMapProvider) {
 		this.keyMapProvider = keyMapProvider;
 	}
 

@@ -1,4 +1,4 @@
-package org.adorsys.encobject.service;
+package org.adorsys.encobject.service.api;
 
 import org.adorsys.encobject.complextypes.BucketDirectory;
 import org.adorsys.encobject.complextypes.BucketPath;

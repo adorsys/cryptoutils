@@ -12,8 +12,8 @@ import com.google.gson.JsonSerializationContext;
 import com.google.gson.JsonSerializer;
 import org.adorsys.encobject.domain.Location;
 import org.adorsys.encobject.domain.StorageMetadata;
-import org.adorsys.encobject.service.SimpleLocationImpl;
-import org.adorsys.encobject.service.SimpleStorageMetadataImpl;
+import org.adorsys.encobject.service.impl.SimpleLocationImpl;
+import org.adorsys.encobject.service.impl.SimpleStorageMetadataImpl;
 
 import java.lang.reflect.Type;
 

@@ -1,15 +1,14 @@
 package org.adorsys.encobject.filesystem;
 
 import junit.framework.Assert;
-import org.adorsys.cryptoutils.utils.HexUtil;
 import org.adorsys.encobject.complextypes.BucketDirectory;
 import org.adorsys.encobject.complextypes.BucketPath;
 import org.adorsys.encobject.domain.Payload;
 import org.adorsys.encobject.domain.StorageMetadata;
 import org.adorsys.encobject.domain.StorageType;
-import org.adorsys.encobject.service.ExtendedStoreConnection;
-import org.adorsys.encobject.service.SimplePayloadImpl;
-import org.adorsys.encobject.service.SimpleStorageMetadataImpl;
+import org.adorsys.encobject.service.api.ExtendedStoreConnection;
+import org.adorsys.encobject.service.impl.SimplePayloadImpl;
+import org.adorsys.encobject.service.impl.SimpleStorageMetadataImpl;
 import org.adorsys.encobject.types.ListRecursiveFlag;
 import org.junit.After;
 import org.junit.Before;

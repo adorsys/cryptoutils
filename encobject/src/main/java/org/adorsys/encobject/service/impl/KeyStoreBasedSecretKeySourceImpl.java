@@ -1,6 +1,7 @@
-package org.adorsys.encobject.keysource;
+package org.adorsys.encobject.service.impl;
 
 import org.adorsys.cryptoutils.exceptions.BaseExceptionHandler;
+import org.adorsys.encobject.service.api.KeySource;
 import org.adorsys.encobject.types.KeyID;
 import org.adorsys.jkeygen.keystore.PasswordCallbackUtils;
 

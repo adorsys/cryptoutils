@@ -8,7 +8,7 @@ import org.adorsys.encobject.domain.Payload;
 import org.adorsys.encobject.domain.StorageMetadata;
 import org.adorsys.encobject.domain.StorageType;
 import org.adorsys.encobject.exceptions.StorageConnectionException;
-import org.adorsys.encobject.service.SimplePayloadImpl;
+import org.adorsys.encobject.service.impl.SimplePayloadImpl;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
 import org.slf4j.Logger;

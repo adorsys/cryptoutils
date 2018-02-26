@@ -1,6 +1,5 @@
-package org.adorsys.encobject.service;
+package org.adorsys.encobject.service.api;
 
-import org.adorsys.encobject.keysource.KeySource;
 import org.adorsys.encobject.types.KeyID;
 
 /**

@@ -1,4 +1,4 @@
-package org.adorsys.encobject.service;
+package org.adorsys.encobject.service.api;
 
 import org.adorsys.encobject.domain.ObjectHandle;
 import org.adorsys.encobject.domain.Tuple;

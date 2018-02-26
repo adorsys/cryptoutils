@@ -11,14 +11,15 @@ import org.adorsys.encobject.domain.KeyCredentials;
 import org.adorsys.encobject.domain.ObjectHandle;
 import org.adorsys.encobject.domain.Payload;
 import org.adorsys.encobject.exceptions.ObjectNotFoundException;
-import org.adorsys.encobject.keysource.KeyCredentialBasedKeySource;
+import org.adorsys.encobject.service.impl.KeyCredentialBasedKeySourceImpl;
 import org.adorsys.encobject.params.KeyParams;
-import org.adorsys.encobject.service.BlobStoreKeystorePersistence;
-import org.adorsys.encobject.service.EncryptedPersistenceService;
-import org.adorsys.encobject.service.EncryptionService;
-import org.adorsys.encobject.service.ExtendedStoreConnection;
-import org.adorsys.encobject.service.KeystorePersistence;
-import org.adorsys.encobject.service.SimplePayloadImpl;
+import org.adorsys.encobject.service.impl.BlobStoreKeystorePersistenceImpl;
+import org.adorsys.encobject.service.api.EncryptedPersistenceService;
+import org.adorsys.encobject.service.impl.EncryptedPersistenceServiceImpl;
+import org.adorsys.encobject.service.api.EncryptionService;
+import org.adorsys.encobject.service.api.ExtendedStoreConnection;
+import org.adorsys.encobject.service.api.KeystorePersistence;
+import org.adorsys.encobject.service.impl.SimplePayloadImpl;
 import org.adorsys.encobject.types.KeyID;
 import org.adorsys.jkeygen.keystore.KeyStoreService;
 import org.adorsys.jkeygen.keystore.SecretKeyData;
@@ -33,16 +34,16 @@ public class ObjectPersistenceAdapter {
     private EncryptedPersistenceService encObjectService;
     private ExtendedStoreConnection storeConnection;
     private KeystorePersistence keystorePersistence;
-    private KeyCredentialBasedKeySource keySource;
+    private KeyCredentialBasedKeySourceImpl keySource;
 
     public ObjectPersistenceAdapter(EncryptionService encryptionService, ExtendedStoreConnection storeConnection, KeyCredentials keyCredentials, ObjectMapperSPI objectMapper) {
         super();
         this.keyCredentials = keyCredentials;
-        this.keySource = new KeyCredentialBasedKeySource(keyCredentials, keystorePersistence);
+        this.keySource = new KeyCredentialBasedKeySourceImpl(keyCredentials, keystorePersistence);
         this.objectMapper = objectMapper;
         this.storeConnection = storeConnection;
-        this.keystorePersistence = new BlobStoreKeystorePersistence(storeConnection);
-        this.encObjectService = new EncryptedPersistenceService(storeConnection, encryptionService);
+        this.keystorePersistence = new BlobStoreKeystorePersistenceImpl(storeConnection);
+        this.encObjectService = new EncryptedPersistenceServiceImpl(storeConnection, encryptionService);
     }
 
     /**

@@ -1,4 +1,12 @@
-package org.adorsys.encobject.keysource;
+package org.adorsys.encobject.service.impl;
+
+import org.adorsys.encobject.domain.KeyCredentials;
+import org.adorsys.encobject.exceptions.WrongKeyCredentialException;
+import org.adorsys.encobject.service.api.KeySource;
+import org.adorsys.encobject.service.api.KeystorePersistence;
+import org.adorsys.encobject.types.KeyID;
+import org.adorsys.jkeygen.keystore.PasswordCallbackUtils;
+import org.adorsys.jkeygen.pwd.PasswordCallbackHandler;
 
 import java.security.Key;
 import java.security.KeyStore;
@@ -6,21 +14,14 @@ import java.security.KeyStoreException;
 import java.security.NoSuchAlgorithmException;
 import java.security.UnrecoverableKeyException;
 
-import org.adorsys.encobject.domain.KeyCredentials;
-import org.adorsys.encobject.exceptions.WrongKeyCredentialException;
-import org.adorsys.encobject.service.KeystorePersistence;
-import org.adorsys.encobject.types.KeyID;
-import org.adorsys.jkeygen.keystore.PasswordCallbackUtils;
-import org.adorsys.jkeygen.pwd.PasswordCallbackHandler;
-
-public class KeyCredentialBasedKeySource implements KeySource {
+public class KeyCredentialBasedKeySourceImpl implements KeySource {
 
 	private KeyCredentials keyCredentials;
 	private KeyStore keyStore;
 	private KeystorePersistence keystorePersistence;
 
-	public KeyCredentialBasedKeySource(KeyCredentials keyCredentials,
-			KeystorePersistence keystorePersistence) {
+	public KeyCredentialBasedKeySourceImpl(KeyCredentials keyCredentials,
+                                           KeystorePersistence keystorePersistence) {
 		this.keyCredentials = keyCredentials;
 		this.keystorePersistence = keystorePersistence;
 	}

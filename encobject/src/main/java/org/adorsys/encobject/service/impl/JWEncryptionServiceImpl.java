@@ -1,4 +1,4 @@
-package org.adorsys.encobject.service;
+package org.adorsys.encobject.service.impl;
 
 import com.nimbusds.jose.CompressionAlgorithm;
 import com.nimbusds.jose.JWEDecrypter;
@@ -11,9 +11,10 @@ import org.adorsys.cryptoutils.exceptions.BaseException;
 import org.adorsys.cryptoutils.exceptions.BaseExceptionHandler;
 import org.adorsys.encobject.domain.ContentMetaInfo;
 import org.adorsys.encobject.exceptions.ExtendedPersistenceException;
-import org.adorsys.encobject.keysource.KeySource;
+import org.adorsys.encobject.service.api.KeySource;
 import org.adorsys.encobject.params.EncParamSelector;
 import org.adorsys.encobject.params.EncryptionParams;
+import org.adorsys.encobject.service.api.EncryptionService;
 import org.adorsys.encobject.types.EncryptionType;
 import org.adorsys.encobject.types.KeyID;
 import org.adorsys.encobject.types.PersistenceLayerContentMetaInfoUtil;
@@ -25,7 +26,7 @@ import java.security.Key;
 /**
  * Created by peter on 22.02.18 at 17:50.
  */
-public class JWEncryptionService implements EncryptionService {
+public class JWEncryptionServiceImpl implements EncryptionService {
     private DefaultJWEDecrypterFactory decrypterFactory = new DefaultJWEDecrypterFactory();
 
     @Override

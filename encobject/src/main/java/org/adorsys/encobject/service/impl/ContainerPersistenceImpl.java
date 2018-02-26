@@ -1,7 +1,9 @@
-package org.adorsys.encobject.service;
+package org.adorsys.encobject.service.impl;
 
 import org.adorsys.encobject.exceptions.ContainerExistsException;
 import org.adorsys.encobject.exceptions.UnknownContainerException;
+import org.adorsys.encobject.service.api.ContainerPersistence;
+import org.adorsys.encobject.service.api.ExtendedStoreConnection;
 
 /**
  * Service in charge of creating and deleting container
@@ -9,11 +11,11 @@ import org.adorsys.encobject.exceptions.UnknownContainerException;
  * @author fpo
  *
  */
-public class ContainerPersistence {
+public class ContainerPersistenceImpl implements ContainerPersistence {
 	
 	private ExtendedStoreConnection blobStoreConnection;
 	
-	public ContainerPersistence(ExtendedStoreConnection storeConnection) {
+	public ContainerPersistenceImpl(ExtendedStoreConnection storeConnection) {
 		this.blobStoreConnection = storeConnection;
 	}
 
@@ -23,6 +25,7 @@ public class ContainerPersistence {
 	 * @param container container name
 	 * @throws ContainerExistsException if a container with the same name already exists in the blob store.
 	 */
+	@Override
 	public void createContainer(String container) throws ContainerExistsException {
 		blobStoreConnection.createContainer(container);
 	}
@@ -33,6 +36,7 @@ public class ContainerPersistence {
      * @param container container name
      * @return true if a container with this name exists
 	 */
+	@Override
 	public boolean containerExists(String container){
 		return blobStoreConnection.containerExists(container);
 	}
@@ -43,6 +47,7 @@ public class ContainerPersistence {
      * @param container container name
 	 * @throws UnknownContainerException when no container with given name exists
 	 */
+	@Override
 	public void deleteContainer(String container) throws UnknownContainerException {
 		blobStoreConnection.deleteContainer(container);
 	}

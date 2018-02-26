@@ -1,4 +1,4 @@
-package org.adorsys.encobject.service;
+package org.adorsys.encobject.service.impl;
 
 import org.adorsys.cryptoutils.exceptions.BaseException;
 import org.adorsys.cryptoutils.exceptions.BaseExceptionHandler;

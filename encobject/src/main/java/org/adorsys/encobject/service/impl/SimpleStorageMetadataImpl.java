@@ -1,4 +1,4 @@
-package org.adorsys.encobject.service;
+package org.adorsys.encobject.service.impl;
 
 import org.adorsys.encobject.domain.Location;
 import org.adorsys.encobject.domain.ResourceMetadata;

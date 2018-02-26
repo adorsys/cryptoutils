@@ -8,6 +8,11 @@ import org.adorsys.encobject.domain.UserMetaData;
 import org.adorsys.encobject.exceptions.ContainerExistsException;
 import org.adorsys.encobject.exceptions.UnknownContainerException;
 import org.adorsys.encobject.filesystem.FileSystemExtendedStorageConnection;
+import org.adorsys.encobject.service.api.ExtendedStoreConnection;
+import org.adorsys.encobject.service.api.KeystorePersistence;
+import org.adorsys.encobject.service.impl.BlobStoreKeystorePersistenceImpl;
+import org.adorsys.encobject.service.api.ContainerPersistence;
+import org.adorsys.encobject.service.impl.ContainerPersistenceImpl;
 import org.adorsys.encobject.utils.TestKeyUtils;
 import org.junit.AfterClass;
 import org.junit.Assert;
@@ -35,8 +40,8 @@ public class KeystorePersistenceTest {
     public static void beforeClass() {
         TestKeyUtils.turnOffEncPolicy();
         extendedStoreConnection = new FileSystemExtendedStorageConnection();
-        keystorePersistence = new BlobStoreKeystorePersistence(extendedStoreConnection);
-        containerPersistence = new ContainerPersistence(extendedStoreConnection);
+        keystorePersistence = new BlobStoreKeystorePersistenceImpl(extendedStoreConnection);
+        containerPersistence = new ContainerPersistenceImpl(extendedStoreConnection);
 
         try {
             containerPersistence.createContainer(container);

@@ -1,14 +1,13 @@
-package org.adorsys.encobject.service;
+package org.adorsys.encobject.service.impl;
+
+import com.nimbusds.jose.CompressionAlgorithm;
+import com.nimbusds.jose.JWEHeader;
+import org.adorsys.encobject.domain.ContentMetaInfo;
+import org.apache.commons.lang3.StringUtils;
 
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
-
-import org.adorsys.encobject.domain.ContentMetaInfo;
-import org.apache.commons.lang3.StringUtils;
-
-import com.nimbusds.jose.CompressionAlgorithm;
-import com.nimbusds.jose.JWEHeader;
 
 public class ContentMetaInfoUtils {
 	

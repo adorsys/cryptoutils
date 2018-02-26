@@ -1,4 +1,4 @@
-package org.adorsys.encobject.keysource;
+package org.adorsys.encobject.service.api;
 
 import com.nimbusds.jose.jwk.ECKey;
 import com.nimbusds.jose.jwk.JWK;
@@ -12,7 +12,9 @@ import org.adorsys.cryptoutils.exceptions.BaseExceptionHandler;
 import org.adorsys.encobject.domain.KeyStoreAccess;
 import org.adorsys.encobject.exceptions.AsymmetricEncryptionException;
 import org.adorsys.encobject.exceptions.SymmetricEncryptionException;
-import org.adorsys.encobject.service.KeystorePersistence;
+import org.adorsys.encobject.service.impl.KeyStoreBasedPrivateKeySourceImpl;
+import org.adorsys.encobject.service.impl.KeyStoreBasedPublicKeySourceImpl;
+import org.adorsys.encobject.service.impl.KeyStoreBasedSecretKeySourceImpl;
 import org.adorsys.encobject.types.KeyID;
 import org.adorsys.jjwk.keystore.JwkExport;
 import org.adorsys.jjwk.serverkey.KeyAndJwk;

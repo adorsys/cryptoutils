@@ -12,4 +12,5 @@ public interface EncryptedPersistenceService {
     void encryptAndPersist(BucketPath bucketPath, Payload payload, KeySource keySource, KeyID keyID);
     void encryptAndPersist(BucketPath bucketPath, PayloadStream payloadStream, KeySource keySource, KeyID keyID);
     Payload loadAndDecrypt(BucketPath bucketPath, KeySource keySource);
+    PayloadStream loadAndDecryptStream(BucketPath bucketPath, KeySource keySource);
 }

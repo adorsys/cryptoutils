@@ -157,7 +157,7 @@ public class ZipFileHelper {
                     eof = value == -1;
                     if (! eof) {
                         sum++;
-                        LOGGER.info("wrote " + sum);
+//                        LOGGER.info("wrote " + sum);
                         zos.write(value);
                     }
                 } else {

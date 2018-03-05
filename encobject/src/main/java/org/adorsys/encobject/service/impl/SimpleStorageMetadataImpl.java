@@ -47,15 +47,21 @@ public class SimpleStorageMetadataImpl implements StorageMetadata {
         if (storageMetadata.getUri() != null) {
             setUri(URI.create(storageMetadata.getUri().toString()));
         }
-        for (String key : storageMetadata.getUserMetadata().keySet()) {
-            getUserMetadata().put(key, storageMetadata.getUserMetadata().get(key));
-        }
+        mergeUserMetadata(storageMetadata.getUserMetadata());
         setETag(storageMetadata.getETag());
         setCreationDate(storageMetadata.getCreationDate());
         setLastModified(storageMetadata.getLastModified());
         setSize(storageMetadata.getSize());
         setShouldBeCompressed(storageMetadata.getShouldBeCompressed());
         setContentType(storageMetadata.getContentType());
+    }
+
+    public void mergeUserMetadata(UserMetaData otherUserMetadata) {
+        if (otherUserMetadata != null) {
+            for (String key : otherUserMetadata.keySet()) {
+                getUserMetadata().put(key, otherUserMetadata.get(key));
+            }
+        }
     }
 
     @Override

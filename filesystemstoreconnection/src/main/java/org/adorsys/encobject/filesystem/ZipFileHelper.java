@@ -1,5 +1,6 @@
 package org.adorsys.encobject.filesystem;
 
+import org.adorsys.cryptoutils.exceptions.BaseException;
 import org.adorsys.cryptoutils.exceptions.BaseExceptionHandler;
 import org.adorsys.encobject.complextypes.BucketDirectory;
 import org.adorsys.encobject.complextypes.BucketPath;
@@ -9,6 +10,7 @@ import org.adorsys.encobject.domain.StorageMetadata;
 import org.adorsys.encobject.domain.StorageType;
 import org.adorsys.encobject.exceptions.StorageConnectionException;
 import org.adorsys.encobject.service.impl.SimplePayloadImpl;
+import org.adorsys.encobject.service.impl.SimplePayloadStreamImpl;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
 import org.slf4j.Logger;
@@ -19,6 +21,7 @@ import java.io.BufferedOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
+import java.io.InputStream;
 import java.nio.file.FileSystemException;
 import java.util.UUID;
 import java.util.zip.ZipEntry;
@@ -92,6 +95,87 @@ public class ZipFileHelper {
                 }
             }
         }
+    }
+
+    public void writeZip(BucketPath bucketPath, SimplePayloadStreamImpl payloadStream) {
+        payloadStream.getStorageMetadata().setType(StorageType.BLOB);
+        payloadStream.getStorageMetadata().setName(BucketPathUtil.getAsString(bucketPath));
+        byte[] storageMetadata = gsonHelper.toJson(payloadStream.getStorageMetadata()).getBytes();
+
+        ZipOutputStream zos = null;
+        try {
+            createDirectoryIfNecessary(bucketPath);
+            File tempFile = BucketPathFileHelper.getAsFile(baseDir.append(bucketPath.add(ZIP_SUFFIX).add("." + UUID.randomUUID().toString())));
+            if (tempFile.exists()) {
+                throw new StorageConnectionException("Temporary File exists. This must not happen." + tempFile);
+            }
+            LOGGER.debug("write temporary zip file to " + tempFile);
+
+            zos = new ZipOutputStream(new BufferedOutputStream(new FileOutputStream(tempFile)));
+
+            zos.putNextEntry(new ZipEntry(ZIP_STORAGE_METADATA_JSON));
+            zos.write(storageMetadata, 0, storageMetadata.length);
+            zos.closeEntry();
+
+            zos.putNextEntry(new ZipEntry(ZIP_CONTENT_BINARY));
+            writeInputStreamToZos(payloadStream.openStream(), zos);
+            zos.closeEntry();
+
+            zos.close();
+            zos = null;
+
+            File origFile = BucketPathFileHelper.getAsFile(baseDir.append(bucketPath.add(ZIP_SUFFIX)));
+            if (origFile.exists()) {
+                LOGGER.info("ACHTUNG, file existiert bereits, wird nun neu verlinkt " + bucketPath);
+                FileUtils.forceDelete(origFile);
+            }
+            FileUtils.moveFile(tempFile, origFile);
+        } catch (Exception e) {
+            throw BaseExceptionHandler.handle(e);
+        } finally {
+            if (zos != null) {
+                try {
+                    zos.close();
+                } catch (Exception e) {
+                    LOGGER.error("error during close of zip output stream for file " + bucketPath);
+                }
+            }
+        }
+    }
+
+    private void writeInputStreamToZos(InputStream inputStream, ZipOutputStream zos) {
+        try {
+            LOGGER.info("OK!, receive an inputstream");
+            int available = 0;
+            long sum = 0;
+            boolean eof = false;
+            while (!eof) {
+                available = inputStream.available();
+                if (available <= 1) {
+                    // be blocked, until unexpected EOF Exception or Data availabel of expected EOF
+                    int value = inputStream.read();
+                    eof = value == -1;
+                    if (! eof) {
+                        sum++;
+                        LOGGER.info("wrote " + sum);
+                        zos.write(value);
+                    }
+                } else {
+                    byte[] bytes = new byte[available];
+                    int read = inputStream.read(bytes, 0, available);
+                    if (read != available) {
+                        throw new BaseException("expected to read " + available + " bytes, but read " + read + " bytes");
+                    }
+                    sum += read;
+                    zos.write(bytes, 0, read);
+                    LOGGER.info("wrote " + sum);
+                }
+            }
+            LOGGER.info("finished writing " + sum + " bytes");
+        } catch (Exception e) {
+            throw BaseExceptionHandler.handle(e);
+        }
+
     }
 
     public Payload readZip(BucketPath bucketPath) {

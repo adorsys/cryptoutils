@@ -1,10 +1,12 @@
 package org.adorsys.encobject.filesystem;
 
 import org.adorsys.cryptoutils.exceptions.BaseExceptionHandler;
+import org.adorsys.cryptoutils.exceptions.NYIException;
 import org.adorsys.encobject.complextypes.BucketDirectory;
 import org.adorsys.encobject.complextypes.BucketPath;
 import org.adorsys.encobject.complextypes.BucketPathUtil;
 import org.adorsys.encobject.domain.Payload;
+import org.adorsys.encobject.domain.PayloadStream;
 import org.adorsys.encobject.domain.StorageMetadata;
 import org.adorsys.encobject.domain.StorageType;
 import org.adorsys.encobject.exceptions.StorageConnectionException;
@@ -15,6 +17,7 @@ import org.adorsys.encobject.filesystem.exceptions.FolderDeleteException;
 import org.adorsys.encobject.filesystem.exceptions.FolderIsAFileException;
 import org.adorsys.encobject.service.api.ExtendedStoreConnection;
 import org.adorsys.encobject.service.impl.SimplePayloadImpl;
+import org.adorsys.encobject.service.impl.SimplePayloadStreamImpl;
 import org.adorsys.encobject.service.impl.SimpleStorageMetadataImpl;
 import org.adorsys.encobject.types.ListRecursiveFlag;
 import org.apache.commons.io.FileUtils;
@@ -139,6 +142,12 @@ public class FileSystemExtendedStorageConnection implements ExtendedStoreConnect
     }
 
     @Override
+    public void putBlobStream(BucketPath bucketPath, PayloadStream payloadStream) {
+        zipFileHelper.writeZip(bucketPath, new SimplePayloadStreamImpl(payloadStream));
+
+    }
+
+    @Override
     public StorageMetadata getStorageMetadata(BucketPath bucketPath) {
         return zipFileHelper.readZipMetadataOnly(bucketPath);
     }
@@ -146,6 +155,11 @@ public class FileSystemExtendedStorageConnection implements ExtendedStoreConnect
     @Override
     public Payload getBlob(BucketPath bucketPath) {
         return zipFileHelper.readZip(bucketPath);
+    }
+
+    @Override
+    public PayloadStream getBlobStream(BucketPath bucketPath) {
+        throw new NYIException();
     }
 
     @Override

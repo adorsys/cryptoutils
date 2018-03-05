@@ -2,6 +2,7 @@ package org.adorsys.encobject.service.api;
 
 import org.adorsys.encobject.complextypes.BucketPath;
 import org.adorsys.encobject.domain.Payload;
+import org.adorsys.encobject.domain.PayloadStream;
 import org.adorsys.encobject.types.KeyID;
 
 /**
@@ -9,6 +10,6 @@ import org.adorsys.encobject.types.KeyID;
  */
 public interface EncryptedPersistenceService {
     void encryptAndPersist(BucketPath bucketPath, Payload payload, KeySource keySource, KeyID keyID);
-
+    void encryptAndPersist(BucketPath bucketPath, PayloadStream payloadStream, KeySource keySource, KeyID keyID);
     Payload loadAndDecrypt(BucketPath bucketPath, KeySource keySource);
 }

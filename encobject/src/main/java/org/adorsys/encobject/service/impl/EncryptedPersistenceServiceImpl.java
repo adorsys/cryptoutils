@@ -22,7 +22,7 @@ public class EncryptedPersistenceServiceImpl implements EncryptedPersistenceServ
     private final static Logger LOGGER = LoggerFactory.getLogger(EncryptedPersistenceServiceImpl.class);
     private static final String ENCRYPTION_SERVICE = "EncryptedPersistenceServiceImpl.ENCRYPTION_SERVICE";
     private static final String CHUNKED_ENCRYPTION = "EncryptedPersistenceServiceImpl.CHUNKED_ENCRYPTION";
-    private static final int GLOBAL_CHUNK_SIZE = 1024*1024;
+    private static final int GLOBAL_CHUNK_SIZE = 4096;
     public int chunkSize = GLOBAL_CHUNK_SIZE;
 
     ExtendedStoreConnection extendedStoreConnection;

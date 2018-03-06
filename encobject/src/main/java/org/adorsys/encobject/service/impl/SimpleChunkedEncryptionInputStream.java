@@ -48,7 +48,7 @@ public class SimpleChunkedEncryptionInputStream extends InputStream {
             return -1;
         }
         if (encryptedBytes != null && encryptedBytesIndex < encryptedBytes.length) {
-            return encryptedBytes[encryptedBytesIndex++];
+            return encryptedBytes[encryptedBytesIndex++] & 0xFF;
         }
         if (encryptedBytes != null && encryptedBytesIndex == encryptedBytes.length) {
             encryptedBytesIndex++;
@@ -114,6 +114,6 @@ public class SimpleChunkedEncryptionInputStream extends InputStream {
         }
 
         encryptedBytesIndex = 0;
-        return encryptedBytes[encryptedBytesIndex++];
+        return encryptedBytes[encryptedBytesIndex++] & 0xFF;
     }
 }

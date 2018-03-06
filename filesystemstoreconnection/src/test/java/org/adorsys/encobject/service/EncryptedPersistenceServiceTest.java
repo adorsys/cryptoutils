@@ -29,11 +29,11 @@ public class EncryptedPersistenceServiceTest {
     @Test
     public void testVerySimpleEncryption() {
         EncryptionService encryptionService = new VerySimpleEncryptionService();
-        String content = "Der Affe ist ein Affe und das bleibt auch so";
-        byte[] encrypted = encryptionService.encrypt(content.getBytes(), null, null, null);
+        byte[] content = getTrickyContent();
+        byte[] encrypted = encryptionService.encrypt(content, null, null, null);
         byte[] decrypted = encryptionService.decrypt(encrypted, null);
-        Assert.assertFalse(Arrays.equals(content.getBytes(), encrypted));
-        Assert.assertTrue(Arrays.equals(content.getBytes(), decrypted));
+        Assert.assertFalse(Arrays.equals(content, encrypted));
+        Assert.assertTrue(Arrays.equals(content, decrypted));
 
     }
 
@@ -44,19 +44,16 @@ public class EncryptedPersistenceServiceTest {
             EncryptionService encryptionService = new VerySimpleEncryptionService();
             EncryptedPersistenceServiceImpl service = new EncryptedPersistenceServiceImpl(storageConnection, encryptionService);
             BucketPath bucketPath = new BucketPath("folder1/file1");
-            String content = "Der Affe ist ein Affe und das bleibt auch so";
-            InputStream inputStream = new ByteArrayInputStream(content.getBytes());
+            byte[] content = getTrickyContent();
+            InputStream inputStream = new ByteArrayInputStream(content);
             PayloadStream payLoadStream = new SimplePayloadStreamImpl(new SimpleStorageMetadataImpl(), inputStream);
             service.encryptAndPersist(bucketPath, payLoadStream, null, null);
             Payload returnedPayload = service.loadAndDecrypt(bucketPath, null);
-            LOGGER.debug("vorher:" + content);
-            String nachher = new String(returnedPayload.getData());
-            LOGGER.debug("nachher:" + nachher);
-            Assert.assertEquals(content, nachher);
+            byte[] nachher = returnedPayload.getData();
+            Assert.assertTrue(Arrays.equals(content, nachher));
             PayloadStream returnedPayloadStream = service.loadAndDecryptStream(bucketPath, null);
-            String nachherStream = new String(IOUtils.toByteArray(returnedPayloadStream.openStream()));
-            LOGGER.debug("nachherStream:" + nachherStream);
-            Assert.assertEquals(content, nachherStream);
+            byte[] nachherStream = IOUtils.toByteArray(returnedPayloadStream.openStream());
+            Assert.assertTrue(Arrays.equals(content, nachherStream));
         } catch (Exception e) {
             throw BaseExceptionHandler.handle(e);
         }
@@ -71,19 +68,16 @@ public class EncryptedPersistenceServiceTest {
             EncryptedPersistenceServiceImpl service = new EncryptedPersistenceServiceImpl(storageConnection, encryptionService);
             service.chunkSize = 4;
             BucketPath bucketPath = new BucketPath("folder1/file1");
-            String content = "Der Affe ist ein Affe und das bleibt auch so";
-            InputStream inputStream = new ByteArrayInputStream(content.getBytes());
+            byte[] content = getTrickyContent();
+            InputStream inputStream = new ByteArrayInputStream(content);
             PayloadStream payLoadStream = new SimplePayloadStreamImpl(new SimpleStorageMetadataImpl(), inputStream);
             service.encryptAndPersist(bucketPath, payLoadStream, null, null);
             Payload returnedPayload = service.loadAndDecrypt(bucketPath, null);
-            LOGGER.debug("vorher:" + content);
-            String nachher = new String(returnedPayload.getData());
-            LOGGER.debug("nachher:" + nachher);
-            Assert.assertEquals(content, nachher);
+            byte[] nachher = returnedPayload.getData();
+            Assert.assertTrue(Arrays.equals(content, nachher));
             PayloadStream returnedPayloadStream = service.loadAndDecryptStream(bucketPath, null);
-            String nachherStream = new String(IOUtils.toByteArray(returnedPayloadStream.openStream()));
-            LOGGER.debug("nachherStream:" + nachherStream);
-            Assert.assertEquals(content, nachherStream);
+            byte[] nachherStream = IOUtils.toByteArray(returnedPayloadStream.openStream());
+            Assert.assertTrue(Arrays.equals(content, nachherStream));
         } catch (Exception e) {
             throw BaseExceptionHandler.handle(e);
         }
@@ -98,22 +92,31 @@ public class EncryptedPersistenceServiceTest {
             EncryptedPersistenceServiceImpl service = new EncryptedPersistenceServiceImpl(storageConnection, encryptionService);
             service.chunkSize = 30;
             BucketPath bucketPath = new BucketPath("folder1/file1");
-            String content = "Der Affe ist ein Affe und das bleibt auch so";
-            InputStream inputStream = new ByteArrayInputStream(content.getBytes());
+            byte[] content = getTrickyContent();
+            InputStream inputStream = new ByteArrayInputStream(content);
             PayloadStream payLoadStream = new SimplePayloadStreamImpl(new SimpleStorageMetadataImpl(), inputStream);
             service.encryptAndPersist(bucketPath, payLoadStream, null, null);
             Payload returnedPayload = service.loadAndDecrypt(bucketPath, null);
-            LOGGER.debug("vorher:" + content);
-            String nachher = new String(returnedPayload.getData());
-            LOGGER.debug("nachher:" + nachher);
-            Assert.assertEquals(content, nachher);
+            byte[] nachher = returnedPayload.getData();
+            Assert.assertTrue(Arrays.equals(content, nachher));
             PayloadStream returnedPayloadStream = service.loadAndDecryptStream(bucketPath, null);
-            String nachherStream = new String(IOUtils.toByteArray(returnedPayloadStream.openStream()));
-            LOGGER.debug("nachherStream:" + nachherStream);
-            Assert.assertEquals(content, nachherStream);
+            byte[] nachherStream = IOUtils.toByteArray(returnedPayloadStream.openStream());
+            Assert.assertTrue(Arrays.equals(content, nachherStream));
         } catch (Exception e) {
             throw BaseExceptionHandler.handle(e);
         }
 
+    }
+
+    byte[] getTrickyContent() {
+        int size = 100;
+        byte[] result = new byte[size];
+        for (int i = 0; i < size ; i++) {
+            result[i] = (byte) i;
+            if (i % 10 == 0) {
+                result[i] = -1;
+            }
+        }
+        return result;
     }
 }

@@ -40,7 +40,7 @@ public class SimpleChunkedDecryptionInputStream extends InputStream {
             return -1;
         }
         if (decryptedBytes != null && decryptedBytesIndex < decryptedBytes.length) {
-            return decryptedBytes[decryptedBytesIndex++];
+            return decryptedBytes[decryptedBytesIndex++] & 0xFF;
         }
 
         if (eof) {
@@ -56,6 +56,10 @@ public class SimpleChunkedDecryptionInputStream extends InputStream {
         while (!(eof || delimiterFound)) {
             // LOGGER.debug("eof " + eof + " delimiterFound " + delimiterFound);
             // be blocked, until unexpected EOF Exception or Data availabel of expected EOF
+
+            int available = source.available();
+            // LOGGER.debug("availeble bytes " + available + " read so far " + sum);
+
             int value = source.read();
             eof = value == -1;
             delimiterFound = (value == DELIMITER);
@@ -75,18 +79,18 @@ public class SimpleChunkedDecryptionInputStream extends InputStream {
                 return -1;
             }
             decryptedBytes = encryptionService.decrypt(encryptedBytes, keySource);
-            LOGGER.debug("decrypted last chunk of síze " + encryptedBytes.length + " total bytes read so far " + sum);
+            LOGGER.debug("decrypted last chunk of síze " + encryptedBytes.length + " to " + decryptedBytes.length + " total bytes read so far " + sum);
 
         } else {
             if (encryptedBytes == null) {
                 throw new BaseException("Programming Error. expected encrypted byets not to be null");
             }
             decryptedBytes = encryptionService.decrypt(encryptedBytes, keySource);
-            LOGGER.debug("decrypted next chunk of síze " + encryptedBytes.length + " total bytes read so far " + sum);
+            LOGGER.debug("decrypted last chunk of síze " + encryptedBytes.length + " to " + decryptedBytes.length + " total bytes read so far " + sum);
         }
 
         decryptedBytesIndex = 0;
-        return decryptedBytes[decryptedBytesIndex++];
+        return decryptedBytes[decryptedBytesIndex++] & 0xFF;
     }
 
     public static byte[] add(byte[] byteArray1, byte[] byteArray2) {

@@ -1,7 +1,6 @@
 package org.adorsys.encobject.filesystem;
 
 import org.adorsys.cryptoutils.exceptions.BaseExceptionHandler;
-import org.adorsys.cryptoutils.exceptions.NYIException;
 import org.adorsys.encobject.complextypes.BucketDirectory;
 import org.adorsys.encobject.complextypes.BucketPath;
 import org.adorsys.encobject.complextypes.BucketPathUtil;
@@ -143,7 +142,7 @@ public class FileSystemExtendedStorageConnection implements ExtendedStoreConnect
 
     @Override
     public void putBlobStream(BucketPath bucketPath, PayloadStream payloadStream) {
-        zipFileHelper.writeZip(bucketPath, new SimplePayloadStreamImpl(payloadStream));
+        zipFileHelper.writeZipStream(bucketPath, new SimplePayloadStreamImpl(payloadStream));
 
     }
 
@@ -159,7 +158,7 @@ public class FileSystemExtendedStorageConnection implements ExtendedStoreConnect
 
     @Override
     public PayloadStream getBlobStream(BucketPath bucketPath) {
-        throw new NYIException();
+        return zipFileHelper.readZipStream(bucketPath);
     }
 
     @Override

@@ -1,7 +1,6 @@
 package org.adorsys.encobject.service.impl;
 
 import org.adorsys.cryptoutils.exceptions.BaseException;
-import org.adorsys.cryptoutils.exceptions.NYIException;
 import org.adorsys.encobject.complextypes.BucketPath;
 import org.adorsys.encobject.domain.Payload;
 import org.adorsys.encobject.domain.PayloadStream;
@@ -65,9 +64,9 @@ public class EncryptedPersistenceServiceImpl implements EncryptedPersistenceServ
         payload.getStorageMetadata().getUserMetadata().remove(ENCRYPTION_SERVICE);
         if (encryptionType.equals(encryptionService.getClass().toString())) {
             String chunkedString = payload.getStorageMetadata().getUserMetadata().find(CHUNKED_ENCRYPTION);
-            payload.getStorageMetadata().getUserMetadata().remove(CHUNKED_ENCRYPTION);
             Boolean chunked = false;
             if (chunkedString != null) {
+                payload.getStorageMetadata().getUserMetadata().remove(CHUNKED_ENCRYPTION);
                 chunked = "TRUE".equals(chunkedString.toUpperCase());
             }
             LOGGER.info("chunked:" + chunked);
@@ -79,7 +78,7 @@ public class EncryptedPersistenceServiceImpl implements EncryptedPersistenceServ
                 while (st.hasMoreElements()) {
                     byte[] bytes = st.nextToken().getBytes();
                     byte[] decryptDataChunk = encryptionService.decrypt(bytes, keySource);
-                    decryptData = add(decryptData, decryptDataChunk);
+                    decryptData = SimpleChunkedDecryptionInputStream.add(decryptData, decryptDataChunk);
                 }
             } else {
                 decryptData = encryptionService.decrypt(payload.getData(), keySource);
@@ -92,22 +91,18 @@ public class EncryptedPersistenceServiceImpl implements EncryptedPersistenceServ
 
     @Override
     public PayloadStream loadAndDecryptStream(BucketPath bucketPath, KeySource keySource) {
-        throw new NYIException();
-    }
+        PayloadStream payloadStream = extendedStoreConnection.getBlobStream(bucketPath);
+        String encryptionType = payloadStream.getStorageMetadata().getUserMetadata().get(ENCRYPTION_SERVICE);
+        payloadStream.getStorageMetadata().getUserMetadata().remove(ENCRYPTION_SERVICE);
+        if (encryptionType.equals(encryptionService.getClass().toString())) {
+            String chunkedString = payloadStream.getStorageMetadata().getUserMetadata().find(CHUNKED_ENCRYPTION);
+            if (chunkedString != null) {
+                payloadStream.getStorageMetadata().getUserMetadata().remove(CHUNKED_ENCRYPTION);
+            }
 
-    private byte[] add(byte[] byteArray1, byte[] byteArray2) {
-        if (byteArray1 == null) {
-            return byteArray2;
+            return new SimplePayloadStreamImpl(payloadStream.getStorageMetadata(), new SimpleChunkedDecryptionInputStream(payloadStream.openStream(), encryptionService, keySource));
         }
-        byte[] result = new byte[byteArray1.length + byteArray2.length];
-        int i = 0;
-        for (; i<byteArray1.length; i++) {
-            result[i] = byteArray1[i];
-        }
-        for (int j = 0; j<byteArray2.length; j++) {
-            result[i+j] = byteArray2[j];
-        }
-        return result;
+        throw new BaseException("expected encryptionService of class " + encryptionType + " but was " + encryptionService.getClass().toString());
     }
 
 

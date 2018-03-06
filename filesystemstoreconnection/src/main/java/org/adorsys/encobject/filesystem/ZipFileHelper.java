@@ -6,6 +6,7 @@ import org.adorsys.encobject.complextypes.BucketDirectory;
 import org.adorsys.encobject.complextypes.BucketPath;
 import org.adorsys.encobject.complextypes.BucketPathUtil;
 import org.adorsys.encobject.domain.Payload;
+import org.adorsys.encobject.domain.PayloadStream;
 import org.adorsys.encobject.domain.StorageMetadata;
 import org.adorsys.encobject.domain.StorageType;
 import org.adorsys.encobject.exceptions.StorageConnectionException;
@@ -97,7 +98,7 @@ public class ZipFileHelper {
         }
     }
 
-    public void writeZip(BucketPath bucketPath, SimplePayloadStreamImpl payloadStream) {
+    public void writeZipStream(BucketPath bucketPath, SimplePayloadStreamImpl payloadStream) {
         payloadStream.getStorageMetadata().setType(StorageType.BLOB);
         payloadStream.getStorageMetadata().setName(BucketPathUtil.getAsString(bucketPath));
         byte[] storageMetadata = gsonHelper.toJson(payloadStream.getStorageMetadata()).getBytes();
@@ -197,6 +198,25 @@ public class ZipFileHelper {
             }
             Payload payload = new SimplePayloadImpl(storageMetadata, data);
             return payload;
+        } catch (Exception e) {
+            throw BaseExceptionHandler.handle(e);
+        }
+    }
+
+    public PayloadStream readZipStream(BucketPath bucketPath) {
+        try {
+            StorageMetadata storageMetadata = readZipMetadataOnly(bucketPath);
+
+            File file = BucketPathFileHelper.getAsFile(baseDir.append(bucketPath.add(ZIP_SUFFIX)));
+            ZipInputStream zis = new ZipInputStream(new BufferedInputStream(new FileInputStream(file)));
+            ZipEntry entry;
+            while ((entry = zis.getNextEntry()) != null) {
+                if (entry.getName().equals(ZIP_CONTENT_BINARY)) {
+                    return new SimplePayloadStreamImpl(storageMetadata, zis);
+                }
+                zis.closeEntry();
+            }
+            throw new StorageConnectionException("Zipfile " + bucketPath + " does not have entry for " + ZIP_CONTENT_BINARY);
         } catch (Exception e) {
             throw BaseExceptionHandler.handle(e);
         }

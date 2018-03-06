@@ -42,6 +42,15 @@ public class SimpleChunkedEncryptionInputStream extends InputStream {
         this.shouldBeCompressed = shouldBeCompressed;
     }
 
+    @Override
+    public int available() {
+        if (encryptedBytes == null ) {
+            return 0;
+        }
+        return encryptedBytes.length - encryptedBytesIndex;
+    }
+
+    @Override
     public int read() throws IOException {
         if (eof && encryptedBytes != null && encryptedBytesIndex == encryptedBytes.length) {
             LOGGER.debug("No more encrypted bytes to return");

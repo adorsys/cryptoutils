@@ -1,6 +1,7 @@
 package org.adorsys.encobject.service.impl;
 
 import org.adorsys.cryptoutils.exceptions.BaseException;
+import org.adorsys.cryptoutils.exceptions.BaseExceptionHandler;
 import org.adorsys.encobject.service.api.EncryptionService;
 import org.adorsys.encobject.service.api.KeySource;
 import org.slf4j.Logger;
@@ -27,6 +28,8 @@ public class SimpleChunkedDecryptionInputStream extends InputStream {
     private byte[] decryptedBytes = null;
     private int decryptedBytesIndex = 0;
 
+    private byte[] restBytes = null;
+    private boolean delimiterFound = false;
 
     public SimpleChunkedDecryptionInputStream(InputStream inputStream, EncryptionService encryptionService, KeySource keySource) {
         this.source = inputStream;
@@ -34,6 +37,15 @@ public class SimpleChunkedDecryptionInputStream extends InputStream {
         this.keySource = keySource;
     }
 
+    @Override
+    public int available() {
+        if (decryptedBytes == null) {
+            return 0;
+        }
+        return decryptedBytes.length - decryptedBytesIndex;
+    }
+
+    @Override
     public int read() throws IOException {
         if (eof && decryptedBytes != null && decryptedBytesIndex == decryptedBytes.length) {
             LOGGER.debug("No more decrypted bytes to return");
@@ -44,53 +56,98 @@ public class SimpleChunkedDecryptionInputStream extends InputStream {
         }
 
         if (eof) {
-            throw new BaseException("Expected stream not to be finished");
+            return -1;
         }
 
-        // Jetzt muss gelesen werden, bis wieder ein Delimiter gefunden wurde, oder der Stream zu Ende
-        LOGGER.debug("es müssen neue bytes zum lesen bereitgestellt werden");
-        byte[] encryptedBytes = null;
-
-        boolean delimiterFound = false;
-        // Jetzt lesen wir solange, bis ende oder chungsize erreicht
-        while (!(eof || delimiterFound)) {
-            // LOGGER.debug("eof " + eof + " delimiterFound " + delimiterFound);
-            // be blocked, until unexpected EOF Exception or Data availabel of expected EOF
-
-            int available = source.available();
-            // LOGGER.debug("availeble bytes " + available + " read so far " + sum);
-
-            int value = source.read();
-            eof = value == -1;
-            delimiterFound = (value == DELIMITER);
-            if (! (eof  || delimiterFound)) {
-                byte[] newEncryptedBytes = new byte[1];
-                newEncryptedBytes[0] = (byte) value;
-                encryptedBytes = add(encryptedBytes, newEncryptedBytes);
-                sum++;
-                // LOGGER.debug("READ 1 byte. total " + sum);
-            }
+        while (!ableToDecryptRestBytes()) {
+            findMoreRestBytes();
         }
-        // Es wurden bis zum Ende oder delimiter gelesen
+        decryptRestBytes();
 
-        if (eof) {
-            if (encryptedBytes == null) {
-                decryptedBytesIndex = decryptedBytes.length;
-                return -1;
-            }
-            decryptedBytes = encryptionService.decrypt(encryptedBytes, keySource);
-            LOGGER.debug("decrypted last chunk of síze " + encryptedBytes.length + " to " + decryptedBytes.length + " total bytes read so far " + sum);
-
-        } else {
-            if (encryptedBytes == null) {
-                throw new BaseException("Programming Error. expected encrypted byets not to be null");
-            }
-            decryptedBytes = encryptionService.decrypt(encryptedBytes, keySource);
-            LOGGER.debug("decrypted last chunk of síze " + encryptedBytes.length + " to " + decryptedBytes.length + " total bytes read so far " + sum);
+        if (decryptedBytes == null) {
+            return -1;
         }
-
-        decryptedBytesIndex = 0;
         return decryptedBytes[decryptedBytesIndex++] & 0xFF;
+    }
+
+    private boolean ableToDecryptRestBytes() {
+        LOGGER.info("ableToDecryptRestBytes");
+        if (restBytes == null) {
+            return false;
+        }
+        if (eof) {
+            return true;
+        }
+        return delimiterFound;
+    }
+
+    private void findMoreRestBytes() {
+        LOGGER.info("findMoreRestBytes");
+        try {
+            while (!(eof || delimiterFound)) {
+                // LOGGER.info("eof " + eof + " delimiterFound " + delimiterFound);
+                int available = 0;
+                available = source.available();
+                // LOGGER.info("available:" + available);
+                byte[] newBytes;
+                if (available <= 1) {
+                    newBytes = new byte[1];
+                    int value = source.read();
+                    eof = value == -1;
+                    if (!eof) {
+                        newBytes[0] = (byte) value;
+                    }
+                } else {
+                    newBytes = new byte[available];
+                    int read = source.read(newBytes);
+                    if (read != available) {
+                        throw new BaseException("expected to read " + available + " but read " + read);
+                    }
+                }
+                if (! eof) {
+                    for (int i = 0; !(delimiterFound) && i < newBytes.length; i++) {
+                        delimiterFound = newBytes[i] == DELIMITER;
+                    }
+                    sum += newBytes.length;
+                    // LOGGER.info("delimter founde:" + delimiterFound + " SUM " + sum);
+                    restBytes = add(restBytes, newBytes);
+                }
+            }
+        } catch (Exception e) {
+            throw BaseExceptionHandler.handle(e);
+        }
+    }
+
+
+    private void decryptRestBytes() {
+        int delPos = -1;
+        for (int i = 0; i < restBytes.length; i++) {
+            if (restBytes[i] == DELIMITER) {
+                delPos = i;
+                break;
+            }
+        }
+        if (delPos == -1) {
+            if (! eof) {
+                throw new BaseException("EOF expected");
+            }
+            if (restBytes == null || restBytes.length == 0) {
+                decryptedBytes = null;
+                decryptedBytesIndex = 0;
+            } else {
+                decryptedBytes = encryptionService.decrypt(restBytes, keySource);
+                LOGGER.debug("1decrypted " + restBytes.length + " to " + decryptedBytes.length);
+                decryptedBytesIndex = 0;
+                delimiterFound = false;
+            }
+        } else {
+            byte[] toBeDecrytped = copy(restBytes, 0, delPos);
+            restBytes = copy(restBytes, delPos + 1, restBytes.length);
+            decryptedBytes = encryptionService.decrypt(toBeDecrytped, keySource);
+            LOGGER.debug("2decrypted " + toBeDecrytped.length + " to " + decryptedBytes.length);
+            decryptedBytesIndex = 0;
+            delimiterFound = false;
+        }
     }
 
     public static byte[] add(byte[] byteArray1, byte[] byteArray2) {
@@ -107,5 +164,16 @@ public class SimpleChunkedDecryptionInputStream extends InputStream {
         }
         return result;
     }
+
+    private static byte[] copy(byte[] src, int beginIndex, int endIndex) {
+        int size = endIndex - beginIndex;
+        byte[] result = new byte[size];
+        for (int i = 0; i<size; i++) {
+            result[i] = src[beginIndex + i];
+        }
+        return result;
+    }
+
+
 }
 

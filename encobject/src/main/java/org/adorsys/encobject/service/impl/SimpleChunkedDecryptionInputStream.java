@@ -17,6 +17,7 @@ public class SimpleChunkedDecryptionInputStream extends InputStream {
     private final static Logger LOGGER = LoggerFactory.getLogger(SimpleChunkedDecryptionInputStream.class);
     public final static String DELIMITER_STRING = " ";
     private final static int DELIMITER = DELIMITER_STRING.getBytes()[0];
+    public static final int MINI_CHUNK = 4096;
 
     private InputStream source;
     private EncryptionService encryptionService;
@@ -47,11 +48,11 @@ public class SimpleChunkedDecryptionInputStream extends InputStream {
 
     @Override
     public int read() throws IOException {
-        if (eof && decryptedBytes != null && decryptedBytesIndex == decryptedBytes.length) {
-            LOGGER.debug("No more decrypted bytes to return");
-            return -1;
-        }
-        if (decryptedBytes != null && decryptedBytesIndex < decryptedBytes.length) {
+        if (decryptedBytes != null) {
+            if (decryptedBytesIndex == decryptedBytes.length) {
+                decryptedBytes = null;
+                return -1;
+            }
             return decryptedBytes[decryptedBytesIndex++] & 0xFF;
         }
 
@@ -71,48 +72,38 @@ public class SimpleChunkedDecryptionInputStream extends InputStream {
     }
 
     private boolean ableToDecryptRestBytes() {
-        LOGGER.info("ableToDecryptRestBytes");
-        if (restBytes == null) {
-            return false;
+        LOGGER.info("ableToDecryptRestBytes " + eof);
+        if (delimiterFound) {
+            return true;
         }
         if (eof) {
             return true;
         }
-        return delimiterFound;
+        return false;
     }
 
     private void findMoreRestBytes() {
-        LOGGER.info("findMoreRestBytes");
+        LOGGER.info("findMoreRestBytes " + sum + " eof " + eof);
         try {
+            byte[] newBytes = new byte[MINI_CHUNK];
+            int newByteIndex = 0;
+            int value;
             while (!(eof || delimiterFound)) {
-                // LOGGER.info("eof " + eof + " delimiterFound " + delimiterFound);
-                int available = 0;
-                available = source.available();
-                // LOGGER.info("available:" + available);
-                byte[] newBytes;
-                if (available <= 1) {
-                    newBytes = new byte[1];
-                    int value = source.read();
-                    eof = value == -1;
-                    if (!eof) {
-                        newBytes[0] = (byte) value;
-                    }
-                } else {
-                    newBytes = new byte[available];
-                    int read = source.read(newBytes);
-                    if (read != available) {
-                        throw new BaseException("expected to read " + available + " but read " + read);
-                    }
+                value = source.read();
+                sum++;
+                eof = value == -1;
+                if (!eof) {
+                    newBytes[newByteIndex++] = (byte) value;
+                    delimiterFound = value == DELIMITER;
                 }
-                if (! eof) {
-                    for (int i = 0; !(delimiterFound) && i < newBytes.length; i++) {
-                        delimiterFound = newBytes[i] == DELIMITER;
-                    }
-                    sum += newBytes.length;
-                    // LOGGER.info("delimter founde:" + delimiterFound + " SUM " + sum);
+                if (newByteIndex == MINI_CHUNK) {
                     restBytes = add(restBytes, newBytes);
+                    newBytes = new byte[MINI_CHUNK];
+                    newByteIndex = 0;
                 }
             }
+            byte[] bytesToAdd = copy(newBytes,0, newByteIndex);
+            restBytes = add(restBytes, bytesToAdd);
         } catch (Exception e) {
             throw BaseExceptionHandler.handle(e);
         }

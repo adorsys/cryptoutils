@@ -25,6 +25,9 @@ import java.util.Arrays;
  */
 public class EncryptedPersistenceServiceTest {
     private final static Logger LOGGER = LoggerFactory.getLogger(EncryptedPersistenceServiceTest.class);
+    public static final int LARGE_CHUNK_SIZE = 1024*1024;
+    public static final int VERY_SMALL_CHUNK_SIZE = 4;
+    public static final int SMALL_CHUNK_SIZE = 30;
 
     @Test
     public void testVerySimpleEncryption() {
@@ -39,74 +42,20 @@ public class EncryptedPersistenceServiceTest {
 
     @Test
     public void testWithLargeChunkSize() {
-        try {
-            ExtendedStoreConnection storageConnection = new FileSystemExtendedStorageConnection();
-            EncryptionService encryptionService = new VerySimpleEncryptionService();
-            EncryptedPersistenceServiceImpl service = new EncryptedPersistenceServiceImpl(storageConnection, encryptionService);
-            BucketPath bucketPath = new BucketPath("folder1/file1");
-            byte[] content = getTrickyContent();
-            InputStream inputStream = new ByteArrayInputStream(content);
-            PayloadStream payLoadStream = new SimplePayloadStreamImpl(new SimpleStorageMetadataImpl(), inputStream);
-            service.encryptAndPersistStream(bucketPath, payLoadStream, null, null);
-            Payload returnedPayload = service.loadAndDecrypt(bucketPath, null);
-            byte[] nachher = returnedPayload.getData();
-            Assert.assertTrue(Arrays.equals(content, nachher));
-            PayloadStream returnedPayloadStream = service.loadAndDecryptStream(bucketPath, null);
-            byte[] nachherStream = IOUtils.toByteArray(returnedPayloadStream.openStream());
-            Assert.assertTrue(Arrays.equals(content, nachherStream));
-        } catch (Exception e) {
-            throw BaseExceptionHandler.handle(e);
-        }
+        writeWithStreamAndLoadBytesAndStream(LARGE_CHUNK_SIZE, "folder1/large");
     }
 
-
     @Test
-    public void testWithVerySmalChunkSize() {
-        try {
-            ExtendedStoreConnection storageConnection = new FileSystemExtendedStorageConnection();
-            EncryptionService encryptionService = new VerySimpleEncryptionService();
-            EncryptedPersistenceServiceImpl service = new EncryptedPersistenceServiceImpl(storageConnection, encryptionService);
-            service.chunkSize = 4;
-            BucketPath bucketPath = new BucketPath("folder1/file1");
-            byte[] content = getTrickyContent();
-            InputStream inputStream = new ByteArrayInputStream(content);
-            PayloadStream payLoadStream = new SimplePayloadStreamImpl(new SimpleStorageMetadataImpl(), inputStream);
-            service.encryptAndPersistStream(bucketPath, payLoadStream, null, null);
-            Payload returnedPayload = service.loadAndDecrypt(bucketPath, null);
-            byte[] nachher = returnedPayload.getData();
-            Assert.assertTrue(Arrays.equals(content, nachher));
-            PayloadStream returnedPayloadStream = service.loadAndDecryptStream(bucketPath, null);
-            byte[] nachherStream = IOUtils.toByteArray(returnedPayloadStream.openStream());
-            Assert.assertTrue(Arrays.equals(content, nachherStream));
-        } catch (Exception e) {
-            throw BaseExceptionHandler.handle(e);
-        }
+    public void testWithASmalLChunkSize() {
+        writeWithStreamAndLoadBytesAndStream(SMALL_CHUNK_SIZE, "folder1/small");
 
     }
 
     @Test
-    public void testWithASmalChunkSize() {
-        try {
-            ExtendedStoreConnection storageConnection = new FileSystemExtendedStorageConnection();
-            EncryptionService encryptionService = new VerySimpleEncryptionService();
-            EncryptedPersistenceServiceImpl service = new EncryptedPersistenceServiceImpl(storageConnection, encryptionService);
-            service.chunkSize = 30;
-            BucketPath bucketPath = new BucketPath("folder1/file1");
-            byte[] content = getTrickyContent();
-            InputStream inputStream = new ByteArrayInputStream(content);
-            PayloadStream payLoadStream = new SimplePayloadStreamImpl(new SimpleStorageMetadataImpl(), inputStream);
-            service.encryptAndPersistStream(bucketPath, payLoadStream, null, null);
-            Payload returnedPayload = service.loadAndDecrypt(bucketPath, null);
-            byte[] nachher = returnedPayload.getData();
-            Assert.assertTrue(Arrays.equals(content, nachher));
-            PayloadStream returnedPayloadStream = service.loadAndDecryptStream(bucketPath, null);
-            byte[] nachherStream = IOUtils.toByteArray(returnedPayloadStream.openStream());
-            Assert.assertTrue(Arrays.equals(content, nachherStream));
-        } catch (Exception e) {
-            throw BaseExceptionHandler.handle(e);
-        }
-
+    public void testWithVerySmallChunkSize() {
+        writeWithStreamAndLoadBytesAndStream(VERY_SMALL_CHUNK_SIZE, "folder1/verysmall");
     }
+
 
     byte[] getTrickyContent() {
         int size = 100;
@@ -119,4 +68,29 @@ public class EncryptedPersistenceServiceTest {
         }
         return result;
     }
+
+    private void writeWithStreamAndLoadBytesAndStream(int chunkSize, String file) {
+        try {
+            ExtendedStoreConnection storageConnection = new FileSystemExtendedStorageConnection();
+            EncryptionService encryptionService = new VerySimpleEncryptionService();
+            EncryptedPersistenceServiceImpl service = new EncryptedPersistenceServiceImpl(storageConnection, encryptionService);
+            service.chunkSize = chunkSize;
+            BucketPath bucketPath = new BucketPath(file);
+            byte[] content = getTrickyContent();
+            InputStream inputStream = new ByteArrayInputStream(content);
+            PayloadStream payLoadStream = new SimplePayloadStreamImpl(new SimpleStorageMetadataImpl(), inputStream);
+            service.encryptAndPersistStream(bucketPath, payLoadStream, null, null);
+            Payload returnedPayload = service.loadAndDecrypt(bucketPath, null);
+            byte[] readPayoad = returnedPayload.getData();
+            Assert.assertTrue(Arrays.equals(content, readPayoad));
+            PayloadStream returnedPayloadStream = service.loadAndDecryptStream(bucketPath, null);
+            byte[] readPayloadStream = IOUtils.toByteArray(returnedPayloadStream.openStream());
+            Assert.assertTrue(Arrays.equals(content, readPayloadStream));
+        } catch (Exception e) {
+            throw BaseExceptionHandler.handle(e);
+        }
+    }
+
+
+
 }

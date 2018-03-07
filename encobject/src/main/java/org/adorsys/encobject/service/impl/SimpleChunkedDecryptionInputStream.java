@@ -51,12 +51,13 @@ public class SimpleChunkedDecryptionInputStream extends InputStream {
         if (decryptedBytes != null) {
             if (decryptedBytesIndex == decryptedBytes.length) {
                 decryptedBytes = null;
-                return -1;
+            } else {
+                return decryptedBytes[decryptedBytesIndex++] & 0xFF;
             }
-            return decryptedBytes[decryptedBytesIndex++] & 0xFF;
         }
 
         if (eof) {
+            LOGGER.info("2 return EOF after " + sum + " bytes");
             return -1;
         }
 
@@ -66,6 +67,7 @@ public class SimpleChunkedDecryptionInputStream extends InputStream {
         decryptRestBytes();
 
         if (decryptedBytes == null) {
+            LOGGER.info("3 return EOF after " + sum + " bytes");
             return -1;
         }
         return decryptedBytes[decryptedBytesIndex++] & 0xFF;
@@ -90,9 +92,9 @@ public class SimpleChunkedDecryptionInputStream extends InputStream {
             int value;
             while (!(eof || delimiterFound)) {
                 value = source.read();
-                sum++;
                 eof = value == -1;
                 if (!eof) {
+                    sum++;
                     newBytes[newByteIndex++] = (byte) value;
                     delimiterFound = value == DELIMITER;
                 }

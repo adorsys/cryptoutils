@@ -22,7 +22,7 @@ public class EncryptedPersistenceServiceImpl implements EncryptedPersistenceServ
     private final static Logger LOGGER = LoggerFactory.getLogger(EncryptedPersistenceServiceImpl.class);
     private static final String ENCRYPTION_SERVICE = "EncryptedPersistenceServiceImpl.ENCRYPTION_SERVICE";
     private static final String CHUNKED_ENCRYPTION = "EncryptedPersistenceServiceImpl.CHUNKED_ENCRYPTION";
-    private static final int GLOBAL_CHUNK_SIZE = 4096;
+    private static final int GLOBAL_CHUNK_SIZE = 1024*1024;
     public int chunkSize = GLOBAL_CHUNK_SIZE;
 
     ExtendedStoreConnection extendedStoreConnection;
@@ -39,22 +39,6 @@ public class EncryptedPersistenceServiceImpl implements EncryptedPersistenceServ
         payload.getStorageMetadata().getUserMetadata().put(ENCRYPTION_SERVICE, encryptionService.getClass().toString());
         SimplePayloadImpl newPayload = new SimplePayloadImpl(payload.getStorageMetadata(), encryptedData);
         extendedStoreConnection.putBlob(bucketPath, newPayload);
-    }
-
-    @Override
-    public void encryptAndPersist(BucketPath bucketPath, PayloadStream payloadStream, KeySource keySource, KeyID keyID) {
-        payloadStream.getStorageMetadata().getUserMetadata().put(ENCRYPTION_SERVICE, encryptionService.getClass().toString());
-        payloadStream.getStorageMetadata().getUserMetadata().put(CHUNKED_ENCRYPTION, "true");
-
-        InputStream encryptedStream = new SimpleChunkedEncryptionInputStream(
-                payloadStream.openStream(),
-                encryptionService,
-                chunkSize,
-                keySource,
-                keyID,
-                payloadStream.getStorageMetadata().getShouldBeCompressed()
-        );
-        extendedStoreConnection.putBlobStream(bucketPath,new SimplePayloadStreamImpl(payloadStream.getStorageMetadata(), encryptedStream));
     }
 
     @Override
@@ -87,6 +71,22 @@ public class EncryptedPersistenceServiceImpl implements EncryptedPersistenceServ
         } else {
             throw new BaseException("expected encryptionService of class " + encryptionType + " but was " + encryptionService.getClass().toString());
         }
+    }
+
+    @Override
+    public void encryptAndPersistStream(BucketPath bucketPath, PayloadStream payloadStream, KeySource keySource, KeyID keyID) {
+        payloadStream.getStorageMetadata().getUserMetadata().put(ENCRYPTION_SERVICE, encryptionService.getClass().toString());
+        payloadStream.getStorageMetadata().getUserMetadata().put(CHUNKED_ENCRYPTION, "true");
+
+        InputStream encryptedStream = new SimpleChunkedEncryptionInputStream(
+                payloadStream.openStream(),
+                encryptionService,
+                chunkSize,
+                keySource,
+                keyID,
+                payloadStream.getStorageMetadata().getShouldBeCompressed()
+        );
+        extendedStoreConnection.putBlobStream(bucketPath,new SimplePayloadStreamImpl(payloadStream.getStorageMetadata(), encryptedStream));
     }
 
     @Override

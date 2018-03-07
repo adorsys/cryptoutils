@@ -141,9 +141,19 @@ public class FileSystemExtendedStorageConnection implements ExtendedStoreConnect
     }
 
     @Override
+    public Payload getBlob(BucketPath bucketPath) {
+        return zipFileHelper.readZip(bucketPath);
+    }
+
+    @Override
     public void putBlobStream(BucketPath bucketPath, PayloadStream payloadStream) {
         zipFileHelper.writeZipStream(bucketPath, new SimplePayloadStreamImpl(payloadStream));
 
+    }
+
+    @Override
+    public PayloadStream getBlobStream(BucketPath bucketPath) {
+        return zipFileHelper.readZipStream(bucketPath);
     }
 
     @Override
@@ -151,15 +161,7 @@ public class FileSystemExtendedStorageConnection implements ExtendedStoreConnect
         return zipFileHelper.readZipMetadataOnly(bucketPath);
     }
 
-    @Override
-    public Payload getBlob(BucketPath bucketPath) {
-        return zipFileHelper.readZip(bucketPath);
-    }
 
-    @Override
-    public PayloadStream getBlobStream(BucketPath bucketPath) {
-        return zipFileHelper.readZipStream(bucketPath);
-    }
 
     @Override
     public void removeBlob(BucketPath bucketPath) {

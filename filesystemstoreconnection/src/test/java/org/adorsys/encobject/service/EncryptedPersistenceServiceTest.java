@@ -47,7 +47,7 @@ public class EncryptedPersistenceServiceTest {
             byte[] content = getTrickyContent();
             InputStream inputStream = new ByteArrayInputStream(content);
             PayloadStream payLoadStream = new SimplePayloadStreamImpl(new SimpleStorageMetadataImpl(), inputStream);
-            service.encryptAndPersist(bucketPath, payLoadStream, null, null);
+            service.encryptAndPersistStream(bucketPath, payLoadStream, null, null);
             Payload returnedPayload = service.loadAndDecrypt(bucketPath, null);
             byte[] nachher = returnedPayload.getData();
             Assert.assertTrue(Arrays.equals(content, nachher));
@@ -71,7 +71,7 @@ public class EncryptedPersistenceServiceTest {
             byte[] content = getTrickyContent();
             InputStream inputStream = new ByteArrayInputStream(content);
             PayloadStream payLoadStream = new SimplePayloadStreamImpl(new SimpleStorageMetadataImpl(), inputStream);
-            service.encryptAndPersist(bucketPath, payLoadStream, null, null);
+            service.encryptAndPersistStream(bucketPath, payLoadStream, null, null);
             Payload returnedPayload = service.loadAndDecrypt(bucketPath, null);
             byte[] nachher = returnedPayload.getData();
             Assert.assertTrue(Arrays.equals(content, nachher));
@@ -95,7 +95,7 @@ public class EncryptedPersistenceServiceTest {
             byte[] content = getTrickyContent();
             InputStream inputStream = new ByteArrayInputStream(content);
             PayloadStream payLoadStream = new SimplePayloadStreamImpl(new SimpleStorageMetadataImpl(), inputStream);
-            service.encryptAndPersist(bucketPath, payLoadStream, null, null);
+            service.encryptAndPersistStream(bucketPath, payLoadStream, null, null);
             Payload returnedPayload = service.loadAndDecrypt(bucketPath, null);
             byte[] nachher = returnedPayload.getData();
             Assert.assertTrue(Arrays.equals(content, nachher));

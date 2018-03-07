@@ -12,13 +12,14 @@ import java.util.List;
 public interface ExtendedStoreConnection {
 
     void putBlob(BucketPath bucketPath, Payload payload);
+    Payload getBlob(BucketPath bucketPath);
+
     void putBlobStream(BucketPath bucketPath, PayloadStream payloadStream);
+    PayloadStream getBlobStream(BucketPath bucketPath);
 
     @Deprecated
     void putBlob(BucketPath bucketPath, byte[] bytes);
 
-    Payload getBlob(BucketPath bucketPath);
-    PayloadStream getBlobStream(BucketPath bucketPath);
 
     StorageMetadata getStorageMetadata(BucketPath bucketPath);
 

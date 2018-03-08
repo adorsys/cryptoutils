@@ -1,6 +1,5 @@
 package org.adorsys.encobject.filesystem;
 
-import org.adorsys.cryptoutils.exceptions.BaseException;
 import org.adorsys.cryptoutils.exceptions.BaseExceptionHandler;
 import org.adorsys.encobject.complextypes.BucketDirectory;
 import org.adorsys.encobject.complextypes.BucketPath;
@@ -37,7 +36,6 @@ public class ZipFileHelper {
     protected static final String ZIP_STORAGE_METADATA_JSON = "StorageMetadata.json";
     protected static final String ZIP_CONTENT_BINARY = "Content.binary";
     protected static final String ZIP_SUFFIX = ".zip";
-    protected static final String FINAL_SIZE = "ZipFileHelper.FINAL_SIZE";
 
 
     protected BucketDirectory baseDir;
@@ -54,7 +52,6 @@ public class ZipFileHelper {
         payload.getStorageMetadata().setType(StorageType.BLOB);
         payload.getStorageMetadata().setName(BucketPathUtil.getAsString(bucketPath));
         byte[] content = payload.getData();
-        payload.getStorageMetadata().getUserMetadata().put(FINAL_SIZE, "" + content.length);
         byte[] storageMetadata = gsonHelper.toJson(payload.getStorageMetadata()).getBytes();
 
         ZipOutputStream zos = null;
@@ -104,6 +101,7 @@ public class ZipFileHelper {
         byte[] storageMetadata = gsonHelper.toJson(payloadStream.getStorageMetadata()).getBytes();
 
         ZipOutputStream zos = null;
+        InputStream is = null;
         try {
             createDirectoryIfNecessary(bucketPath);
             File tempFile = BucketPathFileHelper.getAsFile(baseDir.append(bucketPath.add(ZIP_SUFFIX).add("." + UUID.randomUUID().toString())));
@@ -118,11 +116,13 @@ public class ZipFileHelper {
             zos.write(storageMetadata, 0, storageMetadata.length);
             zos.closeEntry();
 
+            is = payloadStream.openStream();
             zos.putNextEntry(new ZipEntry(ZIP_CONTENT_BINARY));
-            writeInputStreamToZos(payloadStream.openStream(), zos);
-            zos.closeEntry();
+            IOUtils.copy(is, zos);
 
-            zos.close();
+            IOUtils.closeQuietly(is);
+            is = null;
+            IOUtils.closeQuietly(zos);
             zos = null;
 
             File origFile = BucketPathFileHelper.getAsFile(baseDir.append(bucketPath.add(ZIP_SUFFIX)));
@@ -135,49 +135,14 @@ public class ZipFileHelper {
             throw BaseExceptionHandler.handle(e);
         } finally {
             if (zos != null) {
-                try {
-                    zos.close();
-                } catch (Exception e) {
-                    LOGGER.error("error during close of zip output stream for file " + bucketPath);
-                }
+                IOUtils.closeQuietly(zos);
+            }
+            if (is != null) {
+                IOUtils.closeQuietly(is);
             }
         }
     }
 
-    private void writeInputStreamToZos(InputStream inputStream, ZipOutputStream zos) {
-        try {
-            LOGGER.info("OK!, receive an inputstream");
-            int available = 0;
-            long sum = 0;
-            boolean eof = false;
-            while (!eof) {
-                available = inputStream.available();
-                if (available <= 1) {
-                    // be blocked, until unexpected EOF Exception or Data availabel of expected EOF
-                    int value = inputStream.read();
-                    eof = value == -1;
-                    if (! eof) {
-                        sum++;
-//                        LOGGER.info("wrote " + sum);
-                        zos.write(value);
-                    }
-                } else {
-                    byte[] bytes = new byte[available];
-                    int read = inputStream.read(bytes, 0, available);
-                    if (read != available) {
-                        throw new BaseException("expected to read " + available + " bytes, but read " + read + " bytes");
-                    }
-                    sum += read;
-                    zos.write(bytes, 0, read);
-                    LOGGER.info("wrote " + sum);
-                }
-            }
-            LOGGER.info("finished writing " + sum + " bytes");
-        } catch (Exception e) {
-            throw BaseExceptionHandler.handle(e);
-        }
-
-    }
 
     public Payload readZip(BucketPath bucketPath) {
         try {
@@ -243,7 +208,6 @@ public class ZipFileHelper {
             }
 
             StorageMetadata storageMetadata = gsonHelper.fromJson(jsonString);
-            storageMetadata.getUserMetadata().remove(FINAL_SIZE);
             return storageMetadata;
         } catch (Exception e) {
             throw new RuntimeException(e);

@@ -62,7 +62,7 @@ public class JWEncryptionServiceImpl implements EncryptionService {
     }
 
     @Override
-    public byte[] decrypt(byte[] jweEncryptedBytes, KeySource keySource) {
+    public byte[] decrypt(byte[] jweEncryptedBytes, KeySource keySource, KeyID keyID) {
         try {
             String jweEncryptedObject = IOUtils.toString(jweEncryptedBytes, "UTF-8");
 
@@ -73,10 +73,13 @@ public class JWEncryptionServiceImpl implements EncryptionService {
             if (!encryptionType.equals(EncryptionType.JWE)) {
                 throw new BaseException("Expected EncryptionType is " + EncryptionType.JWE + " but was " + encryptionType);
             }
-            KeyID keyID = PersistenceLayerContentMetaInfoUtil.getKeyID(metaInfo);
-            KeyID keyID2 = new KeyID(jweObject.getHeader().getKeyID());
+            KeyID keyID2 = PersistenceLayerContentMetaInfoUtil.getKeyID(metaInfo);
+            KeyID keyID3 = new KeyID(jweObject.getHeader().getKeyID());
             if (!keyID.equals(keyID2)) {
                 throw new BaseException("die in der MetaInfo hinterlegte keyID " + keyID + " passt nicht zu der im header hinterlegten KeyID " + keyID2);
+            }
+            if (!keyID2.equals(keyID3)) {
+                throw new BaseException("die in der MetaInfo hinterlegte keyID " + keyID2 + " passt nicht zu der im header hinterlegten KeyID " + keyID3);
             }
             Key key = keySource.readKey(keyID);
 

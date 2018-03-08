@@ -37,7 +37,7 @@ public class ZipFileHelper {
     protected static final String ZIP_STORAGE_METADATA_JSON = "StorageMetadata.json";
     protected static final String ZIP_CONTENT_BINARY = "Content.binary";
     protected static final String ZIP_SUFFIX = ".zip";
-    protected static final String FINAL_SIZE = "FINAL_SIZE";
+    protected static final String FINAL_SIZE = "ZipFileHelper.FINAL_SIZE";
 
 
     protected BucketDirectory baseDir;

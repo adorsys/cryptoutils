@@ -9,5 +9,5 @@ import java.io.InputStream;
  */
 public interface EncryptionStreamService {
     InputStream getEncryptedInputStream(InputStream inputStream, KeySource keySource, KeyID keyID, Boolean compress);
-    InputStream getDecryptedInputStream(InputStream inputStream, KeySource keySource);
+    InputStream getDecryptedInputStream(InputStream inputStream, KeySource keySource, KeyID keyID);
 }

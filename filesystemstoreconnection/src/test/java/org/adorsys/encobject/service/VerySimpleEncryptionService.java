@@ -1,30 +1,42 @@
 package org.adorsys.encobject.service;
 
-import org.adorsys.cryptoutils.utils.HexUtil;
-import org.adorsys.encobject.service.api.EncryptionService;
+import org.adorsys.encobject.service.api.EncryptionStreamService;
 import org.adorsys.encobject.service.api.KeySource;
 import org.adorsys.encobject.types.KeyID;
+
+import java.io.IOException;
+import java.io.InputStream;
 
 /**
  * Created by peter on 05.03.18 at 16:37.
  */
-public class VerySimpleEncryptionService implements EncryptionService{
+public class VerySimpleEncryptionService implements EncryptionStreamService {
     @Override
-    public byte[] encrypt(byte[] data, KeySource keySource, KeyID keyID, Boolean compress) {
-        byte[] output = new byte[data.length];
-        for (int i = 0; i<data.length; i++) {
-            output[i] = (byte) (255 - (int) data[i]);
-        }
-        return HexUtil.convertBytesToHexString(output).getBytes();
+    public InputStream getEncryptedInputStream(InputStream inputStream, KeySource keySource, KeyID keyID, Boolean compress) {
+        return new VerySimpleEncryptionStream(inputStream);
     }
 
     @Override
-    public byte[] decrypt(byte[] data, KeySource keySource) {
-        byte[] realData = HexUtil.convertHexStringToBytes(new String(data));
-        byte[] output = new byte[realData.length];
-        for (int i = 0; i<realData.length; i++) {
-            output[i] = (byte) (255 - (int) realData[i]);
+    public InputStream getDecryptedInputStream(InputStream inputStream, KeySource keySource, KeyID keyID) {
+        return new VerySimpleEncryptionStream(inputStream);
+    }
+
+
+    private static class VerySimpleEncryptionStream extends InputStream {
+        private InputStream source;
+        public VerySimpleEncryptionStream(InputStream source) {
+            this.source = source;
         }
-        return output;
+
+        @Override
+        public int read() throws IOException{
+            int value = source.read();
+            if (value == -1) {
+                return value;
+            }
+            int newValue = (byte) (255 - (byte)value);
+            return newValue & 0xFF;
+        }
+
     }
 }

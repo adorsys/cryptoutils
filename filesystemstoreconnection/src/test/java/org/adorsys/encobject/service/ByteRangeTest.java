@@ -20,6 +20,7 @@ public class ByteRangeTest {
         LOGGER.info("i:" +i) ;
         LOGGER.info("i2:" +i2) ;
         LOGGER.info("b2:" +b2) ;
+
         // Siehe getTrickContent in EncryptedPersistenceServiceTest
     }
 }

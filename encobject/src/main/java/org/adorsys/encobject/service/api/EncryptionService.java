@@ -13,7 +13,7 @@ public interface EncryptionService {
      * @return daten, die aus einem unverschlüsseltem Header bestehen,
      */
     byte[] encrypt(byte[] data, KeySource keySource, KeyID keyID, Boolean compress);
-    byte[] decrypt(byte[] data, KeySource keySource);
+    byte[] decrypt(byte[] data, KeySource keySource, KeyID keyID);
 }
 
 

@@ -1,24 +1,19 @@
 package org.adorsys.encobject.userdata;
 
-import java.security.KeyStore;
-
-import javax.crypto.SecretKey;
-import javax.security.auth.callback.CallbackHandler;
-
 import org.adorsys.cryptoutils.exceptions.BaseExceptionHandler;
 import org.adorsys.encobject.complextypes.BucketPath;
 import org.adorsys.encobject.domain.KeyCredentials;
 import org.adorsys.encobject.domain.ObjectHandle;
 import org.adorsys.encobject.domain.Payload;
 import org.adorsys.encobject.exceptions.ObjectNotFoundException;
-import org.adorsys.encobject.service.impl.KeyCredentialBasedKeySourceImpl;
 import org.adorsys.encobject.params.KeyParams;
-import org.adorsys.encobject.service.impl.BlobStoreKeystorePersistenceImpl;
 import org.adorsys.encobject.service.api.EncryptedPersistenceService;
-import org.adorsys.encobject.service.impl.EncryptedPersistenceServiceImpl;
-import org.adorsys.encobject.service.api.EncryptionService;
+import org.adorsys.encobject.service.api.EncryptionStreamService;
 import org.adorsys.encobject.service.api.ExtendedStoreConnection;
 import org.adorsys.encobject.service.api.KeystorePersistence;
+import org.adorsys.encobject.service.impl.BlobStoreKeystorePersistenceImpl;
+import org.adorsys.encobject.service.impl.EncryptedPersistenceServiceImpl;
+import org.adorsys.encobject.service.impl.KeyCredentialBasedKeySourceImpl;
 import org.adorsys.encobject.service.impl.SimplePayloadImpl;
 import org.adorsys.encobject.types.KeyID;
 import org.adorsys.jkeygen.keystore.KeyStoreService;
@@ -26,6 +21,10 @@ import org.adorsys.jkeygen.keystore.SecretKeyData;
 import org.adorsys.jkeygen.keystore.SecretKeyEntry;
 import org.adorsys.jkeygen.pwd.PasswordCallbackHandler;
 import org.adorsys.jkeygen.secretkey.SecretKeyBuilder;
+
+import javax.crypto.SecretKey;
+import javax.security.auth.callback.CallbackHandler;
+import java.security.KeyStore;
 
 public class ObjectPersistenceAdapter {
 
@@ -36,7 +35,7 @@ public class ObjectPersistenceAdapter {
     private KeystorePersistence keystorePersistence;
     private KeyCredentialBasedKeySourceImpl keySource;
 
-    public ObjectPersistenceAdapter(EncryptionService encryptionService, ExtendedStoreConnection storeConnection, KeyCredentials keyCredentials, ObjectMapperSPI objectMapper) {
+    public ObjectPersistenceAdapter(EncryptionStreamService encryptionService, ExtendedStoreConnection storeConnection, KeyCredentials keyCredentials, ObjectMapperSPI objectMapper) {
         super();
         this.keyCredentials = keyCredentials;
         this.keySource = new KeyCredentialBasedKeySourceImpl(keyCredentials, keystorePersistence);

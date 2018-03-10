@@ -1,13 +1,12 @@
 package org.adorsys.encobject.service;
 
-import com.google.protobuf.ByteString;
 import junit.framework.Assert;
 import org.adorsys.cryptoutils.exceptions.BaseExceptionHandler;
 import org.adorsys.cryptoutils.utils.HexUtil;
+import org.adorsys.encobject.service.impl.AESEncryptionStreamServiceImpl;
 import org.adorsys.encobject.service.impl.generator.SecretKeyGeneratorImpl;
 import org.adorsys.encobject.types.KeyID;
 import org.adorsys.jkeygen.keystore.SecretKeyData;
-import org.adorsys.plooh.core.encrypt.SecretKeyAlgoFactory;
 import org.apache.commons.io.IOUtils;
 import org.junit.Test;
 import org.slf4j.Logger;
@@ -35,11 +34,11 @@ public class EncryptionTest {
 
             byte[] decrypted = "Der Affe ist ein Affe und das bleibt auch so".getBytes();
             InputStream decryptedStream = new ByteArrayInputStream(decrypted);
-            CipherInputStream encryptionStream = SecretKeyAlgoFactory.AES_SECRET_KEY_ALGO.createCipherInputStream(t.getSecretKey().getEncoded(), decryptedStream, Cipher.ENCRYPT_MODE);
+            CipherInputStream encryptionStream = AESEncryptionStreamServiceImpl.createCipherInputStream(t.getSecretKey().getEncoded(), decryptedStream, Cipher.ENCRYPT_MODE);
             byte[] encrypted = IOUtils.toByteArray(encryptionStream);
 
             InputStream encryptedInputStream = new ByteArrayInputStream(encrypted);
-            CipherInputStream decryptionStream = SecretKeyAlgoFactory.AES_SECRET_KEY_ALGO.createCipherInputStream(t.getSecretKey().getEncoded(), encryptedInputStream, Cipher.DECRYPT_MODE);
+            CipherInputStream decryptionStream = AESEncryptionStreamServiceImpl.createCipherInputStream(t.getSecretKey().getEncoded(), encryptedInputStream, Cipher.DECRYPT_MODE);
             byte[] redecrypted = IOUtils.toByteArray(decryptionStream);
 
             LOGGER.info("  decrypted : " + HexUtil.convertBytesToHexString(decrypted));
@@ -61,10 +60,6 @@ public class EncryptionTest {
         SecretKeyData secretKeyData = secretKeyGenerator.generate(documentKeyID.getValue(), null);
         SecretKey documentKey = secretKeyData.getSecretKey();
         return new KeyIDWithKey(documentKeyID, documentKey);
-    }
-
-    ByteString getSecretKeyAsByteString(SecretKey key) {
-        return ByteString.copyFrom(key.getEncoded());
     }
 
     private static class KeyIDWithKey {

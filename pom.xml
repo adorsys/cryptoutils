@@ -48,7 +48,8 @@
 		<module>jtstamp</module>
 		<module>jkeyutils</module>
 		<module>filesystemstoreconnection</module>
-	</modules>
+        <module>mongodbstorageconnection</module>
+    </modules>
 
 	<dependencyManagement>
 		<dependencies>

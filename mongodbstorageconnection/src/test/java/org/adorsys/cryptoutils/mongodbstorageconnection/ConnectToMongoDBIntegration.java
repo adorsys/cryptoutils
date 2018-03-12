@@ -37,8 +37,8 @@ import static com.mongodb.client.model.Filters.regex;
 /**
  * Created by peter on 12.03.18 at 12:32.
  */
-public class connectToMongoDBTest {
-    private final static Logger LOGGER = LoggerFactory.getLogger(connectToMongoDBTest.class);
+public class ConnectToMongoDBIntegration {
+    private final static Logger LOGGER = LoggerFactory.getLogger(ConnectToMongoDBIntegration.class);
 
     @Test
     public void createSimpleCollection() {

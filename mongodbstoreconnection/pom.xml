@@ -9,7 +9,7 @@
     </parent>
     <modelVersion>4.0.0</modelVersion>
 
-    <artifactId>mongodbstorageconnection</artifactId>
+    <artifactId>mongodbstoreconnection</artifactId>
 
     <dependencies>
         <dependency>
@@ -32,7 +32,7 @@
     </dependencies>
 
     <build>
-        <finalName>mongodbstorageconnection</finalName>
+        <finalName>mongodbstoreconnection</finalName>
         <plugins>
             <plugin>
                 <groupId>com.github.os72</groupId>

@@ -1,4 +1,4 @@
-package org.adorsys.cryptoutils.mongodbstorageconnection;
+package org.adorsys.cryptoutils.mongodbstoreconnection;
 
 import com.mongodb.DB;
 import com.mongodb.MongoClient;
@@ -46,8 +46,8 @@ import static com.mongodb.client.model.Filters.regex;
 /**
  * Created by peter on 12.03.18 at 18:53.
  */
-public class MongoDBExtendedStorageConnection implements ExtendedStoreConnection {
-    private final static Logger LOGGER = LoggerFactory.getLogger(MongoDBExtendedStorageConnection.class);
+public class MongoDBExtendedStoreConnection implements ExtendedStoreConnection {
+    private final static Logger LOGGER = LoggerFactory.getLogger(MongoDBExtendedStoreConnection.class);
     public static final String STORAGE_METADATA = "StorageMetadata";
     public static final String FILENAME = "filename";
     private MongoDatabase database;
@@ -55,14 +55,14 @@ public class MongoDBExtendedStorageConnection implements ExtendedStoreConnection
     protected StorageMetadataFlattenerGSON gsonHelper = new StorageMetadataFlattenerGSON();
 
 
-    public MongoDBExtendedStorageConnection(String databasename) {
+    public MongoDBExtendedStoreConnection(String databasename) {
             MongoClient mongoClient = new MongoClient();
             database = mongoClient.getDatabase(databasename);
             databaseDeprecated = mongoClient.getDB(databasename);
     }
 
 
-    public MongoDBExtendedStorageConnection() {
+    public MongoDBExtendedStoreConnection() {
         this("default-database");
     }
 

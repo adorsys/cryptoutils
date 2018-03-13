@@ -1,4 +1,4 @@
-package org.adorsys.cryptoutils.mongodbstorageconnection;
+package org.adorsys.cryptoutils.mongodbstoreconnection;
 
 import junit.framework.Assert;
 import org.adorsys.encobject.complextypes.BucketDirectory;
@@ -22,10 +22,10 @@ import java.util.List;
 /**
  * Created by peter on 06.02.18 at 16:45.
  */
-public class MongoDBExtendedStorageConnectionTest {
-    private final static Logger LOGGER = LoggerFactory.getLogger(MongoDBExtendedStorageConnectionTest.class);
+public class MongoDBExtendedStoreConnectionTest {
+    private final static Logger LOGGER = LoggerFactory.getLogger(MongoDBExtendedStoreConnectionTest.class);
     private List<String> containers = new ArrayList<>();
-    private ExtendedStoreConnection s = new MongoDBExtendedStorageConnection();
+    private ExtendedStoreConnection s = new MongoDBExtendedStoreConnection();
 
 
     @Before

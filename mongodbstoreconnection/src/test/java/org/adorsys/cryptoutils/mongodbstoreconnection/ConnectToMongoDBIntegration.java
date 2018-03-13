@@ -1,4 +1,4 @@
-package org.adorsys.cryptoutils.mongodbstorageconnection;
+package org.adorsys.cryptoutils.mongodbstoreconnection;
 
 import com.mongodb.DB;
 import com.mongodb.MongoClient;
@@ -23,9 +23,7 @@ import org.adorsys.encobject.complextypes.BucketPathUtil;
 import org.apache.commons.io.IOUtils;
 import org.bson.Document;
 import org.bson.types.ObjectId;
-import org.junit.After;
 import org.junit.Assert;
-import org.junit.Before;
 import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

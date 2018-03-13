@@ -53,13 +53,19 @@
 
         <dependency>
             <groupId>de.adorsys.cryptoutils</groupId>
-            <artifactId>jjwk</artifactId>
+            <artifactId>basetypes</artifactId>
         </dependency>
 
         <dependency>
             <groupId>de.adorsys.cryptoutils</groupId>
-            <artifactId>basetypes</artifactId>
+            <artifactId>storeconnection</artifactId>
         </dependency>
+
+        <dependency>
+            <groupId>de.adorsys.cryptoutils</groupId>
+            <artifactId>jjwk</artifactId>
+        </dependency>
+
 
         <!-- logging -->
         <!-- 2.10.0 ist leider nicht kompatibel mit spring boot -->

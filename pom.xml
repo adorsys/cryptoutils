@@ -43,19 +43,30 @@
 
 	<modules>
 		<module>basetypes</module>
+		<module>storeconnection</module>
+		<module>filesystemstoreconnection</module>
+		<module>mongodbstoreconnection</module>
 		<module>jjwk</module>
         <module>encobject</module>
 		<module>jtstamp</module>
 		<module>jkeyutils</module>
-		<module>filesystemstoreconnection</module>
-        <module>mongodbstorageconnection</module>
-    </modules>
+	</modules>
 
 	<dependencyManagement>
 		<dependencies>
 			<dependency>
 				<groupId>de.adorsys.cryptoutils</groupId>
 				<artifactId>encobject</artifactId>
+				<version>${project.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>de.adorsys.cryptoutils</groupId>
+				<artifactId>storeconnection</artifactId>
+				<version>${project.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>de.adorsys.cryptoutils</groupId>
+				<artifactId>mongodbstoreconnection</artifactId>
 				<version>${project.version}</version>
 			</dependency>
 			<dependency>

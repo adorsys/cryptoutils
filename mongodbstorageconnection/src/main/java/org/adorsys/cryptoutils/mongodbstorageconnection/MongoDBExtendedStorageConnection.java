@@ -1,17 +1,19 @@
 package org.adorsys.cryptoutils.mongodbstorageconnection;
 
+import com.mongodb.DB;
 import com.mongodb.MongoClient;
 import com.mongodb.client.MongoDatabase;
 import com.mongodb.client.gridfs.GridFSBucket;
 import com.mongodb.client.gridfs.GridFSBuckets;
 import com.mongodb.client.gridfs.GridFSDownloadStream;
 import com.mongodb.client.gridfs.GridFSFindIterable;
+import com.mongodb.client.gridfs.model.GridFSDownloadOptions;
 import com.mongodb.client.gridfs.model.GridFSFile;
 import com.mongodb.client.gridfs.model.GridFSUploadOptions;
 import com.mongodb.client.model.Filters;
-import org.adorsys.cryptoutils.exceptions.BaseException;
+import com.mongodb.gridfs.GridFS;
+import com.mongodb.gridfs.GridFSDBFile;
 import org.adorsys.cryptoutils.exceptions.BaseExceptionHandler;
-import org.adorsys.cryptoutils.exceptions.NYIException;
 import org.adorsys.encobject.complextypes.BucketDirectory;
 import org.adorsys.encobject.complextypes.BucketPath;
 import org.adorsys.encobject.complextypes.BucketPathUtil;
@@ -49,13 +51,16 @@ public class MongoDBExtendedStorageConnection implements ExtendedStoreConnection
     public static final String STORAGE_METADATA = "StorageMetadata";
     public static final String FILENAME = "filename";
     private MongoDatabase database;
+    private DB databaseDeprecated;
     protected StorageMetadataFlattenerGSON gsonHelper = new StorageMetadataFlattenerGSON();
 
 
     public MongoDBExtendedStorageConnection(String databasename) {
-        MongoClient mongoClient = new MongoClient();
-        database = mongoClient.getDatabase(databasename);
+            MongoClient mongoClient = new MongoClient();
+            database = mongoClient.getDatabase(databasename);
+            databaseDeprecated = mongoClient.getDB(databasename);
     }
+
 
     public MongoDBExtendedStorageConnection() {
         this("default-database");
@@ -102,7 +107,8 @@ public class MongoDBExtendedStorageConnection implements ExtendedStoreConnection
         GridFSBucket bucket = getGridFSBucket(bucketPath);
         String filename = bucketPath.getObjectHandle().getName();
 
-        GridFSDownloadStream fileStream = bucket.openDownloadStream(filename);
+        GridFSDownloadOptions options = new GridFSDownloadOptions();
+        GridFSDownloadStream fileStream = bucket.openDownloadStream(filename, options);
         PayloadStream payloadStream = new SimplePayloadStreamImpl(getStorageMetadata(bucketPath), fileStream);
         LOGGER.info("finished getBlobStream for " + bucketPath);
         return payloadStream;
@@ -115,25 +121,10 @@ public class MongoDBExtendedStorageConnection implements ExtendedStoreConnection
 
     @Override
     public StorageMetadata getStorageMetadata(BucketPath bucketPath) {
-        GridFSBucket bucket = getGridFSBucket(bucketPath);
-        String filename = bucketPath.getObjectHandle().getName();
-        return getStorageMetadata(bucket, filename);
-    }
-
-    private StorageMetadata getStorageMetadata(GridFSBucket bucket, String filename) {
-        List<ObjectId> list = new ArrayList<>();
-        bucket.find(Filters.eq(FILENAME, filename)).forEach((Consumer<GridFSFile>) file -> list.add(file.getObjectId()));
-        if (list.isEmpty()) {
-            throw new BaseException("file not found " + filename);
-        }
-        if (list.size() > 1) {
-            throw new BaseException("more than on instance found of " + filename);
-        }
-        return getStorageMetadata(bucket, list.get(0));
-    }
-
-    private StorageMetadata getStorageMetadata(GridFSBucket bucket, ObjectId objectId) {
-        throw new NYIException();
+        GridFS gridFS = new GridFS(databaseDeprecated, bucketPath.getObjectHandle().getContainer());
+        GridFSDBFile one = gridFS.findOne(bucketPath.getObjectHandle().getName());
+        String jsonString = (String) one.getMetaData().get(STORAGE_METADATA);
+        return gsonHelper.fromJson(jsonString);
     }
 
     @Override
@@ -184,45 +175,56 @@ public class MongoDBExtendedStorageConnection implements ExtendedStoreConnection
 
     }
 
-    // =========================================================================================
-
-
     @Override
     public List<StorageMetadata> list(BucketDirectory bucketDirectory, ListRecursiveFlag listRecursiveFlag) {
         LOGGER.info("start list for " + bucketDirectory);
         GridFSBucket bucket = getGridFSBucket(bucketDirectory);
-        String filename = bucketDirectory.getObjectHandle().getName();
+        String directoryname = (bucketDirectory.getObjectHandle().getName() != null)
+                ? bucketDirectory.getObjectHandle().getName() + BucketPath.BUCKET_SEPARATOR
+                : "";
 
         List<StorageMetadata> list = new ArrayList<>();
-        List<ObjectId> ids = new ArrayList<>();
+        List<String> filenames = new ArrayList<>();
+        Set<BucketDirectory> dirs = new HashSet<>();
         if (listRecursiveFlag.equals(ListRecursiveFlag.TRUE)) {
-            String pattern1 = filename + BucketPath.BUCKET_SEPARATOR + "*";
-            GridFSFindIterable gridFSFiles = bucket.find(regex("filename", pattern1, "i"));
-            gridFSFiles.forEach((Consumer<GridFSFile>) file -> ids.add(file.getObjectId()));
+            String pattern = "^" + directoryname + ".*";
+            GridFSFindIterable gridFSFiles = bucket.find(regex(FILENAME, pattern, "i"));
+            gridFSFiles.forEach((Consumer<GridFSFile>) file -> filenames.add(file.getFilename()));
+            LOGGER.debug("found recursive " + filenames.size());
+            dirs.addAll(findAllSubDirs(filenames, bucketDirectory));
         } else {
             // files only
-            {
-                String pattern1 = filename + BucketPath.BUCKET_SEPARATOR + "[^/]*$";
-                GridFSFindIterable gridFSFiles = bucket.find(regex("filename", pattern1, "i"));
-                gridFSFiles.forEach((Consumer<GridFSFile>) file -> ids.add(file.getObjectId()));
-            }
-            findSubdirs(bucket, bucketDirectory).forEach(dir -> {
-                SimpleStorageMetadataImpl storageMetadata = new SimpleStorageMetadataImpl();
-                storageMetadata.setType(StorageType.FOLDER);
-                storageMetadata.setName(dir);
-                list.add(storageMetadata);
-            });
+            String pattern = "^" + directoryname + "[^/]*$";
+            GridFSFindIterable gridFSFiles = bucket.find(regex(FILENAME, pattern, "i"));
+            gridFSFiles.forEach((Consumer<GridFSFile>) file -> filenames.add(file.getFilename()));
+            LOGGER.debug("found non-recursive " + filenames.size());
+
+            dirs.addAll(findSubdirs(bucket, bucketDirectory));
         }
-        ids.forEach((Consumer<ObjectId>) objectID -> {
-            list.add(getStorageMetadata(bucket, objectID));
+
+        filenames.forEach(fn -> {
+            list.add(getStorageMetadata(new BucketPath(bucket.getBucketName(), fn)));
         });
 
+        dirs.add(bucketDirectory);
+        dirs.forEach(dir -> {
+            SimpleStorageMetadataImpl storageMetadata = new SimpleStorageMetadataImpl();
+            storageMetadata.setType(StorageType.FOLDER);
+            storageMetadata.setName(BucketPathUtil.getAsString(dir));
+            list.add(storageMetadata);
+        });
+
+        LOGGER.info("list(" + bucketDirectory + ")");
+        list.forEach(c -> LOGGER.debug(" > " + c.getName() + " " + c.getType()));
         return list;
     }
 
 
+    // =========================================================================================
+
+
     private GridFSBucket getGridFSBucket(BucketPath bucketPath) {
-        return getGridFSBucket(bucketPath.getBucketDirectory());
+        return GridFSBuckets.create(database, bucketPath.getObjectHandle().getContainer());
     }
 
     private GridFSBucket getGridFSBucket(BucketDirectory bucketDirectory) {
@@ -233,32 +235,55 @@ public class MongoDBExtendedStorageConnection implements ExtendedStoreConnection
     private void deleteAllExcept(GridFSBucket bucket, String filename, ObjectId objectID) {
         List<ObjectId> idsToDelete = new ArrayList<>();
         bucket.find(Filters.eq(FILENAME, filename)).forEach((Consumer<GridFSFile>) file -> idsToDelete.add(file.getObjectId()));
+        LOGGER.info("****  number of files to delete:" + idsToDelete.size());
         idsToDelete.forEach(id -> {
-            if (objectID.equals(objectID)) {
+            if (!id.equals(objectID)) {
+                LOGGER.info("****  delete:" + id);
                 bucket.delete(id);
             }
         });
     }
 
-    private Set<String> findSubdirs(GridFSBucket bucket, BucketDirectory bucketDirectory) {
-        String prefix = bucketDirectory.getObjectHandle().getName() + BucketPath.BUCKET_SEPARATOR;
-        Set<String> dirsOnly = new HashSet<>();
+    private Set<BucketDirectory> findSubdirs(GridFSBucket bucket, BucketDirectory bucketDirectory) {
+        String prefix = (bucketDirectory.getObjectHandle().getName() != null)
+                ? bucketDirectory.getObjectHandle().getName() + BucketPath.BUCKET_SEPARATOR
+                : "";
         List<String> allFiles = new ArrayList<>();
         {
             // all files
-            String pattern = prefix + "*";
-            GridFSFindIterable gridFSFiles = bucket.find(regex("filename", pattern, "i"));
+            String pattern = "^" + prefix + ".*";
+            GridFSFindIterable gridFSFiles = bucket.find(regex(FILENAME, pattern, "i"));
             gridFSFiles.forEach((Consumer<GridFSFile>) file -> allFiles.add(file.getFilename()));
         }
+        Set<BucketDirectory> dirsOnly = new HashSet<>();
         allFiles.forEach(filename -> {
-            String remainder = filename.substring(prefix.length());
-            int pos = remainder.indexOf(BucketPath.BUCKET_SEPARATOR);
-            if (pos != -1) {
-                String dirname = remainder.substring(0, pos);
-                dirsOnly.add(BucketPathUtil.getAsString(bucketDirectory.appendDirectory(dirname)));
-
+            if (filename.length() < prefix.length()) {
+                // Absoluter Sonderfall. Z.B. es exisitiert a/b.txt und gesucht wurde mit a/b.txt
+            } else {
+                String remainder = filename.substring(prefix.length());
+                int pos = remainder.indexOf(BucketPath.BUCKET_SEPARATOR);
+                if (pos != -1) {
+                    String dirname = remainder.substring(0, pos);
+                    dirsOnly.add(bucketDirectory.appendDirectory(dirname));
+                }
             }
         });
         return dirsOnly;
     }
+
+    private Set<BucketDirectory> findAllSubDirs(List<String> filenames, BucketDirectory bucketDirectory) {
+        Set<String> allDirs = new HashSet<>();
+        filenames.forEach(filename -> {
+            int last = filename.lastIndexOf(BucketPath.BUCKET_SEPARATOR);
+            if (last != -1) {
+                allDirs.add(filename.substring(0, last));
+            }
+        });
+        Set<BucketDirectory> list = new HashSet<>();
+        allDirs.forEach(dir -> {
+            list.add(new BucketDirectory(bucketDirectory.getObjectHandle().getContainer() + BucketPath.BUCKET_SEPARATOR + dir));
+        });
+        return list;
+    }
+
 }

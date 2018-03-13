@@ -20,7 +20,7 @@ import java.lang.reflect.Type;
 /**
  * Created by peter on 21.02.18 at 20:08.
  */
-class StorageMetadataFlattenerGSON {
+public class StorageMetadataFlattenerGSON {
     private Gson gson = new GsonBuilder().setPrettyPrinting()
             .registerTypeAdapter(Location.class, new InterfaceAdapter<SimpleLocationImpl>())
             .create();

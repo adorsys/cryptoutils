@@ -11,12 +11,14 @@ import com.mongodb.client.gridfs.GridFSDownloadStream;
 import com.mongodb.client.gridfs.GridFSFindIterable;
 import com.mongodb.client.gridfs.model.GridFSFile;
 import com.mongodb.client.gridfs.model.GridFSUploadOptions;
+import com.mongodb.client.model.Filters;
 import org.adorsys.cryptoutils.exceptions.BaseException;
 import org.adorsys.cryptoutils.exceptions.BaseExceptionHandler;
 import org.apache.commons.io.IOUtils;
 import org.bson.BsonObjectId;
 import org.bson.BsonValue;
 import org.bson.Document;
+import org.bson.conversions.Bson;
 import org.bson.types.ObjectId;
 import org.junit.Assert;
 import org.junit.Test;
@@ -92,6 +94,16 @@ public class connectToMongoDBTest {
                 }
             }
         }
+        for (int k = 0; k < files; k++) {
+            String filename = "folder/file" + k;
+            streamDocument(bucket, filename);
+        }
+        for (int i = 0; i < dir1; i++) {
+            for (int k = 0; k < files; k++) {
+                String filename = "folder/" + i + "/file" + k;
+                streamDocument(bucket, filename);
+            }
+        }
 
         String pattern1 = "folder/1/.*";
         GridFSFindIterable gridFSFiles = bucket.find(regex("filename", pattern1, "i"));
@@ -103,14 +115,14 @@ public class connectToMongoDBTest {
         final List<Integer> list = new ArrayList<>();
         gridFSFiles.forEach((Consumer<GridFSFile>) file -> list.add(new Integer(1)));
         LOGGER.debug(pattern1 + " -> " + list.size());
-        Assert.assertEquals(dir2 * files, list.size());
+        Assert.assertEquals(dir2 * files + files, list.size());
 
         list.clear();
         String pattern2 = "folder/.*";
         gridFSFiles = bucket.find(regex("filename", pattern2, "i"));
         gridFSFiles.forEach((Consumer<GridFSFile>) file -> list.add(new Integer(1)));
         LOGGER.debug(pattern2 + " -> " + list.size());
-        Assert.assertEquals(dir1 * dir2 * files, list.size());
+        Assert.assertEquals(dir1 * dir2 * files  + dir1*files + files, list.size());
     }
 
     @Test
@@ -154,7 +166,7 @@ public class connectToMongoDBTest {
                 List<ObjectId> idsToDelete = new ArrayList<>();
                 {
                     String pattern2 = filename;
-                    GridFSFindIterable gridFSFiles = bucket.find(regex("filename", pattern2, "i"));
+                    GridFSFindIterable gridFSFiles = bucket.find(Filters.eq("filename", pattern2));
                     gridFSFiles.forEach((Consumer<GridFSFile>) file -> idsToDelete.add(file.getObjectId()));
                     if (idsToDelete.size() > 1) {
                         throw new BaseException("das darf nicht sein, ist aber so....");
@@ -180,7 +192,7 @@ public class connectToMongoDBTest {
                 is = new ByteArrayInputStream(content2.getBytes());
                 {
                     String pattern2 = filename;
-                    GridFSFindIterable gridFSFiles = bucket.find(regex("filename", pattern2, "i"));
+                    GridFSFindIterable gridFSFiles = bucket.find(Filters.eq("filename", pattern2));
                     gridFSFiles.forEach((Consumer<GridFSFile>) file -> idsToDelete.add(file.getObjectId()));
                     if (idsToDelete.size() > 1) {
                         throw new BaseException("das darf nicht sein, ist aber so....");
@@ -206,7 +218,6 @@ public class connectToMongoDBTest {
                 }
                 Assert.assertEquals(1, counter);
             }
-
 
 
         } catch (Exception e) {

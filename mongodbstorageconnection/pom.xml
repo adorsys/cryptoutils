@@ -14,7 +14,7 @@
     <dependencies>
         <dependency>
             <groupId>de.adorsys.cryptoutils</groupId>
-            <artifactId>encobject</artifactId>
+            <artifactId>filesystemstoreconnection</artifactId>
         </dependency>
 
         <dependency>

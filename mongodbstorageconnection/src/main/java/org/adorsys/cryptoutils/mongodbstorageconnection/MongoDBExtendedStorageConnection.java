@@ -1,25 +1,28 @@
 package org.adorsys.cryptoutils.mongodbstorageconnection;
 
 import com.mongodb.MongoClient;
-import com.mongodb.client.MongoCursor;
 import com.mongodb.client.MongoDatabase;
 import com.mongodb.client.gridfs.GridFSBucket;
 import com.mongodb.client.gridfs.GridFSBuckets;
+import com.mongodb.client.gridfs.GridFSDownloadStream;
 import com.mongodb.client.gridfs.GridFSFindIterable;
 import com.mongodb.client.gridfs.model.GridFSFile;
 import com.mongodb.client.gridfs.model.GridFSUploadOptions;
 import com.mongodb.client.model.Filters;
-import com.sun.xml.internal.ws.policy.privateutil.PolicyUtils;
 import org.adorsys.cryptoutils.exceptions.BaseException;
+import org.adorsys.cryptoutils.exceptions.BaseExceptionHandler;
 import org.adorsys.cryptoutils.exceptions.NYIException;
 import org.adorsys.encobject.complextypes.BucketDirectory;
 import org.adorsys.encobject.complextypes.BucketPath;
+import org.adorsys.encobject.complextypes.BucketPathUtil;
 import org.adorsys.encobject.domain.Payload;
 import org.adorsys.encobject.domain.PayloadStream;
 import org.adorsys.encobject.domain.StorageMetadata;
+import org.adorsys.encobject.domain.StorageType;
 import org.adorsys.encobject.filesystem.StorageMetadataFlattenerGSON;
 import org.adorsys.encobject.service.api.ExtendedStoreConnection;
 import org.adorsys.encobject.service.impl.SimplePayloadImpl;
+import org.adorsys.encobject.service.impl.SimplePayloadStreamImpl;
 import org.adorsys.encobject.service.impl.SimpleStorageMetadataImpl;
 import org.adorsys.encobject.types.ListRecursiveFlag;
 import org.apache.commons.io.IOUtils;
@@ -31,8 +34,9 @@ import org.slf4j.LoggerFactory;
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;
 import java.util.ArrayList;
-import java.util.Date;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 import java.util.function.Consumer;
 
 import static com.mongodb.client.model.Filters.regex;
@@ -59,12 +63,17 @@ public class MongoDBExtendedStorageConnection implements ExtendedStoreConnection
 
     @Override
     public void putBlob(BucketPath bucketPath, Payload payload) {
-
+        putBlobStream(bucketPath, new SimplePayloadStreamImpl(new SimpleStorageMetadataImpl(), new ByteArrayInputStream(payload.getData())));
     }
 
     @Override
     public Payload getBlob(BucketPath bucketPath) {
-        return null;
+        try {
+            PayloadStream blobStream = getBlobStream(bucketPath);
+            return new SimplePayloadImpl(blobStream.getStorageMetadata(), IOUtils.toByteArray(blobStream.openStream()));
+        } catch (Exception e) {
+            throw BaseExceptionHandler.handle(e);
+        }
     }
 
     @Override
@@ -75,7 +84,10 @@ public class MongoDBExtendedStorageConnection implements ExtendedStoreConnection
 
         GridFSUploadOptions uploadOptions = new GridFSUploadOptions();
         uploadOptions.metadata(new Document());
-        uploadOptions.getMetadata().put(STORAGE_METADATA, gsonHelper.toJson(payloadStream.getStorageMetadata()));
+        SimpleStorageMetadataImpl storareMetaData = new SimpleStorageMetadataImpl(payloadStream.getStorageMetadata());
+        storareMetaData.setType(StorageType.BLOB);
+        storareMetaData.setName(BucketPathUtil.getAsString(bucketPath));
+        uploadOptions.getMetadata().put(STORAGE_METADATA, gsonHelper.toJson(storareMetaData));
         InputStream is = payloadStream.openStream();
         ObjectId objectId = bucket.uploadFromStream(filename, is, uploadOptions);
         IOUtils.closeQuietly(is);
@@ -86,7 +98,14 @@ public class MongoDBExtendedStorageConnection implements ExtendedStoreConnection
 
     @Override
     public PayloadStream getBlobStream(BucketPath bucketPath) {
-        return null;
+        LOGGER.info("start getBlobStream for " + bucketPath);
+        GridFSBucket bucket = getGridFSBucket(bucketPath);
+        String filename = bucketPath.getObjectHandle().getName();
+
+        GridFSDownloadStream fileStream = bucket.openDownloadStream(filename);
+        PayloadStream payloadStream = new SimplePayloadStreamImpl(getStorageMetadata(bucketPath), fileStream);
+        LOGGER.info("finished getBlobStream for " + bucketPath);
+        return payloadStream;
     }
 
     @Override
@@ -96,7 +115,25 @@ public class MongoDBExtendedStorageConnection implements ExtendedStoreConnection
 
     @Override
     public StorageMetadata getStorageMetadata(BucketPath bucketPath) {
-        return null;
+        GridFSBucket bucket = getGridFSBucket(bucketPath);
+        String filename = bucketPath.getObjectHandle().getName();
+        return getStorageMetadata(bucket, filename);
+    }
+
+    private StorageMetadata getStorageMetadata(GridFSBucket bucket, String filename) {
+        List<ObjectId> list = new ArrayList<>();
+        bucket.find(Filters.eq(FILENAME, filename)).forEach((Consumer<GridFSFile>) file -> list.add(file.getObjectId()));
+        if (list.isEmpty()) {
+            throw new BaseException("file not found " + filename);
+        }
+        if (list.size() > 1) {
+            throw new BaseException("more than on instance found of " + filename);
+        }
+        return getStorageMetadata(bucket, list.get(0));
+    }
+
+    private StorageMetadata getStorageMetadata(GridFSBucket bucket, ObjectId objectId) {
+        throw new NYIException();
     }
 
     @Override
@@ -147,21 +184,40 @@ public class MongoDBExtendedStorageConnection implements ExtendedStoreConnection
 
     }
 
+    // =========================================================================================
+
+
     @Override
     public List<StorageMetadata> list(BucketDirectory bucketDirectory, ListRecursiveFlag listRecursiveFlag) {
         LOGGER.info("start list for " + bucketDirectory);
         GridFSBucket bucket = getGridFSBucket(bucketDirectory);
         String filename = bucketDirectory.getObjectHandle().getName();
-        String pattern1 = filename + BucketPath.BUCKET_SEPARATOR + ".*";
-        GridFSFindIterable gridFSFiles = bucket.find(regex("filename", pattern1, "i"));
-//        gridFSFiles.forEach((Consumer<GridFSFile> file -> file.l)
-        MongoCursor<GridFSFile> iterator = gridFSFiles.iterator();
-        while (iterator.hasNext()) {
-            GridFSFile file = iterator.next();
-            LOGGER.info("element:" + file);
-        }
 
-        return null;
+        List<StorageMetadata> list = new ArrayList<>();
+        List<ObjectId> ids = new ArrayList<>();
+        if (listRecursiveFlag.equals(ListRecursiveFlag.TRUE)) {
+            String pattern1 = filename + BucketPath.BUCKET_SEPARATOR + "*";
+            GridFSFindIterable gridFSFiles = bucket.find(regex("filename", pattern1, "i"));
+            gridFSFiles.forEach((Consumer<GridFSFile>) file -> ids.add(file.getObjectId()));
+        } else {
+            // files only
+            {
+                String pattern1 = filename + BucketPath.BUCKET_SEPARATOR + "[^/]*$";
+                GridFSFindIterable gridFSFiles = bucket.find(regex("filename", pattern1, "i"));
+                gridFSFiles.forEach((Consumer<GridFSFile>) file -> ids.add(file.getObjectId()));
+            }
+            findSubdirs(bucket, bucketDirectory).forEach(dir -> {
+                SimpleStorageMetadataImpl storageMetadata = new SimpleStorageMetadataImpl();
+                storageMetadata.setType(StorageType.FOLDER);
+                storageMetadata.setName(dir);
+                list.add(storageMetadata);
+            });
+        }
+        ids.forEach((Consumer<ObjectId>) objectID -> {
+            list.add(getStorageMetadata(bucket, objectID));
+        });
+
+        return list;
     }
 
 
@@ -184,4 +240,25 @@ public class MongoDBExtendedStorageConnection implements ExtendedStoreConnection
         });
     }
 
+    private Set<String> findSubdirs(GridFSBucket bucket, BucketDirectory bucketDirectory) {
+        String prefix = bucketDirectory.getObjectHandle().getName() + BucketPath.BUCKET_SEPARATOR;
+        Set<String> dirsOnly = new HashSet<>();
+        List<String> allFiles = new ArrayList<>();
+        {
+            // all files
+            String pattern = prefix + "*";
+            GridFSFindIterable gridFSFiles = bucket.find(regex("filename", pattern, "i"));
+            gridFSFiles.forEach((Consumer<GridFSFile>) file -> allFiles.add(file.getFilename()));
+        }
+        allFiles.forEach(filename -> {
+            String remainder = filename.substring(prefix.length());
+            int pos = remainder.indexOf(BucketPath.BUCKET_SEPARATOR);
+            if (pos != -1) {
+                String dirname = remainder.substring(0, pos);
+                dirsOnly.add(BucketPathUtil.getAsString(bucketDirectory.appendDirectory(dirname)));
+
+            }
+        });
+        return dirsOnly;
+    }
 }

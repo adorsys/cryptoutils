@@ -14,11 +14,11 @@ import com.mongodb.client.gridfs.model.GridFSUploadOptions;
 import com.mongodb.client.model.Filters;
 import org.adorsys.cryptoutils.exceptions.BaseException;
 import org.adorsys.cryptoutils.exceptions.BaseExceptionHandler;
+import org.adorsys.encobject.complextypes.BucketDirectory;
+import org.adorsys.encobject.complextypes.BucketPath;
+import org.adorsys.encobject.complextypes.BucketPathUtil;
 import org.apache.commons.io.IOUtils;
-import org.bson.BsonObjectId;
-import org.bson.BsonValue;
 import org.bson.Document;
-import org.bson.conversions.Bson;
 import org.bson.types.ObjectId;
 import org.junit.Assert;
 import org.junit.Test;
@@ -27,11 +27,12 @@ import org.slf4j.LoggerFactory;
 
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 import java.util.function.Consumer;
 
 import static com.mongodb.client.model.Filters.regex;
@@ -83,8 +84,8 @@ public class connectToMongoDBTest {
     @Test
     public void listDirectoryStucture() {
         int dir1 = 3;
-        int dir2 = 3;
-        int files = 3;
+        int dir2 = 4;
+        int files = 5;
         GridFSBucket bucket = createBucket("bucket");
         for (int i = 0; i < dir1; i++) {
             for (int j = 0; j < dir2; j++) {
@@ -105,24 +106,46 @@ public class connectToMongoDBTest {
             }
         }
 
-        String pattern1 = "folder/1/.*";
-        GridFSFindIterable gridFSFiles = bucket.find(regex("filename", pattern1, "i"));
-        MongoCursor<GridFSFile> iterator = gridFSFiles.iterator();
-        while (iterator.hasNext()) {
-            GridFSFile file = iterator.next();
-            LOGGER.info("element:" + file);
+        {
+            String pattern1 = "folder/1/*";
+            GridFSFindIterable gridFSFiles = bucket.find(regex("filename", pattern1, "i"));
+            List<GridFSFile> list = new ArrayList<>();
+            gridFSFiles.forEach((Consumer<GridFSFile>) file -> {
+                list.add(file);
+                LOGGER.info("element " + pattern1 + ": " + file.getFilename());
+            });
+            Assert.assertEquals(dir2 * files + files, list.size());
         }
-        final List<Integer> list = new ArrayList<>();
-        gridFSFiles.forEach((Consumer<GridFSFile>) file -> list.add(new Integer(1)));
-        LOGGER.debug(pattern1 + " -> " + list.size());
-        Assert.assertEquals(dir2 * files + files, list.size());
-
-        list.clear();
-        String pattern2 = "folder/.*";
-        gridFSFiles = bucket.find(regex("filename", pattern2, "i"));
-        gridFSFiles.forEach((Consumer<GridFSFile>) file -> list.add(new Integer(1)));
-        LOGGER.debug(pattern2 + " -> " + list.size());
-        Assert.assertEquals(dir1 * dir2 * files  + dir1*files + files, list.size());
+        {
+            String pattern1 = "folder/*";
+            GridFSFindIterable gridFSFiles = bucket.find(regex("filename", pattern1, "i"));
+            List<GridFSFile> list = new ArrayList<>();
+            gridFSFiles.forEach((Consumer<GridFSFile>) file -> {
+                list.add(file);
+                LOGGER.info("element " + pattern1 + ": " + file.getFilename());
+            });
+            Assert.assertEquals(dir1 * dir2 * files + dir1 * files + files, list.size());
+        }
+        {
+            String pattern1 = "folder/[^/]*$";
+            GridFSFindIterable gridFSFiles = bucket.find(regex("filename", pattern1, "i"));
+            List<GridFSFile> list = new ArrayList<>();
+            gridFSFiles.forEach((Consumer<GridFSFile>) file -> {
+                list.add(file);
+                LOGGER.info("element " + pattern1 + ": " + file.getFilename());
+            });
+            Assert.assertEquals(files, list.size());
+        }
+        {
+            Set<String> folder = findSubdirs(new BucketDirectory("bucket/folder"));
+            folder.forEach(file -> LOGGER.info("folder -> " + file));
+            Assert.assertEquals(dir1, folder.size());
+        }
+        {
+            Set<String> folder = findSubdirs(new BucketDirectory("bucket/folder/1"));
+            folder.forEach(file -> LOGGER.info("folder -> " + file));
+            Assert.assertEquals(dir2, folder.size());
+        }
     }
 
     @Test
@@ -250,4 +273,30 @@ public class connectToMongoDBTest {
         return GridFSBuckets.create(database, bucketName);
     }
 
+    private Set<String> findSubdirs(BucketDirectory bucketDirectory) {
+        MongoClient mongoClient = new MongoClient();
+        MongoDatabase database = mongoClient.getDatabase("testgrid");
+        GridFSBucket bucket = GridFSBuckets.create(database, bucketDirectory.getObjectHandle().getContainer());
+
+        String prefix = bucketDirectory.getObjectHandle().getName() + BucketPath.BUCKET_SEPARATOR;
+        Set<String> dirsOnly = new HashSet<>();
+        List<String> allFiles = new ArrayList<>();
+        {
+            // all files
+            String pattern = prefix + "*";
+            GridFSFindIterable gridFSFiles = bucket.find(regex("filename", pattern, "i"));
+            gridFSFiles.forEach((Consumer<GridFSFile>) file -> allFiles.add(file.getFilename()));
+        }
+        allFiles.forEach(filename -> {
+            String remainder = filename.substring(prefix.length());
+            int pos = remainder.indexOf(BucketPath.BUCKET_SEPARATOR);
+            if (pos != -1) {
+                String dirname = remainder.substring(0, pos);
+                dirsOnly.add(BucketPathUtil.getAsString(bucketDirectory.appendDirectory(dirname)));
+            }
+        });
+        return dirsOnly;
+
+
+    }
 }

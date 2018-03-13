@@ -92,5 +92,11 @@
             <scope>test</scope>
         </dependency>
 
+        <dependency>
+            <groupId>de.adorsys.cryptoutils</groupId>
+            <artifactId>filesystemstoreconnection</artifactId>
+            <scope>test</scope>
+        </dependency>
+
     </dependencies>
 </project>

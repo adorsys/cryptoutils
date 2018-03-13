@@ -65,13 +65,18 @@
     <dependencies>
         <dependency>
             <groupId>de.adorsys.cryptoutils</groupId>
-            <artifactId>encobject</artifactId>
+            <artifactId>storeconnection</artifactId>
         </dependency>
 
         <dependency>
             <groupId>com.google.code.gson</groupId>
             <artifactId>gson</artifactId>
             <version>2.8.2</version>
+        </dependency>
+
+        <dependency>
+            <groupId>commons-io</groupId>
+            <artifactId>commons-io</artifactId>
         </dependency>
 
         <!-- test -->
@@ -81,6 +86,7 @@
             <scope>test</scope>
         </dependency>
 
+        <!--
         <dependency>
             <groupId>de.adorsys.cryptoutils</groupId>
             <artifactId>encobject</artifactId>
@@ -88,7 +94,7 @@
             <type>test-jar</type>
             <scope>test</scope>
         </dependency>
-
+-->
 
     </dependencies>
 </project>

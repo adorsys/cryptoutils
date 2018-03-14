@@ -1,11 +1,13 @@
-package org.adorsys.encobject.filesystem;
+package org.adorsys.cryptoutils.storageconnection.testsuite;
 
 import junit.framework.Assert;
+import org.adorsys.cryptoutils.mongodbstoreconnection.MongoDBExtendedStoreConnection;
 import org.adorsys.encobject.complextypes.BucketDirectory;
 import org.adorsys.encobject.complextypes.BucketPath;
 import org.adorsys.encobject.domain.Payload;
 import org.adorsys.encobject.domain.StorageMetadata;
 import org.adorsys.encobject.domain.StorageType;
+import org.adorsys.encobject.filesystem.FileSystemExtendedStorageConnection;
 import org.adorsys.encobject.service.api.ExtendedStoreConnection;
 import org.adorsys.encobject.service.impl.SimplePayloadImpl;
 import org.adorsys.encobject.service.impl.SimpleStorageMetadataImpl;
@@ -22,10 +24,11 @@ import java.util.List;
 /**
  * Created by peter on 06.02.18 at 16:45.
  */
-public class FileSystemExtendedStorageConnectionTest {
-    private final static Logger LOGGER = LoggerFactory.getLogger(FileSystemExtendedStorageConnectionTest.class);
+public class ExtendedStoreConnectionTest {
+    private final static Logger LOGGER = LoggerFactory.getLogger(ExtendedStoreConnectionTest.class);
     private List<String> containers = new ArrayList<>();
-    private ExtendedStoreConnection s = new FileSystemExtendedStorageConnection();
+//    private ExtendedStoreConnection s = new FileSystemExtendedStorageConnection();
+    private ExtendedStoreConnection s = new MongoDBExtendedStoreConnection();
 
     @Before
     public void before() {
@@ -208,6 +211,7 @@ public class FileSystemExtendedStorageConnectionTest {
         String container = "user1";
         BucketDirectory rootDirectory = new BucketDirectory(container);
         containers.add(container);
+        s.createContainer(container);
         createFiles(s, rootDirectory, 3, 2);
 
         {

@@ -58,7 +58,7 @@
 
         <dependency>
             <groupId>de.adorsys.cryptoutils</groupId>
-            <artifactId>storeconnection</artifactId>
+            <artifactId>storeconnection-api</artifactId>
         </dependency>
 
         <dependency>

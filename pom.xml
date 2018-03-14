@@ -43,9 +43,7 @@
 
 	<modules>
 		<module>basetypes</module>
-		<module>storeconnection</module>
-		<module>filesystemstoreconnection</module>
-		<module>mongodbstoreconnection</module>
+		<module>extendedstoreconnection</module>
 		<module>jjwk</module>
         <module>encobject</module>
 		<module>jtstamp</module>
@@ -54,19 +52,51 @@
 
 	<dependencyManagement>
 		<dependencies>
-			<dependency>
+            <dependency>
+                <groupId>de.adorsys.cryptoutils</groupId>
+                <artifactId>extendedstoreconnection</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>de.adorsys.cryptoutils</groupId>
+                <artifactId>storeconnection-api</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>de.adorsys.cryptoutils</groupId>
+                <artifactId>storeconnection-impls</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>de.adorsys.cryptoutils</groupId>
+                <artifactId>mongodbstoreconnection</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>de.adorsys.cryptoutils</groupId>
+                <artifactId>filesystemstoreconnection</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>de.adorsys.cryptoutils</groupId>
+                <artifactId>storeconnection-testsuite</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+
+
+
+
+
+
+
+
+
+
+
+
+            <dependency>
 				<groupId>de.adorsys.cryptoutils</groupId>
 				<artifactId>encobject</artifactId>
-				<version>${project.version}</version>
-			</dependency>
-			<dependency>
-				<groupId>de.adorsys.cryptoutils</groupId>
-				<artifactId>storeconnection</artifactId>
-				<version>${project.version}</version>
-			</dependency>
-			<dependency>
-				<groupId>de.adorsys.cryptoutils</groupId>
-				<artifactId>mongodbstoreconnection</artifactId>
 				<version>${project.version}</version>
 			</dependency>
 			<dependency>
@@ -83,12 +113,6 @@
 			<dependency>
 				<groupId>de.adorsys.cryptoutils</groupId>
 				<artifactId>basetypes</artifactId>
-				<version>${project.version}</version>
-			</dependency>
-
-			<dependency>
-				<groupId>de.adorsys.cryptoutils</groupId>
-				<artifactId>filesystemstoreconnection</artifactId>
 				<version>${project.version}</version>
 			</dependency>
 

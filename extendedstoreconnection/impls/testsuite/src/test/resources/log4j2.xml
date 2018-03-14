@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Configuration monitorInterval="10">
+
+    <Properties>
+        <Property name="appname">test-suite</Property>
+        <Property name="pattern">TEST %d{yyyy/MM/dd HH:mm:ss,SSS} [%t] [%-5p] [%-30c{1}] %-100m %n
+        </Property>
+        <Property name="logpath">.</Property>
+    </Properties>
+
+    <Appenders>
+        <RollingRandomAccessFile name="randomrollingfile" fileName="${logpath}/rr-${appname}.log" append="true"
+                                 filePattern="${logpath}/rr-${appname}-%d{MM-dd-yyyy}-%i.log.gz">
+            <PatternLayout pattern="${pattern}"/>
+            <Policies>
+                <TimeBasedTriggeringPolicy/>
+                <SizeBasedTriggeringPolicy size="20 MB"/>
+            </Policies>
+            <DefaultRolloverStrategy max="20"/>
+        </RollingRandomAccessFile>
+
+        <RollingRandomAccessFile name="lfs-notavailable" fileName="${logpath}/lfs-notavailable-rr-${appname}.log"
+                                 append="true"
+                                 filePattern="${logpath}/lfs-notavailable-rr-${appname}-%d{MM-dd-yyyy}-%i.log.gz">
+            <PatternLayout pattern="${pattern}"/>
+            <Policies>
+                <TimeBasedTriggeringPolicy/>
+                <SizeBasedTriggeringPolicy size="20 MB"/>
+            </Policies>
+            <DefaultRolloverStrategy max="20"/>
+        </RollingRandomAccessFile>
+
+
+        <Async name="async">
+            <AppenderRef ref="randomrollingfile"/>
+        </Async>
+
+        <Console name="STDOUT" target="SYSTEM_OUT">
+            <PatternLayout pattern="${pattern}"/>
+            <ThresholdFilter level="debug" onMatch="ACCEPT" onMismatch="DENY"/>
+        </Console>
+    </Appenders>
+
+    <Loggers>
+        <Logger name="org.adorsys" level="debug"/>
+        <Root level="info">
+            <AppenderRef ref="async"/>
+            <AppenderRef ref="STDOUT"/>
+        </Root>
+    </Loggers>
+
+</Configuration>

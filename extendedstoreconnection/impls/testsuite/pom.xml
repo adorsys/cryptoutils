@@ -3,32 +3,32 @@
          xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <parent>
-        <artifactId>cryptoutils</artifactId>
         <groupId>de.adorsys.cryptoutils</groupId>
+        <artifactId>storeconnection-impls</artifactId>
         <version>0.13.0-SNAPSHOT</version>
     </parent>
     <modelVersion>4.0.0</modelVersion>
 
-    <artifactId>mongodbstoreconnection</artifactId>
+    <artifactId>storeconnection-testsuite</artifactId>
 
     <dependencies>
         <dependency>
             <groupId>de.adorsys.cryptoutils</groupId>
-            <artifactId>storeconnection</artifactId>
+            <artifactId>filesystemstoreconnection</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>de.adorsys.cryptoutils</groupId>
+            <artifactId>mongodbstoreconnection</artifactId>
+            <scope>test</scope>
         </dependency>
 
         <dependency>
             <groupId>commons-io</groupId>
             <artifactId>commons-io</artifactId>
+            <scope>test</scope>
         </dependency>
 
-        <dependency>
-            <groupId>org.mongodb</groupId>
-            <artifactId>mongodb-driver</artifactId>
-            <version>3.6.3</version>
-        </dependency>
-
-        <!-- test -->
         <dependency>
             <groupId>junit</groupId>
             <artifactId>junit</artifactId>
@@ -37,29 +37,7 @@
     </dependencies>
 
     <build>
-        <finalName>mongodbstoreconnection</finalName>
         <plugins>
-            <plugin>
-                <groupId>com.github.os72</groupId>
-                <artifactId>protoc-jar-maven-plugin</artifactId>
-                <executions>
-                    <execution>
-                        <phase>generate-sources</phase>
-                        <goals>
-                            <goal>run</goal>
-                        </goals>
-                    </execution>
-                </executions>
-            </plugin>
-            <plugin>
-                <artifactId>maven-javadoc-plugin</artifactId>
-                <configuration>
-                    <excludePackageNames>org.adorsys.encobject.domain.*</excludePackageNames>
-                    <show>public</show>
-                    <failOnError>false</failOnError>
-                </configuration>
-            </plugin>
-
             <!-- Setup IntegrationTests by name -->
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
@@ -67,7 +45,7 @@
                 <configuration>
                     <!-- Exclude integation tests from standards -->
                     <excludes>
-                        <exclude>**/*MongoTest.java</exclude>
+                        <exclude>**/*Test.java</exclude>
                     </excludes>
                 </configuration>
                 <executions>
@@ -83,7 +61,7 @@
                                 <exclude>none</exclude>
                             </excludes>
                             <includes>
-                                <include>**/*MongoTest.java</include>
+                                <include>**/*Test.java</include>
                             </includes>
                         </configuration>
                     </execution>

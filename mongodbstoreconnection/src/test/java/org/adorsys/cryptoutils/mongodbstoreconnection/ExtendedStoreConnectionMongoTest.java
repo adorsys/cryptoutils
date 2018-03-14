@@ -22,8 +22,8 @@ import java.util.List;
 /**
  * Created by peter on 06.02.18 at 16:45.
  */
-public class MongoDBExtendedStoreConnectionTest {
-    private final static Logger LOGGER = LoggerFactory.getLogger(MongoDBExtendedStoreConnectionTest.class);
+public class ExtendedStoreConnectionMongoTest {
+    private final static Logger LOGGER = LoggerFactory.getLogger(ExtendedStoreConnectionMongoTest.class);
     private List<String> containers = new ArrayList<>();
     private ExtendedStoreConnection s = new MongoDBExtendedStoreConnection();
 

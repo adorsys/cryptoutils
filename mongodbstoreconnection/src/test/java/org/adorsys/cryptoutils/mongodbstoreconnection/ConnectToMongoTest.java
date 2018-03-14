@@ -43,8 +43,8 @@ import static com.mongodb.client.model.Filters.regex;
 /**
  * Created by peter on 12.03.18 at 12:32.
  */
-public class ConnectToMongoDBIntegration {
-    private final static Logger LOGGER = LoggerFactory.getLogger(ConnectToMongoDBIntegration.class);
+public class ConnectToMongoTest {
+    private final static Logger LOGGER = LoggerFactory.getLogger(ConnectToMongoTest.class);
     public static final String DATABASE_NAME = "testgrid";
 
     @Test

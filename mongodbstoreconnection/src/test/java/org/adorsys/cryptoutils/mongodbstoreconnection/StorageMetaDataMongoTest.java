@@ -27,8 +27,8 @@ import java.util.List;
 /**
  * Created by peter on 20.02.18 at 16:53.
  */
-public class MongoStorageMetaDataTest {
-    private final static Logger LOGGER = LoggerFactory.getLogger(MongoStorageMetaDataTest.class);
+public class StorageMetaDataMongoTest {
+    private final static Logger LOGGER = LoggerFactory.getLogger(StorageMetaDataMongoTest.class);
     private List<String> containers = new ArrayList<>();
 
     @Before

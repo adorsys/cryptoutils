@@ -14,7 +14,12 @@
     <dependencies>
         <dependency>
             <groupId>de.adorsys.cryptoutils</groupId>
-            <artifactId>filesystemstoreconnection</artifactId>
+            <artifactId>storeconnection</artifactId>
+        </dependency>
+
+        <dependency>
+            <groupId>commons-io</groupId>
+            <artifactId>commons-io</artifactId>
         </dependency>
 
         <dependency>

@@ -35,7 +35,6 @@ public class SimplePayloadImpl implements Payload {
             throw new BaseException("Programming error, size must not be null or < 1");
         }
         this.storageMetadata = new SimpleStorageMetadataImpl(storageMetadata);
-        this.storageMetadata.setSize(new Long(data.length));
         this.sensitive = sensitive;
         this.data = data;
     }

@@ -1,4 +1,4 @@
-package org.adorsys.encobject.filesystem;
+package org.adorsys.cryptoutils.mongodbstoreconnection;
 
 import junit.framework.Assert;
 import org.adorsys.cryptoutils.exceptions.BaseExceptionHandler;
@@ -27,8 +27,8 @@ import java.util.List;
 /**
  * Created by peter on 20.02.18 at 16:53.
  */
-public class StorageMetaDataTest {
-    private final static Logger LOGGER = LoggerFactory.getLogger(StorageMetaDataTest.class);
+public class MongoStorageMetaDataTest {
+    private final static Logger LOGGER = LoggerFactory.getLogger(MongoStorageMetaDataTest.class);
     private List<String> containers = new ArrayList<>();
 
     @Before
@@ -38,7 +38,7 @@ public class StorageMetaDataTest {
 
     @After
     public void after() {
-        ExtendedStoreConnection s = new FileSystemExtendedStorageConnection();
+        ExtendedStoreConnection s = new MongoDBExtendedStoreConnection();
         for (String c : containers) {
             try {
                 LOGGER.debug("AFTER TEST DELETE CONTAINER " + c);
@@ -56,7 +56,7 @@ public class StorageMetaDataTest {
     public void testStorageMetaData() {
         String container = "storageMetaData/1";
         containers.add(container);
-        ExtendedStoreConnection s = new FileSystemExtendedStorageConnection();
+        ExtendedStoreConnection s = new MongoDBExtendedStoreConnection();
         s.createContainer(container);
         BucketDirectory bd = new BucketDirectory(container);
         StorageMetadata storageMetadata = createStorageMetadata();
@@ -67,21 +67,10 @@ public class StorageMetaDataTest {
         StorageMetadata loadedStorageMetadata = s.getStorageMetadata(filea);
         int fehler = compareStorageMetadata(storageMetadata, loadedStorageMetadata);
 
-        LOGGER.info("Es werden drei Fehler erwartet für Name, StorageType");
+        LOGGER.info("Es werden zwei Fehler erwartet für Name, StorageType");
         Assert.assertEquals("number of fehlers", 2, fehler);
     }
 
-
-    @Test
-    public void jsonTest() {
-        StorageMetadataFlattenerGSON gsonHelper = new StorageMetadataFlattenerGSON();
-        StorageMetadata storageMetadata = createStorageMetadata();
-        String jsonString = gsonHelper.toJson(storageMetadata);
-        LOGGER.debug(jsonString);
-        StorageMetadata reloadedStorageMetadata = gsonHelper.fromJson(jsonString);
-        int fehler = compareStorageMetadata(storageMetadata, reloadedStorageMetadata);
-        Assert.assertEquals("number of fehler", 0, fehler);
-    }
 
 
     public static final String PATTERN = "yyyy-MM-dd-HH:mm:ss";
@@ -134,7 +123,7 @@ public class StorageMetaDataTest {
 
 
                 }
-                storageMetadata.setUri(java.net.URI.create(URI_VALUE));
+                storageMetadata.setUri(URI.create(URI_VALUE));
                 for (int i = 0; i < 10; i++) {
                     storageMetadata.getUserMetadata().put("key_" + i + " mit json elementen: " + JSON_STRING_ELEMENT, JSON_STRING_ELEMENT);
                 }

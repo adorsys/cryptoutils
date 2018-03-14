@@ -68,7 +68,7 @@ public class MongoDBExtendedStoreConnection implements ExtendedStoreConnection {
 
     @Override
     public void putBlob(BucketPath bucketPath, Payload payload) {
-        putBlobStream(bucketPath, new SimplePayloadStreamImpl(new SimpleStorageMetadataImpl(), new ByteArrayInputStream(payload.getData())));
+        putBlobStream(bucketPath, new SimplePayloadStreamImpl(payload.getStorageMetadata(), new ByteArrayInputStream(payload.getData())));
     }
 
     @Override

@@ -48,7 +48,7 @@ public class MongoDBExtendedStoreConnectionTest {
     /**
      * Suche in einem nicht vorhandenem Bucket sollte einfach eine leere Liste zurückgeben
      */
-    //@Test
+    @Test
     public void testList1() {
         List<StorageMetadata> content = s.list(new BucketDirectory("a"), ListRecursiveFlag.FALSE);
         List<BucketPath> files = getFilesOnly(content);
@@ -99,7 +99,7 @@ public class MongoDBExtendedStoreConnectionTest {
      * Ein nicht existentes Directory darf keinen Fehler verursachen
      * so ist es zumindes bei der jclouldFilesystem umsetzung
      */
-    // @Test
+    @Test
     public void testList4() {
         String container = "affe4";
         containers.add(container);
@@ -116,7 +116,7 @@ public class MongoDBExtendedStoreConnectionTest {
      * Wenn als Verzeichnis eine Datei angegeben wird, dann muss eine leere Liste
      * zurückkommen, so zuindest verhält sich jcloud
      */
-    //@Test
+    @Test
     public void testList5() {
         String container = "affe5";
         containers.add(container);
@@ -208,6 +208,7 @@ public class MongoDBExtendedStoreConnectionTest {
         String container = "user1";
         BucketDirectory rootDirectory = new BucketDirectory(container);
         containers.add(container);
+        s.createContainer(container);
         createFiles(s, rootDirectory, 3, 2);
 
         {

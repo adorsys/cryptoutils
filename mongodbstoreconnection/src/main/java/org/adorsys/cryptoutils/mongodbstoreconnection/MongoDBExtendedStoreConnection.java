@@ -13,6 +13,7 @@ import com.mongodb.client.gridfs.model.GridFSUploadOptions;
 import com.mongodb.client.model.Filters;
 import com.mongodb.gridfs.GridFS;
 import com.mongodb.gridfs.GridFSDBFile;
+import org.adorsys.cryptoutils.exceptions.BaseException;
 import org.adorsys.cryptoutils.exceptions.BaseExceptionHandler;
 import org.adorsys.encobject.complextypes.BucketDirectory;
 import org.adorsys.encobject.complextypes.BucketPath;
@@ -36,6 +37,7 @@ import org.slf4j.LoggerFactory;
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -48,8 +50,10 @@ import static com.mongodb.client.model.Filters.regex;
  */
 public class MongoDBExtendedStoreConnection implements ExtendedStoreConnection {
     private final static Logger LOGGER = LoggerFactory.getLogger(MongoDBExtendedStoreConnection.class);
-    public static final String STORAGE_METADATA = "StorageMetadata";
-    public static final String FILENAME = "filename";
+    private static final String STORAGE_METADATA_KEY = "StorageMetadata";
+    private static final String FILENAME_TAG = "filename";
+    private static final String BUCKET_ID_FILENAME = ".bucket.creation.date.";
+
     private MongoDatabase database;
     private DB databaseDeprecated;
     protected StorageMetadataFlattenerGSON gsonHelper = new StorageMetadataFlattenerGSON();
@@ -85,6 +89,7 @@ public class MongoDBExtendedStoreConnection implements ExtendedStoreConnection {
     public void putBlobStream(BucketPath bucketPath, PayloadStream payloadStream) {
         LOGGER.info("start putBlobStream for " + bucketPath);
         GridFSBucket bucket = getGridFSBucket(bucketPath);
+        checkBucketExists(bucket);
         String filename = bucketPath.getObjectHandle().getName();
 
         GridFSUploadOptions uploadOptions = new GridFSUploadOptions();
@@ -92,7 +97,7 @@ public class MongoDBExtendedStoreConnection implements ExtendedStoreConnection {
         SimpleStorageMetadataImpl storareMetaData = new SimpleStorageMetadataImpl(payloadStream.getStorageMetadata());
         storareMetaData.setType(StorageType.BLOB);
         storareMetaData.setName(BucketPathUtil.getAsString(bucketPath));
-        uploadOptions.getMetadata().put(STORAGE_METADATA, gsonHelper.toJson(storareMetaData));
+        uploadOptions.getMetadata().put(STORAGE_METADATA_KEY, gsonHelper.toJson(storareMetaData));
         InputStream is = payloadStream.openStream();
         ObjectId objectId = bucket.uploadFromStream(filename, is, uploadOptions);
         IOUtils.closeQuietly(is);
@@ -105,6 +110,7 @@ public class MongoDBExtendedStoreConnection implements ExtendedStoreConnection {
     public PayloadStream getBlobStream(BucketPath bucketPath) {
         LOGGER.info("start getBlobStream for " + bucketPath);
         GridFSBucket bucket = getGridFSBucket(bucketPath);
+        checkBucketExists(bucket);
         String filename = bucketPath.getObjectHandle().getName();
 
         GridFSDownloadOptions options = new GridFSDownloadOptions();
@@ -121,9 +127,11 @@ public class MongoDBExtendedStoreConnection implements ExtendedStoreConnection {
 
     @Override
     public StorageMetadata getStorageMetadata(BucketPath bucketPath) {
+        GridFSBucket bucket = getGridFSBucket(bucketPath);
+        checkBucketExists(bucket);
         GridFS gridFS = new GridFS(databaseDeprecated, bucketPath.getObjectHandle().getContainer());
         GridFSDBFile one = gridFS.findOne(bucketPath.getObjectHandle().getName());
-        String jsonString = (String) one.getMetaData().get(STORAGE_METADATA);
+        String jsonString = (String) one.getMetaData().get(STORAGE_METADATA_KEY);
         return gsonHelper.fromJson(jsonString);
     }
 
@@ -131,9 +139,10 @@ public class MongoDBExtendedStoreConnection implements ExtendedStoreConnection {
     public boolean blobExists(BucketPath bucketPath) {
         LOGGER.info("start blob Exists for " + bucketPath);
         GridFSBucket bucket = getGridFSBucket(bucketPath);
+        checkBucketExists(bucket);
         String filename = bucketPath.getObjectHandle().getName();
         List<ObjectId> ids = new ArrayList<>();
-        bucket.find(Filters.eq(FILENAME, filename)).forEach((Consumer<GridFSFile>) file -> ids.add(file.getObjectId()));
+        bucket.find(Filters.eq(FILENAME_TAG, filename)).forEach((Consumer<GridFSFile>) file -> ids.add(file.getObjectId()));
         LOGGER.info("finished blob Exists for " + bucketPath);
         return !ids.isEmpty();
     }
@@ -142,9 +151,10 @@ public class MongoDBExtendedStoreConnection implements ExtendedStoreConnection {
     public void removeBlob(BucketPath bucketPath) {
         LOGGER.info("start removeBlob for " + bucketPath);
         GridFSBucket bucket = getGridFSBucket(bucketPath);
+        checkBucketExists(bucket);
         String filename = bucketPath.getObjectHandle().getName();
         List<ObjectId> ids = new ArrayList<>();
-        bucket.find(Filters.eq(FILENAME, filename)).forEach((Consumer<GridFSFile>) file -> ids.add(file.getObjectId()));
+        bucket.find(Filters.eq(FILENAME_TAG, filename)).forEach((Consumer<GridFSFile>) file -> ids.add(file.getObjectId()));
         ids.forEach(id -> bucket.delete(id));
         LOGGER.info("finished removeBlob for " + bucketPath);
     }
@@ -161,16 +171,24 @@ public class MongoDBExtendedStoreConnection implements ExtendedStoreConnection {
 
     @Override
     public void createContainer(String container) {
-        GridFSBuckets.create(database, container);
+        BucketPath bp = new BucketPath(container);
+        GridFSBucket bucket = GridFSBuckets.create(database, bp.getObjectHandle().getContainer());
+        InputStream is = new ByteArrayInputStream(new Date().toString().getBytes());
+        bucket.uploadFromStream(BUCKET_ID_FILENAME, is);
+        IOUtils.closeQuietly(is);
     }
 
     @Override
     public boolean containerExists(String container) {
-        return true;
+        BucketPath bp = new BucketPath(container);
+        GridFSBucket bucket = GridFSBuckets.create(database, bp.getObjectHandle().getContainer());
+        return containerExists(bucket);
     }
 
     @Override
     public void deleteContainer(String container) {
+        BucketPath bp = new BucketPath(container);
+        BucketPathUtil.checkContainerName(bp.getObjectHandle().getContainer());
         GridFSBuckets.create(database, container).drop();
 
     }
@@ -179,23 +197,37 @@ public class MongoDBExtendedStoreConnection implements ExtendedStoreConnection {
     public List<StorageMetadata> list(BucketDirectory bucketDirectory, ListRecursiveFlag listRecursiveFlag) {
         LOGGER.info("start list for " + bucketDirectory);
         GridFSBucket bucket = getGridFSBucket(bucketDirectory);
+        List<StorageMetadata> list = new ArrayList<>();
+        if (!containerExists(bucket)) {
+            LOGGER.debug("container " + bucket.getBucketName() + " existiert nicht, daher leere Liste");
+            return list;
+        }
+
+        if (bucketDirectory.getObjectHandle().getName() != null) {
+            if (bucket.find(Filters.eq(FILENAME_TAG, bucketDirectory.getObjectHandle().getName())).iterator().hasNext()) {
+                // Spezialfall, das übergebene Directory ist eine Datei. In diesem Fall geben wir
+                // eine leere Liste zurück
+                return list;
+            }
+        }
+
+
         String directoryname = (bucketDirectory.getObjectHandle().getName() != null)
                 ? bucketDirectory.getObjectHandle().getName() + BucketPath.BUCKET_SEPARATOR
                 : "";
 
-        List<StorageMetadata> list = new ArrayList<>();
         List<String> filenames = new ArrayList<>();
         Set<BucketDirectory> dirs = new HashSet<>();
         if (listRecursiveFlag.equals(ListRecursiveFlag.TRUE)) {
             String pattern = "^" + directoryname + ".*";
-            GridFSFindIterable gridFSFiles = bucket.find(regex(FILENAME, pattern, "i"));
+            GridFSFindIterable gridFSFiles = bucket.find(regex(FILENAME_TAG, pattern, "i"));
             gridFSFiles.forEach((Consumer<GridFSFile>) file -> filenames.add(file.getFilename()));
             LOGGER.debug("found recursive " + filenames.size());
             dirs.addAll(findAllSubDirs(filenames, bucketDirectory));
         } else {
             // files only
             String pattern = "^" + directoryname + "[^/]*$";
-            GridFSFindIterable gridFSFiles = bucket.find(regex(FILENAME, pattern, "i"));
+            GridFSFindIterable gridFSFiles = bucket.find(regex(FILENAME_TAG, pattern, "i"));
             gridFSFiles.forEach((Consumer<GridFSFile>) file -> filenames.add(file.getFilename()));
             LOGGER.debug("found non-recursive " + filenames.size());
 
@@ -203,7 +235,9 @@ public class MongoDBExtendedStoreConnection implements ExtendedStoreConnection {
         }
 
         filenames.forEach(fn -> {
-            list.add(getStorageMetadata(new BucketPath(bucket.getBucketName(), fn)));
+            if (!fn.equals(BUCKET_ID_FILENAME)) {
+                list.add(getStorageMetadata(new BucketPath(bucket.getBucketName(), fn)));
+            }
         });
 
         dirs.add(bucketDirectory);
@@ -234,7 +268,7 @@ public class MongoDBExtendedStoreConnection implements ExtendedStoreConnection {
 
     private void deleteAllExcept(GridFSBucket bucket, String filename, ObjectId objectID) {
         List<ObjectId> idsToDelete = new ArrayList<>();
-        bucket.find(Filters.eq(FILENAME, filename)).forEach((Consumer<GridFSFile>) file -> idsToDelete.add(file.getObjectId()));
+        bucket.find(Filters.eq(FILENAME_TAG, filename)).forEach((Consumer<GridFSFile>) file -> idsToDelete.add(file.getObjectId()));
         LOGGER.info("****  number of files to delete:" + idsToDelete.size());
         idsToDelete.forEach(id -> {
             if (!id.equals(objectID)) {
@@ -252,7 +286,7 @@ public class MongoDBExtendedStoreConnection implements ExtendedStoreConnection {
         {
             // all files
             String pattern = "^" + prefix + ".*";
-            GridFSFindIterable gridFSFiles = bucket.find(regex(FILENAME, pattern, "i"));
+            GridFSFindIterable gridFSFiles = bucket.find(regex(FILENAME_TAG, pattern, "i"));
             gridFSFiles.forEach((Consumer<GridFSFile>) file -> allFiles.add(file.getFilename()));
         }
         Set<BucketDirectory> dirsOnly = new HashSet<>();
@@ -284,6 +318,16 @@ public class MongoDBExtendedStoreConnection implements ExtendedStoreConnection {
             list.add(new BucketDirectory(bucketDirectory.getObjectHandle().getContainer() + BucketPath.BUCKET_SEPARATOR + dir));
         });
         return list;
+    }
+
+    private boolean containerExists(GridFSBucket bucket) {
+        return (bucket.find(Filters.eq(FILENAME_TAG, BUCKET_ID_FILENAME)).iterator().hasNext());
+    }
+
+    private void checkBucketExists(GridFSBucket bucket)  {
+        if (!containerExists(bucket)) {
+            throw new BaseException("Container " + bucket.getBucketName() + " does not exist yet");
+        }
     }
 
 }

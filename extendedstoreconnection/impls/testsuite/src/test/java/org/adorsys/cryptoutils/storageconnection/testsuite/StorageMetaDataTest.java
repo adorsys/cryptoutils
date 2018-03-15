@@ -5,7 +5,6 @@ import com.google.gson.GsonBuilder;
 import junit.framework.Assert;
 import org.adorsys.cryptoutils.exceptions.BaseException;
 import org.adorsys.cryptoutils.exceptions.BaseExceptionHandler;
-import org.adorsys.cryptoutils.mongodbstoreconnection.MongoDBExtendedStoreConnection;
 import org.adorsys.encobject.complextypes.BucketDirectory;
 import org.adorsys.encobject.complextypes.BucketPath;
 import org.adorsys.encobject.domain.Location;
@@ -13,7 +12,6 @@ import org.adorsys.encobject.domain.LocationScope;
 import org.adorsys.encobject.domain.Payload;
 import org.adorsys.encobject.domain.StorageMetadata;
 import org.adorsys.encobject.domain.StorageType;
-import org.adorsys.encobject.filesystem.FileSystemExtendedStorageConnection;
 import org.adorsys.encobject.filesystem.StorageMetadataFlattenerGSON;
 import org.adorsys.encobject.service.api.ExtendedStoreConnection;
 import org.adorsys.encobject.service.impl.SimpleLocationImpl;
@@ -38,9 +36,8 @@ import java.util.Map;
  */
 public class StorageMetaDataTest {
     private final static Logger LOGGER = LoggerFactory.getLogger(StorageMetaDataTest.class);
-    private List<String> containers = new ArrayList<>();
-    // ExtendedStoreConnection s = new FileSystemExtendedStorageConnection();
-    ExtendedStoreConnection s = new MongoDBExtendedStoreConnection();
+    private List<BucketDirectory> containers = new ArrayList<>();
+    private ExtendedStoreConnection s = ExtendedStoreConnectionFactory.get();
 
     @Before
     public void before() {
@@ -49,7 +46,7 @@ public class StorageMetaDataTest {
 
     @After
     public void after() {
-        for (String c : containers) {
+        for (BucketDirectory c : containers) {
             try {
                 LOGGER.debug("AFTER TEST DELETE CONTAINER " + c);
                 s.deleteContainer(c);
@@ -64,10 +61,9 @@ public class StorageMetaDataTest {
      */
     @Test
     public void testStorageMetaData() {
-        String container = "storageMetaData/1";
-        containers.add(container);
-        s.createContainer(container);
-        BucketDirectory bd = new BucketDirectory(container);
+        BucketDirectory bd = new BucketDirectory("storageMetaData/1");
+        s.createContainer(bd);
+        containers.add(bd);
         StorageMetadata storageMetadata = createStorageMetadata();
         BucketPath filea = bd.append(new BucketPath("filea"));
         Payload origPayload = new SimplePayloadImpl(storageMetadata, "Inhalt".getBytes());
@@ -108,10 +104,9 @@ public class StorageMetaDataTest {
         }
         Assert.assertFalse(Arrays.equals(data1, data2));
 
-        String container = "overwrite1";
-        containers.add(container);
-        s.createContainer(container);
-        BucketDirectory bd = new BucketDirectory(container);
+        BucketDirectory bd = new BucketDirectory("overwrite1");
+        s.createContainer(bd);
+        containers.add(bd);
 
         BucketPath filea = bd.append(new BucketPath("filea"));
         {
@@ -145,10 +140,9 @@ public class StorageMetaDataTest {
         }
         Assert.assertFalse(Arrays.equals(data1, data2));
 
-        String container = "overwrite2";
-        containers.add(container);
-        s.createContainer(container);
-        BucketDirectory bd = new BucketDirectory(container);
+        BucketDirectory bd = new BucketDirectory("overwrite2");
+        s.createContainer(bd);
+        containers.add(bd);
 
         BucketPath filea = bd.append(new BucketPath("filea"));
         {
@@ -175,10 +169,9 @@ public class StorageMetaDataTest {
     @Test
     public void testOverwrite2() {
 
-        String container = "affe11/.grants/";
-        containers.add(container);
-        s.createContainer(container);
-        BucketDirectory bd = new BucketDirectory(container);
+        BucketDirectory bd = new BucketDirectory("affe11/.grants/");
+        containers.add(bd);
+        s.createContainer(bd);
         BucketPath filea = bd.append(new BucketPath("grantfile"));
         {
             Gson gson = new GsonBuilder().setPrettyPrinting().create();

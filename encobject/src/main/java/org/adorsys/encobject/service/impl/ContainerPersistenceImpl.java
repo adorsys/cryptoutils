@@ -1,5 +1,6 @@
 package org.adorsys.encobject.service.impl;
 
+import org.adorsys.encobject.complextypes.BucketDirectory;
 import org.adorsys.encobject.exceptions.ContainerExistsException;
 import org.adorsys.encobject.exceptions.UnknownContainerException;
 import org.adorsys.encobject.service.api.ContainerPersistence;
@@ -26,7 +27,7 @@ public class ContainerPersistenceImpl implements ContainerPersistence {
 	 * @throws ContainerExistsException if a container with the same name already exists in the blob store.
 	 */
 	@Override
-	public void createContainer(String container) throws ContainerExistsException {
+	public void createContainer(BucketDirectory container) throws ContainerExistsException {
 		blobStoreConnection.createContainer(container);
 	}
 	
@@ -37,7 +38,7 @@ public class ContainerPersistenceImpl implements ContainerPersistence {
      * @return true if a container with this name exists
 	 */
 	@Override
-	public boolean containerExists(String container){
+	public boolean containerExists(BucketDirectory container){
 		return blobStoreConnection.containerExists(container);
 	}
 	
@@ -48,7 +49,7 @@ public class ContainerPersistenceImpl implements ContainerPersistence {
 	 * @throws UnknownContainerException when no container with given name exists
 	 */
 	@Override
-	public void deleteContainer(String container) throws UnknownContainerException {
+	public void deleteContainer(BucketDirectory container) throws UnknownContainerException {
 		blobStoreConnection.deleteContainer(container);
 	}
 }

@@ -7,6 +7,7 @@
         <artifactId>storeconnection-impls</artifactId>
         <version>0.14.0-SNAPSHOT</version>
     </parent>
+
     <modelVersion>4.0.0</modelVersion>
 
     <artifactId>storeconnection-testsuite</artifactId>
@@ -34,6 +35,21 @@
             <artifactId>junit</artifactId>
             <scope>test</scope>
         </dependency>
+
+        <dependency>
+            <groupId>org.apache.logging.log4j</groupId>
+            <artifactId>log4j-slf4j-impl</artifactId>
+            <version>2.7</version>
+            <scope>test</scope>
+        </dependency>
+
+        <dependency>
+            <groupId>org.apache.logging.log4j</groupId>
+            <artifactId>log4j-core</artifactId>
+            <version>2.7</version>
+            <scope>test</scope>
+        </dependency>
+
     </dependencies>
 
     <build>
@@ -80,19 +96,7 @@
                         </goals>
                         <configuration>
                             <version>3.4.13</version>
-                            <!-- optional, default 27017 <port>37017</port> -->
-                            <!-- optional, default is false, if true allocates a random port and overrides embedmongo.port <randomPort>true</randomPort> -->
-                            <!-- optional, default 2.2.1 -->
-                            <!-- optional, default is a new dir in java.io.tmpdir -->
                             <databaseDirectory>target/mongotest</databaseDirectory>
-                            <!-- optional (file|console|none), default console <logging>file</logging> -->
-                            <!-- optional, can be used when logging=file, default is ./embedmongo.log <logFile>${project.build.directory}/myfile.log</logFile> -->
-                            <!-- optional, can be used when logging=file, default is utf-8 <logFileEncoding>utf-8</logFileEncoding> -->
-                            <!-- optional, default is to listen on all interfaces <bindIp>127.0.0.1</bindIp> -->
-                            <!-- optional, default is http://fastdl.mongodb.org/ <downloadPath>http://internal-mongo-repo/</downloadPath> -->
-                            <!-- optional, default is /tmp <unixSocketPrefix>${user.home}/.embedmongo</unixSocketPrefix> -->
-                            <!-- optional, one of wiredTiger or mmapv1 (default is mmapv1) <storageEngine>wiredTiger</storageEngine> -->
-                            <!-- optional, skips this plugin entirely, use on the command line like -Dembedmongo.skip <skip>false</skip> -->
                         </configuration>
                     </execution>
                     <execution>
@@ -103,6 +107,21 @@
                     </execution>
                 </executions>
             </plugin>
+
+        <!-- Damit die Factory auch in anderen Tests benutzt werden kann -->
+        <plugin>
+            <groupId>org.apache.maven.plugins</groupId>
+            <artifactId>maven-jar-plugin</artifactId>
+            <version>2.4</version>
+            <executions>
+                <execution>
+                    <goals>
+                        <goal>test-jar</goal>
+                    </goals>
+                </execution>
+            </executions>
+        </plugin>
+
         </plugins>
 
     </build>

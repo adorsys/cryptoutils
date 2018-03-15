@@ -28,20 +28,65 @@
                 </configuration>
             </plugin>
 
-        <!-- Damit TestKeyUtils auch in encobject-jcloud benutzt werden kann -->
+            <!-- START needed for mongodb TESTS -->
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-jar-plugin</artifactId>
-                <version>2.4</version>
+                <artifactId>maven-surefire-plugin</artifactId>
+                <configuration>
+                    <!-- Exclude integation tests from standards -->
+                    <excludes>
+                        <exclude>**/*Test.java</exclude>
+                    </excludes>
+                </configuration>
+                <executions>
+                    <!-- Define execution for integration tests. -->
+                    <execution>
+                        <id>integration-test</id>
+                        <goals>
+                            <goal>test</goal>
+                        </goals>
+                        <phase>integration-test</phase>
+                        <configuration>
+                            <excludes>
+                                <exclude>none</exclude>
+                            </excludes>
+                            <includes>
+                                <include>**/*Test.java</include>
+                            </includes>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+            <plugin>
+                <!-- see https://github.com/joelittlejohn/embedmongo-maven-plugin -->
+                <groupId>com.github.joelittlejohn.embedmongo</groupId>
+                <artifactId>embedmongo-maven-plugin</artifactId>
+                <version>0.3.5</version>
                 <executions>
                     <execution>
+                        <id>start</id>
                         <goals>
-                            <goal>test-jar</goal>
+                            <goal>start</goal>
+                        </goals>
+                        <configuration>
+                            <version>3.4.13</version>
+                            <databaseDirectory>target/mongotest</databaseDirectory>
+                        </configuration>
+                    </execution>
+                    <execution>
+                        <id>stop</id>
+                        <goals>
+                            <goal>stop</goal>
                         </goals>
                     </execution>
                 </executions>
             </plugin>
+            <!-- END needed for mongodb TESTS -->
+
+
         </plugins>
+
+
 
     </build>
 
@@ -95,6 +140,19 @@
         <dependency>
             <groupId>de.adorsys.cryptoutils</groupId>
             <artifactId>filesystemstoreconnection</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>de.adorsys.cryptoutils</groupId>
+            <artifactId>mongodbstoreconnection</artifactId>
+            <scope>test</scope>
+        </dependency>
+
+        <dependency>
+            <groupId>de.adorsys.cryptoutils</groupId>
+            <artifactId>storeconnection-testsuite</artifactId>
+            <version>${project.version}</version>
+            <type>test-jar</type>
             <scope>test</scope>
         </dependency>
 

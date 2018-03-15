@@ -26,9 +26,8 @@ import java.util.List;
  */
 public class ExtendedStoreConnectionTest {
     private final static Logger LOGGER = LoggerFactory.getLogger(ExtendedStoreConnectionTest.class);
-    private List<String> containers = new ArrayList<>();
-//    private ExtendedStoreConnection s = new FileSystemExtendedStorageConnection();
-    private ExtendedStoreConnection s = new MongoDBExtendedStoreConnection();
+    private List<BucketDirectory> containers = new ArrayList<>();
+    private ExtendedStoreConnection s = ExtendedStoreConnectionFactory.get();
 
     @Before
     public void before() {
@@ -37,7 +36,7 @@ public class ExtendedStoreConnectionTest {
 
     @After
     public void after() {
-        for (String c : containers) {
+        for (BucketDirectory c : containers) {
             try {
                 LOGGER.debug("AFTER TEST DELETE CONTAINER " + c);
                 s.deleteContainer(c);
@@ -64,15 +63,15 @@ public class ExtendedStoreConnectionTest {
      */
     @Test
     public void testList2() {
-        String container = "affe2";
-        containers.add(container);
-        s.createContainer(container);
-        List<StorageMetadata> content = s.list(new BucketDirectory(container), ListRecursiveFlag.FALSE);
+        BucketDirectory bd = new BucketDirectory("affe2");
+        s.createContainer(bd);
+        containers.add(bd);
+        List<StorageMetadata> content = s.list(bd, ListRecursiveFlag.FALSE);
         LOGGER.debug(show(content));
         List<BucketPath> files = getFilesOnly(content);
         Assert.assertEquals(0, files.size());
         List<BucketDirectory> dirs = getDirectoresOnly(content);
-        dirs.forEach(bd -> LOGGER.debug(bd.toString()));
+        dirs.forEach(dir -> LOGGER.debug(dir.toString()));
         Assert.assertEquals(1, dirs.size());
     }
 
@@ -81,10 +80,9 @@ public class ExtendedStoreConnectionTest {
      */
     @Test
     public void testList3() {
-        String container = "affe3";
-        containers.add(container);
-        s.createContainer(container);
-        BucketDirectory bd = new BucketDirectory(container);
+        BucketDirectory bd = new BucketDirectory("affe3");
+        s.createContainer(bd);
+        containers.add(bd);
         BucketPath file = bd.appendName("file1");
 
         s.putBlob(file, "Inhalt".getBytes());
@@ -103,9 +101,7 @@ public class ExtendedStoreConnectionTest {
      */
     @Test
     public void testList4() {
-        String container = "affe4";
-        containers.add(container);
-        BucketDirectory bd = new BucketDirectory(container);
+        BucketDirectory bd = new BucketDirectory("affe4");
 
         List<StorageMetadata> content = s.list(bd, ListRecursiveFlag.FALSE);
         content.forEach(c -> LOGGER.debug(c.getName()));
@@ -121,14 +117,14 @@ public class ExtendedStoreConnectionTest {
      */
     @Test
     public void testList5() {
-        String container = "affe5";
-        containers.add(container);
-        s.createContainer(container);
-        BucketPath bp = new BucketPath(container);
-        BucketPath file = bp.append("file1");
+        BucketDirectory bd = new BucketDirectory("affe5");
+        s.createContainer(bd);
+        containers.add(bd);
+
+        BucketPath file = bd.appendName("file1");
         s.putBlob(file, "Inhalt".getBytes());
-        BucketDirectory bd = new BucketDirectory(file);
-        List<StorageMetadata> content = s.list(bd, ListRecursiveFlag.FALSE);
+        BucketDirectory bdtrick = new BucketDirectory(file);
+        List<StorageMetadata> content = s.list(bdtrick, ListRecursiveFlag.FALSE);
         List<BucketPath> files = getFilesOnly(content);
         Assert.assertEquals(0, files.size());
         List<BucketDirectory> dirs = getDirectoresOnly(content);
@@ -142,10 +138,10 @@ public class ExtendedStoreConnectionTest {
      */
     @Test
     public void testList6() {
-        String container = "affe6/1/2/3";
-        containers.add(container);
-        s.createContainer(container);
-        BucketDirectory bd = new BucketDirectory(container);
+        BucketDirectory bd = new BucketDirectory("affe6/1/2/3");
+        s.createContainer(bd);
+        containers.add(bd);
+
         s.putBlob(bd.append(new BucketPath("filea")), "Inhalt".getBytes());
         s.putBlob(bd.append(new BucketPath("fileb")), "Inhalt".getBytes());
         s.putBlob(bd.append(new BucketPath("subdir1/filec")), "Inhalt".getBytes());
@@ -177,10 +173,10 @@ public class ExtendedStoreConnectionTest {
      */
     @Test
     public void testList7() {
-        String container = "affe7/1/2/3";
-        containers.add(container);
-        s.createContainer(container);
-        BucketDirectory bd = new BucketDirectory(container);
+        BucketDirectory bd = new BucketDirectory("affe7/1/2/3");
+        s.createContainer(bd);
+        containers.add(bd);
+
         s.putBlob(bd.append(new BucketPath("subdir1/filea")), "Inhalt".getBytes());
         List<StorageMetadata> list = s.list(bd, ListRecursiveFlag.TRUE);
         LOGGER.debug(show(list));
@@ -208,14 +204,14 @@ public class ExtendedStoreConnectionTest {
     public void testList8() {
         LOGGER.debug("START TEST " + new RuntimeException("").getStackTrace()[0].getMethodName());
 
-        String container = "user1";
-        BucketDirectory rootDirectory = new BucketDirectory(container);
-        containers.add(container);
-        s.createContainer(container);
-        createFiles(s, rootDirectory, 3, 2);
+        BucketDirectory bd = new BucketDirectory("bucket8");
+        s.createContainer(bd);
+        containers.add(bd);
+
+        createFiles(s, bd, 3, 2);
 
         {
-            List<StorageMetadata> list = s.list(rootDirectory, ListRecursiveFlag.FALSE);
+            List<StorageMetadata> list = s.list(bd, ListRecursiveFlag.FALSE);
             LOGGER.debug("1 einfaches listing");
             LOGGER.debug(show(list));
             List<BucketPath> files = getFilesOnly(list);
@@ -225,7 +221,7 @@ public class ExtendedStoreConnectionTest {
             Assert.assertEquals(2, files.size());
         }
         {
-            List<StorageMetadata> list = s.list(rootDirectory, ListRecursiveFlag.TRUE);
+            List<StorageMetadata> list = s.list(bd, ListRecursiveFlag.TRUE);
             LOGGER.debug("2 recursives listing");
             LOGGER.debug(show(list));
             List<BucketPath> files = getFilesOnly(list);
@@ -236,7 +232,7 @@ public class ExtendedStoreConnectionTest {
         }
 
         {
-            BucketDirectory bp = rootDirectory.appendDirectory("subdir1");
+            BucketDirectory bp = bd.appendDirectory("subdir1");
             List<StorageMetadata> list = s.list(bp, ListRecursiveFlag.FALSE);
             LOGGER.debug("3 einfaches listing");
             LOGGER.debug(show(list));
@@ -248,7 +244,7 @@ public class ExtendedStoreConnectionTest {
         }
 
         {
-            BucketDirectory bp = rootDirectory.appendDirectory("subdir1");
+            BucketDirectory bp = bd.appendDirectory("subdir1");
             List<StorageMetadata> list = s.list(bp, ListRecursiveFlag.TRUE);
             LOGGER.debug("4 recursives listing");
             LOGGER.debug(show(list));
@@ -265,10 +261,10 @@ public class ExtendedStoreConnectionTest {
      */
     @Test
     public void testOverwrite() {
-        String container = "affe10/1/2/3";
-        containers.add(container);
-        s.createContainer(container);
-        BucketDirectory bd = new BucketDirectory(container);
+        BucketDirectory bd = new BucketDirectory("bucketOverwrite/1/2/3");
+        s.createContainer(bd);
+        containers.add(bd);
+
         StorageMetadata storageMetadata = new SimpleStorageMetadataImpl();
         storageMetadata.getUserMetadata().put("myinfo", "first time");
         BucketPath filea = bd.append(new BucketPath("filea"));

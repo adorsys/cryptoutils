@@ -2,17 +2,23 @@ package org.adorsys.encobject.service;
 
 import junit.framework.Assert;
 import org.adorsys.cryptoutils.exceptions.BaseExceptionHandler;
+import org.adorsys.cryptoutils.storageconnection.testsuite.ExtendedStoreConnectionFactory;
+import org.adorsys.encobject.complextypes.BucketDirectory;
 import org.adorsys.encobject.complextypes.BucketPath;
 import org.adorsys.encobject.domain.Payload;
 import org.adorsys.encobject.domain.PayloadStream;
 import org.adorsys.encobject.filesystem.FileSystemExtendedStorageConnection;
+import org.adorsys.encobject.service.api.ContainerPersistence;
 import org.adorsys.encobject.service.api.EncryptionStreamService;
 import org.adorsys.encobject.service.api.ExtendedStoreConnection;
+import org.adorsys.encobject.service.impl.ContainerPersistenceImpl;
 import org.adorsys.encobject.service.impl.EncryptedPersistenceServiceImpl;
 import org.adorsys.encobject.service.impl.SimplePayloadStreamImpl;
 import org.adorsys.encobject.service.impl.SimpleStorageMetadataImpl;
 import org.adorsys.encobject.types.KeyID;
 import org.apache.commons.io.IOUtils;
+import org.junit.After;
+import org.junit.Before;
 import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -20,12 +26,36 @@ import org.slf4j.LoggerFactory;
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;
 import java.util.Arrays;
+import java.util.HashSet;
+import java.util.Set;
 
 /**
  * Created by peter on 05.03.18 at 12:19.
  */
 public class EncryptedPersistenceServiceTest {
     private final static Logger LOGGER = LoggerFactory.getLogger(EncryptedPersistenceServiceTest.class);
+    public static Set<BucketDirectory> buckets = new HashSet<>();
+
+    @Before
+    public void before() {
+        buckets.clear();
+    }
+
+    @After
+    public void after() {
+        try {
+            ExtendedStoreConnection extendedStoreConnection = ExtendedStoreConnectionFactory.get();
+            ContainerPersistence containerPersistence = new ContainerPersistenceImpl(extendedStoreConnection);
+            for (BucketDirectory container : buckets) {
+                LOGGER.debug("AFTER TEST: DELETE BUCKET " + container);
+                containerPersistence.deleteContainer(container);
+            }
+        } catch (Exception e) {
+            throw BaseExceptionHandler.handle(e);
+        }
+
+    }
+
 
     @Test
     public void testVerySimpleEncryption() {
@@ -58,12 +88,15 @@ public class EncryptedPersistenceServiceTest {
     @Test
     public void writeWithStreamAndLoadBytesAndStream() {
         try {
-            String file = "folder1/file";
+            ExtendedStoreConnection storageConnection = ExtendedStoreConnectionFactory.get();
+            BucketPath bucketPath = new BucketPath("folder1/file1");
+            storageConnection.createContainer(bucketPath.getBucketDirectory());
+            buckets.add(bucketPath.getBucketDirectory());
+
             KeyID keyID = new KeyID("a not null keyid");
-            ExtendedStoreConnection storageConnection = new FileSystemExtendedStorageConnection();
             EncryptionStreamService encryptionService = new VerySimpleEncryptionService();
             EncryptedPersistenceServiceImpl service = new EncryptedPersistenceServiceImpl(storageConnection, encryptionService);
-            BucketPath bucketPath = new BucketPath(file);
+
             byte[] content = getTrickyContent();
             InputStream inputStream = new ByteArrayInputStream(content);
             PayloadStream payLoadStream = new SimplePayloadStreamImpl(new SimpleStorageMetadataImpl(), inputStream);

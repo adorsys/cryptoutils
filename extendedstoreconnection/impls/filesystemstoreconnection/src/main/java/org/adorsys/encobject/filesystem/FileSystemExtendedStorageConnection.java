@@ -1,5 +1,6 @@
 package org.adorsys.encobject.filesystem;
 
+import org.adorsys.cryptoutils.exceptions.BaseException;
 import org.adorsys.cryptoutils.exceptions.BaseExceptionHandler;
 import org.adorsys.encobject.complextypes.BucketDirectory;
 import org.adorsys.encobject.complextypes.BucketPath;
@@ -48,9 +49,12 @@ public class FileSystemExtendedStorageConnection implements ExtendedStoreConnect
         this.zipFileHelper = new ZipFileHelper(this.baseDir);
     }
 
+
     @Override
-    public void createContainer(String container) {
-        File file = BucketPathFileHelper.getAsFile(baseDir.appendDirectory(container));
+    public void createContainer(BucketDirectory bucketDirectory) {
+        String containerOnly = bucketDirectory.getObjectHandle().getContainer();
+
+        File file = BucketPathFileHelper.getAsFile(baseDir.appendDirectory(containerOnly));
         if (file.isDirectory()) {
             LOGGER.debug("directory already exists:" + file);
             return;
@@ -63,12 +67,8 @@ public class FileSystemExtendedStorageConnection implements ExtendedStoreConnect
     }
 
     @Override
-    public boolean containerExists(String container) {
-        return containerExists(new BucketDirectory(container));
-    }
-
     public boolean containerExists(BucketDirectory bucketDirectory) {
-        File file = BucketPathFileHelper.getAsFile(baseDir.append(bucketDirectory));
+        File file = BucketPathFileHelper.getAsFile(baseDir.appendDirectory(bucketDirectory.getObjectHandle().getContainer()));
         if (file.isDirectory()) {
             LOGGER.debug("directory exists:" + file);
             return true;
@@ -82,10 +82,6 @@ public class FileSystemExtendedStorageConnection implements ExtendedStoreConnect
 
 
     @Override
-    public void deleteContainer(String container) {
-        deleteContainer(new BucketDirectory(container));
-    }
-
     public void deleteContainer(BucketDirectory container) {
         File file = BucketPathFileHelper.getAsFile(baseDir.appendDirectory(container.getObjectHandle().getContainer()));
         if (!containerExists(container)) {
@@ -137,34 +133,38 @@ public class FileSystemExtendedStorageConnection implements ExtendedStoreConnect
 
     @Override
     public void putBlob(BucketPath bucketPath, Payload payload) {
+        checkContainerExists(bucketPath);
         zipFileHelper.writeZip(bucketPath, new SimplePayloadImpl(payload));
     }
 
     @Override
     public Payload getBlob(BucketPath bucketPath) {
+        checkContainerExists(bucketPath);
         return zipFileHelper.readZip(bucketPath);
     }
 
     @Override
     public void putBlobStream(BucketPath bucketPath, PayloadStream payloadStream) {
+        checkContainerExists(bucketPath);
         zipFileHelper.writeZipStream(bucketPath, new SimplePayloadStreamImpl(payloadStream));
 
     }
 
     @Override
     public PayloadStream getBlobStream(BucketPath bucketPath) {
+        checkContainerExists(bucketPath);
         return zipFileHelper.readZipStream(bucketPath);
     }
 
     @Override
     public StorageMetadata getStorageMetadata(BucketPath bucketPath) {
+        checkContainerExists(bucketPath);
         return zipFileHelper.readZipMetadataOnly(bucketPath);
     }
 
-
-
     @Override
     public void removeBlob(BucketPath bucketPath) {
+        checkContainerExists(bucketPath);
         File file = BucketPathFileHelper.getAsFile(baseDir.append(bucketPath).add(ZipFileHelper.ZIP_SUFFIX));
         if (!file.exists()) {
             return;
@@ -191,6 +191,11 @@ public class FileSystemExtendedStorageConnection implements ExtendedStoreConnect
     /* ===========================================================================================================
      */
 
+    private void checkContainerExists(BucketPath bucketPath) {
+        if (! containerExists(bucketPath.getBucketDirectory())) {
+            throw new BaseException("Container " + bucketPath.getObjectHandle().getContainer() + " does not exist");
+        }
+    }
     private int countBlobs(DirectoryContent content, int currentCounter) {
         currentCounter += content.getFiles().size();
         for (DirectoryContent subdir : content.getSubidrs()) {

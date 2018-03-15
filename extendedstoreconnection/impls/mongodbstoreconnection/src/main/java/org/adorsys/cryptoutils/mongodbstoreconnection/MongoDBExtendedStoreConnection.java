@@ -170,26 +170,23 @@ public class MongoDBExtendedStoreConnection implements ExtendedStoreConnection {
     }
 
     @Override
-    public void createContainer(String container) {
-        BucketPath bp = new BucketPath(container);
-        GridFSBucket bucket = GridFSBuckets.create(database, bp.getObjectHandle().getContainer());
+    public void createContainer(BucketDirectory bucketDirectory) {
+        GridFSBucket bucket = GridFSBuckets.create(database, bucketDirectory.getObjectHandle().getContainer());
         InputStream is = new ByteArrayInputStream(new Date().toString().getBytes());
         bucket.uploadFromStream(BUCKET_ID_FILENAME, is);
         IOUtils.closeQuietly(is);
     }
 
     @Override
-    public boolean containerExists(String container) {
-        BucketPath bp = new BucketPath(container);
-        GridFSBucket bucket = GridFSBuckets.create(database, bp.getObjectHandle().getContainer());
+    public boolean containerExists(BucketDirectory bucketDirectory) {
+        GridFSBucket bucket = GridFSBuckets.create(database, bucketDirectory.getObjectHandle().getContainer());
         return containerExists(bucket);
     }
 
     @Override
-    public void deleteContainer(String container) {
-        BucketPath bp = new BucketPath(container);
-        BucketPathUtil.checkContainerName(bp.getObjectHandle().getContainer());
-        GridFSBuckets.create(database, container).drop();
+    public void deleteContainer(BucketDirectory bucketDirectory) {
+        BucketPathUtil.checkContainerName(bucketDirectory.getObjectHandle().getContainer());
+        GridFSBuckets.create(database, bucketDirectory.getObjectHandle().getContainer()).drop();
 
     }
 

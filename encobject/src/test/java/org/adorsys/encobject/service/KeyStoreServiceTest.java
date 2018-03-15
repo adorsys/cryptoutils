@@ -1,6 +1,7 @@
 package org.adorsys.encobject.service;
 
 import org.adorsys.cryptoutils.exceptions.BaseExceptionHandler;
+import org.adorsys.cryptoutils.storageconnection.testsuite.ExtendedStoreConnectionFactory;
 import org.adorsys.encobject.complextypes.BucketDirectory;
 import org.adorsys.encobject.complextypes.BucketPath;
 import org.adorsys.encobject.domain.KeyStoreAccess;
@@ -35,7 +36,7 @@ public class KeyStoreServiceTest {
     private final static Logger LOGGER = LoggerFactory.getLogger(KeyStoreServiceTest.class);
 
     private static String keystoreContainer = "keystore-container-" + KeyStoreServiceTest.class.getSimpleName();
-    private ExtendedStoreConnection extendedStoreConnection = new FileSystemExtendedStorageConnection();
+    private ExtendedStoreConnection extendedStoreConnection = ExtendedStoreConnectionFactory.get();
     public static Set<BucketDirectory> buckets = new HashSet<>();
 
     @Before
@@ -49,9 +50,8 @@ public class KeyStoreServiceTest {
         try {
             ContainerPersistence containerPersistence = new ContainerPersistenceImpl(extendedStoreConnection);
             for (BucketDirectory bucket : buckets) {
-                String container = bucket.getObjectHandle().getContainer();
-                LOGGER.debug("AFTER TEST: DELETE BUCKET " + container);
-                containerPersistence.deleteContainer(container);
+                LOGGER.debug("AFTER TEST: DELETE BUCKET " + bucket);
+                containerPersistence.deleteContainer(bucket);
             }
         } catch (Exception e) {
             throw BaseExceptionHandler.handle(e);
@@ -100,7 +100,7 @@ public class KeyStoreServiceTest {
             try {
                 // sollte der container exsitieren, ignorieren wir die Exception, um zu
                 // sehen, ob sich ein keystore überschreiben lässt
-                containerPersistence.createContainer(keyStoreDirectory.getObjectHandle().getContainer());
+                containerPersistence.createContainer(keyStoreDirectory);
             } catch (Exception e) {
                 LOGGER.error("Exception is ignored");
             }

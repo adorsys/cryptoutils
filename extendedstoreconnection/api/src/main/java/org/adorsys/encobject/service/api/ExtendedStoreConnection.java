@@ -20,7 +20,6 @@ public interface ExtendedStoreConnection {
     @Deprecated
     void putBlob(BucketPath bucketPath, byte[] bytes);
 
-
     StorageMetadata getStorageMetadata(BucketPath bucketPath);
 
     boolean blobExists(BucketPath bucketPath);
@@ -31,11 +30,11 @@ public interface ExtendedStoreConnection {
 
     long countBlobs(BucketDirectory bucketDirectory, ListRecursiveFlag recursive);
 
-    void createContainer(String container);
+    void createContainer(BucketDirectory bucketDirectory);
 
-    boolean containerExists(String container);
+    boolean containerExists(BucketDirectory bucketDirectory);
 
-    void deleteContainer(String container);
+    void deleteContainer(BucketDirectory bucketDirectory);
 
     List<StorageMetadata> list(BucketDirectory bucketDirectory, ListRecursiveFlag listRecursiveFlag);
 }

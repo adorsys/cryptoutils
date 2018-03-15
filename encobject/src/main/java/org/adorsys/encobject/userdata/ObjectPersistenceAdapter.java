@@ -1,6 +1,7 @@
 package org.adorsys.encobject.userdata;
 
 import org.adorsys.cryptoutils.exceptions.BaseExceptionHandler;
+import org.adorsys.encobject.complextypes.BucketDirectory;
 import org.adorsys.encobject.complextypes.BucketPath;
 import org.adorsys.encobject.domain.KeyCredentials;
 import org.adorsys.encobject.domain.ObjectHandle;
@@ -59,7 +60,7 @@ public class ObjectPersistenceAdapter {
      */
     public void initStore() {
         try {
-            String container = keyCredentials.getHandle().getContainer();
+            BucketDirectory container = new BucketDirectory(keyCredentials.getHandle().getContainer());
             if (!storeConnection.containerExists(container)) {
             	storeConnection.createContainer(container);
             }
@@ -83,7 +84,7 @@ public class ObjectPersistenceAdapter {
     }
 
     private <T> void storeInternal(ObjectHandle handle, T t) {
-    	String container = keyCredentials.getHandle().getContainer();
+    	BucketDirectory container = new BucketDirectory(keyCredentials.getHandle().getContainer());
     	if(!storeConnection.containerExists(container)){
     		storeConnection.createContainer(container);
     	}

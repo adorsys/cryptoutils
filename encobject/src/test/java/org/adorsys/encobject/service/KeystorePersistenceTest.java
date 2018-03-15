@@ -1,6 +1,8 @@
 package org.adorsys.encobject.service;
 
 import org.adorsys.cryptoutils.exceptions.BaseExceptionHandler;
+import org.adorsys.cryptoutils.storageconnection.testsuite.ExtendedStoreConnectionFactory;
+import org.adorsys.encobject.complextypes.BucketDirectory;
 import org.adorsys.encobject.complextypes.BucketPath;
 import org.adorsys.encobject.domain.ObjectHandle;
 import org.adorsys.encobject.domain.Tuple;
@@ -31,7 +33,7 @@ import java.util.Map;
 public class KeystorePersistenceTest {
     private final static Logger LOGGER = LoggerFactory.getLogger(KeystorePersistenceTest.class);
 
-    private static String container = KeystorePersistenceTest.class.getSimpleName();
+    private static BucketDirectory container = new BucketDirectory(KeystorePersistenceTest.class.getSimpleName());
     private static ExtendedStoreConnection extendedStoreConnection;
     private static KeystorePersistence keystorePersistence;
     private static ContainerPersistence containerPersistence;
@@ -39,7 +41,7 @@ public class KeystorePersistenceTest {
     @BeforeClass
     public static void beforeClass() {
         TestKeyUtils.turnOffEncPolicy();
-        extendedStoreConnection = new FileSystemExtendedStorageConnection();
+        extendedStoreConnection = ExtendedStoreConnectionFactory.get();
         keystorePersistence = new BlobStoreKeystorePersistenceImpl(extendedStoreConnection);
         containerPersistence = new ContainerPersistenceImpl(extendedStoreConnection);
 
@@ -67,8 +69,8 @@ public class KeystorePersistenceTest {
         char[] storePass = "aSimplePass".toCharArray();
         KeyStore keystore = TestKeyUtils.testSecretKeystore(storeid, storePass, "mainKey", "aSimpleSecretPass".toCharArray());
         Assume.assumeNotNull(keystore);
-        keystorePersistence.saveKeyStore(keystore, TestKeyUtils.callbackHandlerBuilder(storeid, storePass).build(), new ObjectHandle(container, storeid));
-        Assert.assertTrue(extendedStoreConnection.blobExists(new BucketPath(container, storeid)));
+        keystorePersistence.saveKeyStore(keystore, TestKeyUtils.callbackHandlerBuilder(storeid, storePass).build(), container.appendName(storeid).getObjectHandle());
+        Assert.assertTrue(extendedStoreConnection.blobExists(container.appendName(storeid)));
     }
 
     @Test
@@ -79,6 +81,7 @@ public class KeystorePersistenceTest {
             char[] storePass = "aSimplePass".toCharArray();
             KeyStore keystore = TestKeyUtils.testSecretKeystore(storeid, storePass, "mainKey", "aSimpleSecretPass".toCharArray());
             Assume.assumeNotNull(keystore);
+            extendedStoreConnection.createContainer(new BucketDirectory(container));
             keystorePersistence.saveKeyStore(keystore, TestKeyUtils.callbackHandlerBuilder(storeid, storePass).build(), new ObjectHandle(container, storeid));
 
             KeyStore loadedKeystore = null;
@@ -106,6 +109,7 @@ public class KeystorePersistenceTest {
             attributes.put("b", "2");
             attributes.put("c", "3");
 
+            extendedStoreConnection.createContainer(new BucketDirectory(container));
             keystorePersistence.saveKeyStoreWithAttributes(keystore, attributes, TestKeyUtils.callbackHandlerBuilder(storeid, storePass).build(), new ObjectHandle(container, storeid));
 
             KeyStore loadedKeystore = null;

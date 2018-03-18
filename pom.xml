@@ -72,11 +72,16 @@
                 <artifactId>mongodbstoreconnection</artifactId>
                 <version>${project.version}</version>
             </dependency>
-            <dependency>
-                <groupId>de.adorsys.cryptoutils</groupId>
-                <artifactId>filesystemstoreconnection</artifactId>
-                <version>${project.version}</version>
-            </dependency>
+			<dependency>
+				<groupId>de.adorsys.cryptoutils</groupId>
+				<artifactId>filesystemstoreconnection</artifactId>
+				<version>${project.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>de.adorsys.cryptoutils</groupId>
+				<artifactId>miniostoreconnection</artifactId>
+				<version>${project.version}</version>
+			</dependency>
 			<dependency>
 				<groupId>de.adorsys.cryptoutils</groupId>
 				<artifactId>storeconnection-testsuite</artifactId>

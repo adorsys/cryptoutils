@@ -23,6 +23,11 @@
             <artifactId>mongodbstoreconnection</artifactId>
             <scope>test</scope>
         </dependency>
+        <dependency>
+            <groupId>de.adorsys.cryptoutils</groupId>
+            <artifactId>miniostoreconnection</artifactId>
+            <scope>test</scope>
+        </dependency>
 
         <dependency>
             <groupId>commons-io</groupId>

@@ -16,7 +16,11 @@ public class ObjectHandle {
 
 	public ObjectHandle(String container, String name) {
 		super();
-		this.container = container;
+		if (container != null) {
+			this.container = container.toLowerCase();
+		} else {
+			this.container = container;
+		}
 		this.name = name;
 	}
 
@@ -26,7 +30,11 @@ public class ObjectHandle {
 	}
 
 	public void setContainer(String container) {
-		this.container = container;
+		if (container != null) {
+			this.container = container.toLowerCase();
+		} else {
+			this.container = container;
+		}
 	}
 
 	@ApiModelProperty(value = "The name of the object in the store")

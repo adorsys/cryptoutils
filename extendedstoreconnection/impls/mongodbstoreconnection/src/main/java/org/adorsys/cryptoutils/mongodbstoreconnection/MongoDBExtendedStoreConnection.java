@@ -28,6 +28,7 @@ import org.adorsys.encobject.service.api.ExtendedStoreConnection;
 import org.adorsys.encobject.service.impl.SimplePayloadImpl;
 import org.adorsys.encobject.service.impl.SimplePayloadStreamImpl;
 import org.adorsys.encobject.service.impl.SimpleStorageMetadataImpl;
+import org.adorsys.encobject.service.impl.StoreConnectionListHelper;
 import org.adorsys.encobject.types.ListRecursiveFlag;
 import org.apache.commons.io.IOUtils;
 import org.bson.Document;
@@ -61,9 +62,9 @@ public class MongoDBExtendedStoreConnection implements ExtendedStoreConnection {
 
 
     public MongoDBExtendedStoreConnection(String databasename) {
-            MongoClient mongoClient = new MongoClient();
-            database = mongoClient.getDatabase(databasename);
-            databaseDeprecated = mongoClient.getDB(databasename);
+        MongoClient mongoClient = new MongoClient();
+        database = mongoClient.getDatabase(databasename);
+        databaseDeprecated = mongoClient.getDB(databasename);
     }
 
 
@@ -228,27 +229,29 @@ public class MongoDBExtendedStoreConnection implements ExtendedStoreConnection {
                 ? bucketDirectory.getObjectHandle().getName() + BucketPath.BUCKET_SEPARATOR
                 : "";
 
-        List<String> filenames = new ArrayList<>();
+        List<BucketPath> bucketPaths = new ArrayList<>();
         Set<BucketDirectory> dirs = new HashSet<>();
         if (listRecursiveFlag.equals(ListRecursiveFlag.TRUE)) {
             String pattern = "^" + directoryname + ".*";
             GridFSFindIterable gridFSFiles = bucket.find(regex(FILENAME_TAG, pattern, "i"));
-            gridFSFiles.forEach((Consumer<GridFSFile>) file -> filenames.add(file.getFilename()));
-            LOGGER.debug("found recursive " + filenames.size());
-            dirs.addAll(findAllSubDirs(filenames, bucketDirectory));
+            gridFSFiles.forEach((Consumer<GridFSFile>) file -> bucketPaths.add(
+                    new BucketPath(bucketDirectory.getObjectHandle().getContainer(), file.getFilename())));
+            LOGGER.debug("found recursive " + bucketPaths.size());
+            dirs.addAll(StoreConnectionListHelper.findAllSubDirs(bucketPaths));
         } else {
             // files only
             String pattern = "^" + directoryname + "[^/]*$";
             GridFSFindIterable gridFSFiles = bucket.find(regex(FILENAME_TAG, pattern, "i"));
-            gridFSFiles.forEach((Consumer<GridFSFile>) file -> filenames.add(file.getFilename()));
-            LOGGER.debug("found non-recursive " + filenames.size());
+            gridFSFiles.forEach((Consumer<GridFSFile>) file -> bucketPaths.add(
+                    new BucketPath(bucketDirectory.getObjectHandle().getContainer(), file.getFilename())));
+            LOGGER.debug("found non-recursive " + bucketPaths.size());
 
             dirs.addAll(findSubdirs(bucket, bucketDirectory));
         }
 
-        filenames.forEach(fn -> {
-            if (!fn.equals(BUCKET_ID_FILENAME)) {
-                list.add(getStorageMetadata(new BucketPath(bucket.getBucketName(), fn)));
+        bucketPaths.forEach(bucketPath -> {
+            if (!bucketPath.getObjectHandle().getName().equals(BUCKET_ID_FILENAME)) {
+                list.add(getStorageMetadata(bucketPath));
             }
         });
 
@@ -317,6 +320,7 @@ public class MongoDBExtendedStoreConnection implements ExtendedStoreConnection {
         return dirsOnly;
     }
 
+    /*
     private Set<BucketDirectory> findAllSubDirs(List<String> filenames, BucketDirectory bucketDirectory) {
         Set<String> allDirs = new HashSet<>();
         filenames.forEach(filename -> {
@@ -331,12 +335,13 @@ public class MongoDBExtendedStoreConnection implements ExtendedStoreConnection {
         });
         return list;
     }
+    */
 
     private boolean containerExists(GridFSBucket bucket) {
         return (bucket.find(Filters.eq(FILENAME_TAG, BUCKET_ID_FILENAME)).iterator().hasNext());
     }
 
-    private void checkBucketExists(GridFSBucket bucket)  {
+    private void checkBucketExists(GridFSBucket bucket) {
         if (!containerExists(bucket)) {
             throw new BaseException("Container " + bucket.getBucketName() + " does not exist yet");
         }

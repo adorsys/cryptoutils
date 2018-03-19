@@ -2,33 +2,56 @@ package org.adorsys.cryptoutils.miniostoreconnection;
 
 import io.minio.MinioClient;
 import io.minio.ObjectStat;
+import io.minio.Result;
+import io.minio.errors.ErrorResponseException;
+import io.minio.errors.InsufficientDataException;
+import io.minio.errors.InternalException;
+import io.minio.errors.InvalidBucketNameException;
+import io.minio.errors.NoResponseException;
+import io.minio.messages.DeleteError;
+import io.minio.messages.Item;
+import org.adorsys.cryptoutils.exceptions.BaseException;
 import org.adorsys.cryptoutils.exceptions.BaseExceptionHandler;
+import org.adorsys.cryptoutils.exceptions.NYIException;
 import org.adorsys.encobject.complextypes.BucketDirectory;
 import org.adorsys.encobject.complextypes.BucketPath;
+import org.adorsys.encobject.complextypes.BucketPathUtil;
 import org.adorsys.encobject.domain.Payload;
 import org.adorsys.encobject.domain.PayloadStream;
 import org.adorsys.encobject.domain.StorageMetadata;
+import org.adorsys.encobject.domain.StorageType;
+import org.adorsys.encobject.exceptions.BucketException;
+import org.adorsys.encobject.exceptions.StorageConnectionException;
 import org.adorsys.encobject.filesystem.StorageMetadataFlattenerGSON;
 import org.adorsys.encobject.service.api.ExtendedStoreConnection;
 import org.adorsys.encobject.service.impl.SimplePayloadImpl;
 import org.adorsys.encobject.service.impl.SimplePayloadStreamImpl;
 import org.adorsys.encobject.service.impl.SimpleStorageMetadataImpl;
+import org.adorsys.encobject.service.impl.StoreConnectionListHelper;
 import org.adorsys.encobject.types.ListRecursiveFlag;
 import org.apache.commons.io.IOUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.xmlpull.v1.XmlPullParserException;
 
 import java.io.ByteArrayInputStream;
+import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
+import java.security.InvalidKeyException;
+import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
 
 /**
  * Created by peter on 18.03.18 at 19:59.
  */
 public class MinioExtendedStoreConnection implements ExtendedStoreConnection {
     private final static Logger LOGGER = LoggerFactory.getLogger(MinioExtendedStoreConnection.class);
+    private final static String CONTENT_TYPE = "";
+    private final static String METADATA_EXT = ".metadata.extension.";
+
     private final MinioClient minioClient;
     private final StorageMetadataFlattenerGSON storageMetadataFlattenerGSON = new StorageMetadataFlattenerGSON();
 
@@ -58,12 +81,14 @@ public class MinioExtendedStoreConnection implements ExtendedStoreConnection {
     @Override
     public void putBlobStream(BucketPath bucketPath, PayloadStream payloadStream) {
         try {
-            String storageMetadataString = storageMetadataFlattenerGSON.toJson(payloadStream.getStorageMetadata());
+            // TODO hier wird der Stream komplett in den Speicher gezogen
+            storeMetadata(bucketPath, payloadStream.getStorageMetadata());
+            byte[] bytes = IOUtils.toByteArray(payloadStream.openStream());
             minioClient.putObject(bucketPath.getObjectHandle().getContainer(),
                     bucketPath.getObjectHandle().getName(),
-                    payloadStream.openStream(),
-                    0,
-                    storageMetadataString);
+                    new ByteArrayInputStream(bytes),
+                    bytes.length,
+                    CONTENT_TYPE);
         } catch (Exception e) {
             throw BaseExceptionHandler.handle(e);
         }
@@ -89,9 +114,12 @@ public class MinioExtendedStoreConnection implements ExtendedStoreConnection {
     @Override
     public StorageMetadata getStorageMetadata(BucketPath bucketPath) {
         try {
-            ObjectStat objectStat = minioClient.statObject(bucketPath.getObjectHandle().getContainer(), bucketPath.getObjectHandle().getName());
-            String storageMeagedataString = objectStat.contentType();
-            StorageMetadata storageMetadata = storageMetadataFlattenerGSON.fromJson(storageMeagedataString);
+            LOGGER.debug("load metadata for " + bucketPath);
+            InputStream is = minioClient.getObject(bucketPath.getObjectHandle().getContainer(), bucketPath.add(METADATA_EXT).getObjectHandle().getName());
+            byte[] bytes = IOUtils.toByteArray(is);
+            String jsonString = new String(bytes);
+            StorageMetadata storageMetadata = storageMetadataFlattenerGSON.fromJson(jsonString);
+            // LOGGER.debug("meta data for " + bucketPath + " is " + jsonString);
             return storageMetadata;
         } catch (Exception e) {
             throw BaseExceptionHandler.handle(e);
@@ -119,14 +147,26 @@ public class MinioExtendedStoreConnection implements ExtendedStoreConnection {
     }
 
     @Override
+    public void removeBlobFolder(BucketDirectory bucketDirectory) {
+        if (bucketDirectory.getObjectHandle().getName() == null) {
+            throw new StorageConnectionException("not a valid bucket directory " + bucketDirectory);
+        }
+        List<StorageMetadata> list = list(bucketDirectory, ListRecursiveFlag.TRUE);
+        list.forEach(metadata -> {
+            if (metadata.getType().equals(StorageType.BLOB)) {
+                removeBlob(new BucketPath(metadata.getName()));
+            }
+        });
+    }
+
+    @Override
     public void removeBlobs(Iterable<BucketPath> iterable) {
         iterable.forEach(bucketPath -> removeBlob(bucketPath));
-
     }
 
     @Override
     public long countBlobs(BucketDirectory bucketDirectory, ListRecursiveFlag listRecursiveFlag) {
-        return 0;
+        throw new NYIException();
     }
 
     @Override
@@ -149,7 +189,28 @@ public class MinioExtendedStoreConnection implements ExtendedStoreConnection {
 
     @Override
     public void deleteContainer(BucketDirectory bucketDirectory) {
+        LOGGER.info("deleteContainer " + bucketDirectory);
         try {
+            List<String> objectNames = new ArrayList<>();
+            minioClient.listObjects(bucketDirectory.getObjectHandle().getContainer()).forEach(el -> {
+                try {
+                    // LOGGER.info("container " + bucketDirectory + " contains: " + el.get().objectName());
+                    objectNames.add(el.get().objectName());
+                } catch (Exception e) {
+                    throw BaseExceptionHandler.handle(e);
+                }
+            });
+
+            LOGGER.info("delete " + objectNames.size() + " Elements of Container " + bucketDirectory);
+            minioClient.removeObject(bucketDirectory.getObjectHandle().getContainer(), objectNames).forEach(error -> {
+                try {
+                    DeleteError de = error.get();
+                    throw new BucketException("can not delete File " + de.objectName() + " of bucket " + bucketDirectory.getObjectHandle().getContainer() + " :" + de.message());
+                } catch (Exception e) {
+                    throw BaseExceptionHandler.handle(e);
+                }
+            });
+            LOGGER.info("eventually delete empty Container " + bucketDirectory);
             minioClient.removeBucket(bucketDirectory.getObjectHandle().getContainer());
         } catch (Exception e) {
             throw BaseExceptionHandler.handle(e);
@@ -159,6 +220,122 @@ public class MinioExtendedStoreConnection implements ExtendedStoreConnection {
     @Override
     public List<StorageMetadata> list(BucketDirectory bucketDirectory, ListRecursiveFlag listRecursiveFlag) {
         List<StorageMetadata> returnList = new ArrayList<>();
+        if (!containerExists(bucketDirectory)) {
+            return returnList;
+        }
+        String container = bucketDirectory.getObjectHandle().getContainer();
+        String prefix = bucketDirectory.getObjectHandle().getName();
+        if (prefix == null) {
+            prefix = "";
+        }
+        List<BucketPath> bucketPaths = new ArrayList<>();
+        LOGGER.debug("search in " + bucketDirectory + " with prefix " + prefix + " " + listRecursiveFlag);
+        minioClient.listObjects(container, prefix, true).forEach(el -> {
+            try {
+                BucketPath bucketPath = new BucketPath(container, el.get().objectName());
+                if (!bucketPath.getObjectHandle().getName().endsWith(METADATA_EXT)) {
+                    LOGGER.debug("found: " + bucketPath);
+                    bucketPaths.add(bucketPath);
+                }
+            } catch (Exception e) {
+                throw BaseExceptionHandler.handle(e);
+            }
+        });
+        if (bucketPaths.contains(new BucketPath(bucketDirectory.getObjectHandle().getContainer(), bucketDirectory.getObjectHandle().getName()))) {
+            // die If-Abfrage dient dem Spezialfall, dass jemand einen BucketPath als BucketDirectory uebergeben hat.
+            // Dann gibt es diesen bereits als file, dann muss eine leere Liste zurücgeben werden
+            return returnList;
+        }
+
+        final String pref = prefix;
+        LOGGER.debug("filter prefix ist " + pref);
+        Set<BucketDirectory> bucketDirectories = StoreConnectionListHelper.findAllSubDirs(bucketPaths);
+        bucketDirectories.add(bucketDirectory);
+        if (listRecursiveFlag.equals(ListRecursiveFlag.FALSE)) {
+            bucketDirectories.removeIf(bucketSubdir -> {
+                String name = bucketSubdir.getObjectHandle().getName();
+                if (name == null) {
+                    LOGGER.debug("filter bucketDirectory " + bucketSubdir + " -> false");
+                    return false;
+                }
+                if (!name.startsWith(pref)) {
+                    throw new BaseException("expected " + name + " to start with " + pref);
+                }
+                String remainder = name.substring(pref.length());
+                int firstSlash = remainder.indexOf(BucketPath.BUCKET_SEPARATOR);
+                boolean filterMeOut = false;
+                if (pref.length() == 0) {
+                    filterMeOut = firstSlash != -1;
+                }
+                if (!filterMeOut && firstSlash != -1) {
+                    int secondSlash = remainder.indexOf(BucketPath.BUCKET_SEPARATOR, firstSlash + 1);
+                    filterMeOut = (secondSlash != -1);
+                }
+                LOGGER.debug("filter bucketDirectory " + bucketSubdir + " " + remainder + " -> " + filterMeOut);
+                return filterMeOut;
+            });
+        }
+        bucketDirectories.forEach(bucketSubdir -> {
+            SimpleStorageMetadataImpl metadata = new SimpleStorageMetadataImpl();
+            metadata.setType(StorageType.FOLDER);
+            metadata.setName(BucketPathUtil.getAsString(bucketSubdir));
+            returnList.add(metadata);
+        });
+
+        if (listRecursiveFlag.equals(ListRecursiveFlag.FALSE)) {
+            bucketPaths.removeIf(bucketPath -> {
+                        String name = bucketPath.getObjectHandle().getName();
+                        if (!name.startsWith(pref)) {
+                            throw new BaseException("expected " + name + " to start with " + pref);
+                        }
+                        String remainder = name.substring(pref.length() + 1);
+
+                        int index = remainder.indexOf(BucketPath.BUCKET_SEPARATOR);
+                        boolean filterMeOut = index != -1;
+                        LOGGER.debug("filter bucketPath " + bucketPath + " " + remainder + " -> " + filterMeOut);
+                        return filterMeOut;
+                    }
+            );
+        }
+        bucketPaths.forEach(bucketPath -> returnList.add(getStorageMetadata(bucketPath)));
+
+        LOGGER.debug("List returns");
+        returnList.forEach(metaData -> {
+            LOGGER.debug(metaData.getName() + " " + metaData.getType());
+        });
         return returnList;
     }
+
+    public void deleteAllBuckets() {
+        try {
+            LOGGER.info("******************************************************");
+            LOGGER.info("DELETE ALL BUCKETS OF DATABASE - FOR TEST PURPOSE ONLY");
+            minioClient.listBuckets().forEach(bucket -> deleteContainer(new BucketDirectory(bucket.name())));
+            LOGGER.info("******************************************************");
+        } catch (Exception e) {
+            throw BaseExceptionHandler.handle(e);
+        }
+    }
+
+    private void storeMetadata(BucketPath bucketPath, StorageMetadata storageMetadata) {
+        try {
+            LOGGER.debug("store metadata for " + bucketPath);
+            SimpleStorageMetadataImpl metaData = new SimpleStorageMetadataImpl(storageMetadata);
+            metaData.setType(StorageType.BLOB);
+            metaData.setName(BucketPathUtil.getAsString(bucketPath));
+            String jsonString = storageMetadataFlattenerGSON.toJson(metaData);
+            byte[] bytes = jsonString.getBytes();
+            InputStream is = new ByteArrayInputStream(bytes);
+            minioClient.putObject(bucketPath.getObjectHandle().getContainer(),
+                    bucketPath.add(METADATA_EXT).getObjectHandle().getName(),
+                    is,
+                    bytes.length,
+                    CONTENT_TYPE);
+        } catch (Exception e) {
+            throw BaseExceptionHandler.handle(e);
+        }
+
+    }
+
+
 }

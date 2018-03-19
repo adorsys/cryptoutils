@@ -150,6 +150,13 @@
 
         <dependency>
             <groupId>de.adorsys.cryptoutils</groupId>
+            <artifactId>miniostoreconnection</artifactId>
+            <scope>test</scope>
+        </dependency>
+
+
+        <dependency>
+            <groupId>de.adorsys.cryptoutils</groupId>
             <artifactId>storeconnection-testsuite</artifactId>
             <version>${project.version}</version>
             <type>test-jar</type>

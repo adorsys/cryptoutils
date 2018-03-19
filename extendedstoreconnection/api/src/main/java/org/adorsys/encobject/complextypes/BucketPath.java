@@ -153,7 +153,7 @@ public class BucketPath {
         if (directory != null) {
             documentDirectory = documentDirectory.appendDirectory(directory);
         }
-        LOGGER.debug("directory for path : " + documentDirectory + " for " + this);
+        // LOGGER.debug("directory for path : " + documentDirectory + " for " + this);
         return documentDirectory;
     }
 

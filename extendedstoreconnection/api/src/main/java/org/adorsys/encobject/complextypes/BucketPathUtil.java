@@ -8,13 +8,23 @@ import org.adorsys.encobject.domain.ObjectHandle;
  */
 public class BucketPathUtil {
     public static String getAsString(BucketDirectory bucketDirectory) {
-        ObjectHandle objectHandle = bucketDirectory.getObjectHandle();
-        return objectHandle.getContainer() + BucketPath.BUCKET_SEPARATOR + objectHandle.getName();
+        String container = bucketDirectory.getObjectHandle().getContainer();
+        String name = bucketDirectory.getObjectHandle().getName();
+        if (name == null) {
+            name = "";
+        }
+
+        return container + BucketPath.BUCKET_SEPARATOR + name;
     }
 
-    public static String getAsString(BucketPath bucketDirectory) {
-        ObjectHandle objectHandle = bucketDirectory.getObjectHandle();
-        return objectHandle.getContainer() + BucketPath.BUCKET_SEPARATOR + objectHandle.getName();
+    public static String getAsString(BucketPath bucketPath) {
+        String container = bucketPath.getObjectHandle().getContainer();
+        String name = bucketPath.getObjectHandle().getName();
+        if (name == null) {
+            name = "";
+        }
+
+        return container + BucketPath.BUCKET_SEPARATOR + name;
     }
 
     public static void checkContainerName(String name) {

@@ -1,6 +1,7 @@
 package org.adorsys.cryptoutils.storageconnection.testsuite;
 
 import junit.framework.Assert;
+import org.adorsys.cryptoutils.miniostoreconnection.MinioExtendedStoreConnection;
 import org.adorsys.cryptoutils.mongodbstoreconnection.MongoDBExtendedStoreConnection;
 import org.adorsys.encobject.complextypes.BucketDirectory;
 import org.adorsys.encobject.complextypes.BucketPath;
@@ -47,12 +48,20 @@ public class ExtendedStoreConnectionTest {
         }
     }
 
+    // @Test
+    public void cleanMinioDB() {
+        ExtendedStoreConnection storeConnection = ExtendedStoreConnectionFactory.get();
+        if (storeConnection instanceof MinioExtendedStoreConnection) {
+            MinioExtendedStoreConnection minio = (MinioExtendedStoreConnection) storeConnection;
+            minio.deleteAllBuckets();
+        }
+    }
     /**
      * Suche in einem nicht vorhandenem Bucket sollte einfach eine leere Liste zurückgeben
      */
     @Test
     public void testList1() {
-        List<StorageMetadata> content = s.list(new BucketDirectory("a"), ListRecursiveFlag.FALSE);
+        List<StorageMetadata> content = s.list(new BucketDirectory("abc"), ListRecursiveFlag.FALSE);
         List<BucketPath> files = getFilesOnly(content);
         Assert.assertEquals(0, files.size());
         List<BucketDirectory> dirs = getDirectoresOnly(content);

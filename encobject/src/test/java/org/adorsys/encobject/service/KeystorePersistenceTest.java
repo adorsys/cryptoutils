@@ -33,7 +33,7 @@ import java.util.Map;
 public class KeystorePersistenceTest {
     private final static Logger LOGGER = LoggerFactory.getLogger(KeystorePersistenceTest.class);
 
-    private static BucketDirectory container = new BucketDirectory(KeystorePersistenceTest.class.getSimpleName());
+    private static BucketDirectory container = new BucketDirectory("keyStorePersistenceTest/keystoredirectory");
     private static ExtendedStoreConnection extendedStoreConnection;
     private static KeystorePersistence keystorePersistence;
     private static ContainerPersistence containerPersistence;
@@ -76,16 +76,14 @@ public class KeystorePersistenceTest {
     @Test
     public void testLoadKeystore() {
         try {
-            String container = "KeystorePersistenceTest1";
             String storeid = "sampleKeyStorePersistence";
             char[] storePass = "aSimplePass".toCharArray();
             KeyStore keystore = TestKeyUtils.testSecretKeystore(storeid, storePass, "mainKey", "aSimpleSecretPass".toCharArray());
             Assume.assumeNotNull(keystore);
-            extendedStoreConnection.createContainer(new BucketDirectory(container));
-            keystorePersistence.saveKeyStore(keystore, TestKeyUtils.callbackHandlerBuilder(storeid, storePass).build(), new ObjectHandle(container, storeid));
+            keystorePersistence.saveKeyStore(keystore, TestKeyUtils.callbackHandlerBuilder(storeid, storePass).build(), container.appendName(storeid).getObjectHandle());
 
             KeyStore loadedKeystore = null;
-            loadedKeystore = keystorePersistence.loadKeystore(new ObjectHandle(container, storeid), TestKeyUtils.callbackHandlerBuilder(storeid, storePass).build());
+            loadedKeystore = keystorePersistence.loadKeystore(container.appendName(storeid).getObjectHandle(), TestKeyUtils.callbackHandlerBuilder(storeid, storePass).build());
             Assert.assertNotNull(loadedKeystore);
             Key key = null;
             key = loadedKeystore.getKey("mainKey", "aSimpleSecretPass".toCharArray());
@@ -99,7 +97,6 @@ public class KeystorePersistenceTest {
     @Test
     public void testLoadKeystoreWithAttributes() {
         try {
-            String container = "KeystorePersistenceTest2";
             String storeid = "sampleKeyStorePersistence";
             char[] storePass = "aSimplePass".toCharArray();
             KeyStore keystore = TestKeyUtils.testSecretKeystore(storeid, storePass, "mainKey", "aSimpleSecretPass".toCharArray());
@@ -109,13 +106,12 @@ public class KeystorePersistenceTest {
             attributes.put("b", "2");
             attributes.put("c", "3");
 
-            extendedStoreConnection.createContainer(new BucketDirectory(container));
-            keystorePersistence.saveKeyStoreWithAttributes(keystore, attributes, TestKeyUtils.callbackHandlerBuilder(storeid, storePass).build(), new ObjectHandle(container, storeid));
+            keystorePersistence.saveKeyStoreWithAttributes(keystore, attributes, TestKeyUtils.callbackHandlerBuilder(storeid, storePass).build(), container.appendName(storeid).getObjectHandle());
 
             KeyStore loadedKeystore = null;
             Map<String, String> keyStoreAttributes = null;
 
-            Tuple<KeyStore, Map<String, String>> keyStoreMapTuple = keystorePersistence.loadKeystoreAndAttributes(new ObjectHandle(container, storeid), TestKeyUtils.callbackHandlerBuilder(storeid, storePass).build());
+            Tuple<KeyStore, Map<String, String>> keyStoreMapTuple = keystorePersistence.loadKeystoreAndAttributes(container.appendName(storeid).getObjectHandle(), TestKeyUtils.callbackHandlerBuilder(storeid, storePass).build());
             loadedKeystore = keyStoreMapTuple.getX();
             keyStoreAttributes = keyStoreMapTuple.getY();
 

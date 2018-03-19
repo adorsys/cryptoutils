@@ -172,6 +172,7 @@ public class MinioExtendedStoreConnection implements ExtendedStoreConnection {
     @Override
     public void createContainer(BucketDirectory bucketDirectory) {
         try {
+            LOGGER.info("create container " + bucketDirectory);
             minioClient.makeBucket(bucketDirectory.getObjectHandle().getContainer());
         } catch (Exception e) {
             throw BaseExceptionHandler.handle(e);

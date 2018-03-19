@@ -3,6 +3,7 @@ package org.adorsys.cryptoutils.storageconnection.testsuite;
 import org.adorsys.cryptoutils.exceptions.BaseExceptionHandler;
 import org.adorsys.cryptoutils.miniostoreconnection.MinioAccessKey;
 import org.adorsys.cryptoutils.miniostoreconnection.MinioExtendedStoreConnection;
+import org.adorsys.cryptoutils.miniostoreconnection.MinioParamParser;
 import org.adorsys.cryptoutils.miniostoreconnection.MinioSecretKey;
 import org.adorsys.cryptoutils.mongodbstoreconnection.MongoDBExtendedStoreConnection;
 import org.adorsys.encobject.filesystem.FileSystemExtendedStorageConnection;
@@ -18,6 +19,7 @@ import java.util.StringTokenizer;
  */
 public class ExtendedStoreConnectionFactory {
     private final static Logger LOGGER = LoggerFactory.getLogger(ExtendedStoreConnectionFactory.class);
+
     public static ExtendedStoreConnection get() {
         try {
             if (System.getProperty("SC-MONGO") != null) {
@@ -25,17 +27,13 @@ public class ExtendedStoreConnectionFactory {
                 return new MongoDBExtendedStoreConnection();
             }
             if (System.getProperty("SC-MINIO") != null) {
-                String value = System.getProperty("SC-MINIO");
-                StringTokenizer st = new StringTokenizer(value, ",");
-                String urlString = st.nextToken();
-                String accessKey = st.nextToken();
-                String secretKey = st.nextToken();
-                URL url = new URL(urlString);
-                MinioAccessKey minioAccessKey = new MinioAccessKey(accessKey);
-                MinioSecretKey minioSecretKey = new MinioSecretKey(secretKey);
 
+                MinioParamParser minioParamParser = new MinioParamParser(System.getProperty("SC-MINIO"));
                 LOGGER.info("USE MinioExtendedStoreConnection");
-                return new MinioExtendedStoreConnection(url, minioAccessKey, minioSecretKey);
+                return new MinioExtendedStoreConnection(
+                        minioParamParser.getUrl(),
+                        minioParamParser.getMinioAccessKey(),
+                        minioParamParser.getMinioSecretKey());
             }
             LOGGER.info("USE FileSystemExtendedStorageConnection");
             return new FileSystemExtendedStorageConnection();

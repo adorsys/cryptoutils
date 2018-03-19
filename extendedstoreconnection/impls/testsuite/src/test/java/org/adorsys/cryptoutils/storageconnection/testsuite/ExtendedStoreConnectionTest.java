@@ -7,6 +7,7 @@ import org.adorsys.encobject.complextypes.BucketPath;
 import org.adorsys.encobject.domain.Payload;
 import org.adorsys.encobject.domain.StorageMetadata;
 import org.adorsys.encobject.domain.StorageType;
+import org.adorsys.encobject.exceptions.StorageConnectionException;
 import org.adorsys.encobject.filesystem.FileSystemExtendedStorageConnection;
 import org.adorsys.encobject.service.api.ExtendedStoreConnection;
 import org.adorsys.encobject.service.impl.SimplePayloadImpl;
@@ -254,6 +255,32 @@ public class ExtendedStoreConnectionTest {
             Assert.assertEquals(4, dirs.size());
             Assert.assertEquals(8, files.size());
         }
+
+        {
+            BucketDirectory subdirectory1 = bd.appendDirectory("subdir1");
+            s.removeBlobFolder(subdirectory1);
+            List<StorageMetadata> list = s.list(bd, ListRecursiveFlag.TRUE);
+            LOGGER.debug("5 recursives listing");
+            LOGGER.debug(show(list));
+            List<BucketPath> files = getFilesOnly(list);
+            List<BucketDirectory> dirs = getDirectoresOnly(list);
+
+            Assert.assertEquals(9, dirs.size());
+            Assert.assertEquals(18, files.size());
+        }
+
+        {
+            // Extra nicht mit expected Annotation, damit diese Exception niecht vorher schon zum
+            // Abbruch anderern Tests führt
+            boolean testOk = false;
+            try {
+                s.removeBlobFolder(bd);
+            } catch (StorageConnectionException e) {
+                testOk = true;
+            }
+            Assert.assertTrue(testOk);
+        }
+
     }
 
     /**

@@ -177,6 +177,25 @@ public class FileSystemExtendedStorageConnection implements ExtendedStoreConnect
     }
 
     @Override
+    public void removeBlobFolder(BucketDirectory bucketDirectory) {
+        checkContainerExists(bucketDirectory);
+        if (bucketDirectory.getObjectHandle().getName() == null) {
+            throw new StorageConnectionException("not a valid bucket directory " + bucketDirectory);
+        }
+        File directory = BucketPathFileHelper.getAsFile(baseDir.append(bucketDirectory));
+        LOGGER.debug("remove directory " + directory.getAbsolutePath());
+        if (!directory.exists()) {
+            return;
+        }
+        try {
+            FileUtils.forceDelete(directory);
+        } catch (IOException e) {
+            throw new DeleteFileException("can not delete " + directory, e);
+        }
+
+    }
+
+    @Override
     public void removeBlobs(Iterable<BucketPath> bucketPaths) {
         for (BucketPath bp : bucketPaths) {
             removeBlob(bp);
@@ -196,6 +215,12 @@ public class FileSystemExtendedStorageConnection implements ExtendedStoreConnect
             throw new BaseException("Container " + bucketPath.getObjectHandle().getContainer() + " does not exist");
         }
     }
+    private void checkContainerExists(BucketDirectory bucketDirectory) {
+        if (! containerExists(bucketDirectory)) {
+            throw new BaseException("Container " + bucketDirectory.getObjectHandle().getContainer() + " does not exist");
+        }
+    }
+
     private int countBlobs(DirectoryContent content, int currentCounter) {
         currentCounter += content.getFiles().size();
         for (DirectoryContent subdir : content.getSubidrs()) {

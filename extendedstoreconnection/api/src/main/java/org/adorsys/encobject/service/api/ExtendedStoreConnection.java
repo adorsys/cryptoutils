@@ -25,6 +25,7 @@ public interface ExtendedStoreConnection {
     boolean blobExists(BucketPath bucketPath);
 
     void removeBlob(BucketPath bucketPath);
+    void removeBlobFolder(BucketDirectory bucketDirectory);
 
     void removeBlobs(Iterable<BucketPath> bucketPaths);
 

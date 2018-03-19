@@ -22,6 +22,7 @@ import org.adorsys.encobject.domain.Payload;
 import org.adorsys.encobject.domain.PayloadStream;
 import org.adorsys.encobject.domain.StorageMetadata;
 import org.adorsys.encobject.domain.StorageType;
+import org.adorsys.encobject.exceptions.StorageConnectionException;
 import org.adorsys.encobject.filesystem.StorageMetadataFlattenerGSON;
 import org.adorsys.encobject.service.api.ExtendedStoreConnection;
 import org.adorsys.encobject.service.impl.SimplePayloadImpl;
@@ -157,6 +158,20 @@ public class MongoDBExtendedStoreConnection implements ExtendedStoreConnection {
         bucket.find(Filters.eq(FILENAME_TAG, filename)).forEach((Consumer<GridFSFile>) file -> ids.add(file.getObjectId()));
         ids.forEach(id -> bucket.delete(id));
         LOGGER.info("finished removeBlob for " + bucketPath);
+    }
+
+    @Override
+    public void removeBlobFolder(BucketDirectory bucketDirectory) {
+        LOGGER.info("start removeBlobFolder for " + bucketDirectory);
+        if (bucketDirectory.getObjectHandle().getName() == null) {
+            throw new StorageConnectionException("not a valid bucket directory " + bucketDirectory);
+        }
+        GridFSBucket bucket = getGridFSBucket(bucketDirectory);
+        String directoryname = bucketDirectory.getObjectHandle().getName() + BucketPath.BUCKET_SEPARATOR;
+        String pattern = "^" + directoryname + ".*";
+        GridFSFindIterable list = bucket.find(regex(FILENAME_TAG, pattern, "i"));
+        list.forEach((Consumer<GridFSFile>) file -> bucket.delete(file.getObjectId()));
+        LOGGER.info("finished removeBlobFolder for " + bucketDirectory);
     }
 
     @Override

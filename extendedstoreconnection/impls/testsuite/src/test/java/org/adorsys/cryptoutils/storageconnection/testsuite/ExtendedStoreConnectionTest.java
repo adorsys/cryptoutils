@@ -56,6 +56,7 @@ public class ExtendedStoreConnectionTest {
             minio.deleteAllBuckets();
         }
     }
+
     /**
      * Suche in einem nicht vorhandenem Bucket sollte einfach eine leere Liste zurückgeben
      */
@@ -278,8 +279,10 @@ public class ExtendedStoreConnectionTest {
             Assert.assertEquals(18, files.size());
         }
         {
-            Assert.assertTrue(s.blobExists(bd.appendDirectory("subdir1").appendName("file1")));
-            Assert.assertFalse(s.blobExists(bd.appendDirectory("subdir1").appendName("file9")));
+            s.list(bd, ListRecursiveFlag.TRUE).forEach(el -> LOGGER.debug("found. " + el.getName() + " " + el.getType()));
+            Assert.assertFalse(s.blobExists(bd.appendDirectory("subdir1").appendName("file1")));
+            Assert.assertTrue(s.blobExists(bd.appendDirectory("subdir2").appendName("file1")));
+            Assert.assertFalse(s.blobExists(bd.appendDirectory("subdir2").appendName("file9")));
         }
 
         {
@@ -319,6 +322,22 @@ public class ExtendedStoreConnectionTest {
         LOGGER.info("ok, inhalt nach dem zweiten Schreiben auch ok");
     }
 
+    @Test
+    public void testFileExists() {
+        BucketDirectory bd = new BucketDirectory("bucketfileexiststest");
+        s.createContainer(bd);
+        containers.add(bd);
+
+        StorageMetadata storageMetadata = new SimpleStorageMetadataImpl();
+        storageMetadata.getUserMetadata().put("simpleinfo", "any value");
+        BucketPath filea = bd.append(new BucketPath("file1"));
+        Assert.assertFalse(s.blobExists(filea));
+        Payload origPayload = new SimplePayloadImpl(storageMetadata, "1".getBytes());
+        s.putBlob(filea, origPayload);
+        Assert.assertTrue(s.blobExists(filea));
+        s.removeBlob(filea);
+        Assert.assertFalse(s.blobExists(filea));
+    }
    /* =========================================================================================================== */
 
     private void createFiles(ExtendedStoreConnection extendedStoreConnection, BucketDirectory rootDirectory,

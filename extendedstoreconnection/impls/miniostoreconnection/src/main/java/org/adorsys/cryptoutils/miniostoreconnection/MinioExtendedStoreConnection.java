@@ -1,15 +1,7 @@
 package org.adorsys.cryptoutils.miniostoreconnection;
 
 import io.minio.MinioClient;
-import io.minio.ObjectStat;
-import io.minio.Result;
-import io.minio.errors.ErrorResponseException;
-import io.minio.errors.InsufficientDataException;
-import io.minio.errors.InternalException;
-import io.minio.errors.InvalidBucketNameException;
-import io.minio.errors.NoResponseException;
 import io.minio.messages.DeleteError;
-import io.minio.messages.Item;
 import org.adorsys.cryptoutils.exceptions.BaseException;
 import org.adorsys.cryptoutils.exceptions.BaseExceptionHandler;
 import org.adorsys.cryptoutils.exceptions.NYIException;
@@ -32,14 +24,10 @@ import org.adorsys.encobject.types.ListRecursiveFlag;
 import org.apache.commons.io.IOUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.xmlpull.v1.XmlPullParserException;
 
 import java.io.ByteArrayInputStream;
-import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
-import java.security.InvalidKeyException;
-import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
@@ -128,17 +116,31 @@ public class MinioExtendedStoreConnection implements ExtendedStoreConnection {
 
     @Override
     public boolean blobExists(BucketPath bucketPath) {
+        LOGGER.debug("blobExists:" + bucketPath);
         String container = bucketPath.getObjectHandle().getContainer();
         String prefix = bucketPath.getObjectHandle().getName();
-        ArrayList<Integer> list = new ArrayList<>();
-        minioClient.listObjects(container, prefix, false).forEach(item -> list.add(1));
-        return !list.isEmpty();
+        ArrayList<String> list = new ArrayList<>();
+        minioClient.listObjects(container, prefix, false).forEach(item -> {
+                    try {
+                        list.add(item.get().objectName());
+                    } catch (Exception e) {
+                        throw BaseExceptionHandler.handle(e);
+                    }
+                }
+        );
+        list.forEach(el -> LOGGER.debug("FOUND :" + el));
+        boolean value = !list.isEmpty();
+        LOGGER.info("blobExists:" + bucketPath + " -> " + value);
+        return value;
     }
 
     @Override
     public void removeBlob(BucketPath bucketPath) {
         try {
+            LOGGER.debug("removeBlob " + bucketPath);
             minioClient.removeObject(bucketPath.getObjectHandle().getContainer(), bucketPath.getObjectHandle().getName());
+            minioClient.removeObject(bucketPath.getObjectHandle().getContainer(), bucketPath.add(METADATA_EXT).getObjectHandle().getName());
+            LOGGER.info("removeBlob done " + bucketPath);
         } catch (Exception e) {
             throw BaseExceptionHandler.handle(e);
         }

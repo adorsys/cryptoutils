@@ -19,14 +19,17 @@ import java.util.StringTokenizer;
  */
 public class ExtendedStoreConnectionFactory {
     private final static Logger LOGGER = LoggerFactory.getLogger(ExtendedStoreConnectionFactory.class);
+    public static final String PREFIX_MONGO = "SC-MONGO";
+    public static final String PREFIX_MINIO = "SC-MINIO";
+    public static final String PREFIX_FILESYSTEM = "SC-FILESYSTEM";
 
     public static ExtendedStoreConnection get() {
         try {
-            if (System.getProperty("SC-MONGO") != null) {
+            if (System.getProperty(PREFIX_MONGO) != null) {
                 LOGGER.info("USE MongoDBExtendedStoreConnection");
                 return new MongoDBExtendedStoreConnection();
             }
-            if (System.getProperty("SC-MINIO") != null) {
+            if (System.getProperty(PREFIX_MINIO) != null) {
 
                 MinioParamParser minioParamParser = new MinioParamParser(System.getProperty("SC-MINIO"));
                 LOGGER.info("USE MinioExtendedStoreConnection");
@@ -34,6 +37,10 @@ public class ExtendedStoreConnectionFactory {
                         minioParamParser.getUrl(),
                         minioParamParser.getMinioAccessKey(),
                         minioParamParser.getMinioSecretKey());
+            }
+            if (System.getProperty(PREFIX_FILESYSTEM) != null) {
+                LOGGER.info("USE FileSystemExtendedStorageConnection");
+                return new FileSystemExtendedStorageConnection();
             }
             LOGGER.info("USE FileSystemExtendedStorageConnection");
             return new FileSystemExtendedStorageConnection();

@@ -132,7 +132,7 @@ public class MinioExtendedStoreConnection implements ExtendedStoreConnection {
         String prefix = bucketPath.getObjectHandle().getName();
         ArrayList<Integer> list = new ArrayList<>();
         minioClient.listObjects(container, prefix, false).forEach(item -> list.add(1));
-        return ! list.isEmpty();
+        return !list.isEmpty();
     }
 
     @Override
@@ -171,7 +171,10 @@ public class MinioExtendedStoreConnection implements ExtendedStoreConnection {
     public void createContainer(BucketDirectory bucketDirectory) {
         try {
             LOGGER.info("create container " + bucketDirectory);
-            minioClient.makeBucket(bucketDirectory.getObjectHandle().getContainer());
+            String container = bucketDirectory.getObjectHandle().getContainer();
+            if (!minioClient.bucketExists(container)) {
+                minioClient.makeBucket(container);
+            }
         } catch (Exception e) {
             throw BaseExceptionHandler.handle(e);
         }

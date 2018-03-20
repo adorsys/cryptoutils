@@ -65,7 +65,7 @@ public class ObjectHandle {
             throw new BucketRestrictionException("Bucket lentgth must be at least 3 chars: " + container);
         }
         if (!container.toLowerCase().equals(container)) {
-            throw new BucketRestrictionException("Bucket must not contain uppercase letters");
+            throw new BucketRestrictionException("Bucket must not contain uppercase letters: " + container);
         }
     }
 }

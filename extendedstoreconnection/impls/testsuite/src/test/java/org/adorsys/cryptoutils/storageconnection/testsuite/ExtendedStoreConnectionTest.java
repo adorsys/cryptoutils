@@ -277,6 +277,10 @@ public class ExtendedStoreConnectionTest {
             Assert.assertEquals(9, dirs.size());
             Assert.assertEquals(18, files.size());
         }
+        {
+            Assert.assertTrue(s.blobExists(bd.appendDirectory("subdir1").appendName("file1")));
+            Assert.assertFalse(s.blobExists(bd.appendDirectory("subdir1").appendName("file9")));
+        }
 
         {
             // Extra nicht mit expected Annotation, damit diese Exception niecht vorher schon zum

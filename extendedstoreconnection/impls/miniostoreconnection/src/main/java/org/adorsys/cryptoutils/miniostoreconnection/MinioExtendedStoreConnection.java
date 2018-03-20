@@ -128,13 +128,11 @@ public class MinioExtendedStoreConnection implements ExtendedStoreConnection {
 
     @Override
     public boolean blobExists(BucketPath bucketPath) {
-        try {
-            getStorageMetadata(bucketPath);
-        } catch (Exception e) {
-            LOGGER.warn("ganz mies, exception -> file exisitert nicht");
-            return false;
-        }
-        return true;
+        String container = bucketPath.getObjectHandle().getContainer();
+        String prefix = bucketPath.getObjectHandle().getName();
+        ArrayList<Integer> list = new ArrayList<>();
+        minioClient.listObjects(container, prefix, false).forEach(item -> list.add(1));
+        return ! list.isEmpty();
     }
 
     @Override

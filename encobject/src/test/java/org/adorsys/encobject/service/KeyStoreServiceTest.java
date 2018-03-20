@@ -35,7 +35,7 @@ import java.util.Set;
 public class KeyStoreServiceTest {
     private final static Logger LOGGER = LoggerFactory.getLogger(KeyStoreServiceTest.class);
 
-    private static String keystoreContainer = "keystore-container-" + KeyStoreServiceTest.class.getSimpleName();
+    private static String keystoreContainer = "keystorecontainer";
     private ExtendedStoreConnection extendedStoreConnection = ExtendedStoreConnectionFactory.get();
     public static Set<BucketDirectory> buckets = new HashSet<>();
 

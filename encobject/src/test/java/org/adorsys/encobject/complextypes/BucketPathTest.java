@@ -1,6 +1,7 @@
 package org.adorsys.encobject.complextypes;
 
 import org.adorsys.encobject.exceptions.BucketException;
+import org.adorsys.encobject.exceptions.BucketRestrictionException;
 import org.junit.Assert;
 import org.junit.Test;
 import org.slf4j.Logger;
@@ -14,20 +15,20 @@ public class BucketPathTest {
     @Test
     public void test1() {
         LOGGER.debug("START TEST " + new RuntimeException("").getStackTrace()[0].getMethodName());
-        BucketPath bp=new BucketPath("a/b/c/d");
-        Assert.assertEquals("bucket", "a", bp.getObjectHandle().getContainer());
+        BucketPath bp=new BucketPath("aaa/b/c/d");
+        Assert.assertEquals("bucket", "aaa", bp.getObjectHandle().getContainer());
         Assert.assertEquals("name  ", "b/c/d", bp.getObjectHandle().getName());
     }
 
     @Test
     public void test2() {
         LOGGER.debug("START TEST " + new RuntimeException("").getStackTrace()[0].getMethodName());
-        BucketPath bp=new BucketPath("a");
-        Assert.assertEquals("bucket", "a", bp.getObjectHandle().getContainer());
+        BucketPath bp=new BucketPath("aaa");
+        Assert.assertEquals("bucket", "aaa", bp.getObjectHandle().getContainer());
         Assert.assertEquals("name  ", null,  bp.getObjectHandle().getName());
     }
 
-    @Test
+    @Test (expected = BucketRestrictionException.class)
     public void test3() {
         LOGGER.debug("START TEST " + new RuntimeException("").getStackTrace()[0].getMethodName());
         BucketPath bp=new BucketPath(null, null);
@@ -35,7 +36,7 @@ public class BucketPathTest {
         Assert.assertEquals("name  ", null,  bp.getObjectHandle().getName());
     }
 
-    @Test
+    @Test (expected = BucketRestrictionException.class)
     public void test3a() {
         LOGGER.debug("START TEST " + new RuntimeException("").getStackTrace()[0].getMethodName());
         BucketPath bp=new BucketPath(null, "");
@@ -43,10 +44,10 @@ public class BucketPathTest {
         Assert.assertEquals("name  ", null,  bp.getObjectHandle().getName());
     }
 
-    @Test
+    @Test (expected = BucketRestrictionException.class)
     public void test3b() {
         LOGGER.debug("START TEST " + new RuntimeException("").getStackTrace()[0].getMethodName());
-        BucketPath bp=new BucketPath(" ", " ");
+        BucketPath bp=new BucketPath("   ", "   ");
         Assert.assertEquals("bucket", null, bp.getObjectHandle().getContainer());
         Assert.assertEquals("name  ", null,  bp.getObjectHandle().getName());
     }
@@ -68,8 +69,8 @@ public class BucketPathTest {
     @Test
     public void test6() {
         LOGGER.debug("START TEST " + new RuntimeException("").getStackTrace()[0].getMethodName());
-        BucketPath bp=new BucketPath("a", "/affe//und//so/");
-        Assert.assertEquals("bucket", "a",  bp.getObjectHandle().getContainer());
+        BucketPath bp=new BucketPath("aaa", "/affe//und//so/");
+        Assert.assertEquals("bucket", "aaa",  bp.getObjectHandle().getContainer());
         Assert.assertEquals("name  ", "affe/und/so",  bp.getObjectHandle().getName());
     }
 
@@ -82,8 +83,8 @@ public class BucketPathTest {
     @Test
     public void test8() {
         LOGGER.debug("START TEST " + new RuntimeException("").getStackTrace()[0].getMethodName());
-        BucketPath bp=new BucketPath("a", "b");
-        Assert.assertEquals("bucket", "a",  bp.getObjectHandle().getContainer());
+        BucketPath bp=new BucketPath("aaa", "b");
+        Assert.assertEquals("bucket", "aaa",  bp.getObjectHandle().getContainer());
         Assert.assertEquals("name  ", "b",  bp.getObjectHandle().getName());
     }
 
@@ -122,8 +123,8 @@ public class BucketPathTest {
     @Test
     public void test13() {
         LOGGER.debug("START TEST " + new RuntimeException("").getStackTrace()[0].getMethodName());
-        BucketPath bp=new BucketPath("a", null).append("affe");
-        Assert.assertEquals("bucket", "a",  bp.getObjectHandle().getContainer());
+        BucketPath bp=new BucketPath("aaa", null).append("affe");
+        Assert.assertEquals("bucket", "aaa",  bp.getObjectHandle().getContainer());
         Assert.assertEquals("name  ", "affe",  bp.getObjectHandle().getName());
     }
 
@@ -155,9 +156,9 @@ public class BucketPathTest {
     @Test
     public void test17() {
         LOGGER.debug("START TEST " + new RuntimeException("").getStackTrace()[0].getMethodName());
-        BucketPath bp = new BucketPath("a");
+        BucketPath bp = new BucketPath("aaa");
         BucketPath bp2 = bp.append("dir1/dir2");
-        Assert.assertEquals("bucket", "a",  bp2.getObjectHandle().getContainer());
+        Assert.assertEquals("bucket", "aaa",  bp2.getObjectHandle().getContainer());
         Assert.assertEquals("name", "dir1/dir2",  bp2.getObjectHandle().getName());
 
     }

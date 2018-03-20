@@ -33,7 +33,7 @@ import java.util.Map;
 public class KeystorePersistenceTest {
     private final static Logger LOGGER = LoggerFactory.getLogger(KeystorePersistenceTest.class);
 
-    private static BucketDirectory container = new BucketDirectory("keyStorePersistenceTest/keystoredirectory");
+    private static BucketDirectory container = new BucketDirectory("keystorepersistencetest/keystoredirectory");
     private static ExtendedStoreConnection extendedStoreConnection;
     private static KeystorePersistence keystorePersistence;
     private static ContainerPersistence containerPersistence;

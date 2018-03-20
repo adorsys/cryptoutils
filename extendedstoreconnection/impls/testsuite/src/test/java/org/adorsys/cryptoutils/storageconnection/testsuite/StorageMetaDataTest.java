@@ -61,7 +61,7 @@ public class StorageMetaDataTest {
      */
     @Test
     public void testStorageMetaData() {
-        BucketDirectory bd = new BucketDirectory("storageMetaData/1");
+        BucketDirectory bd = new BucketDirectory("storagemetadata/1");
         s.createContainer(bd);
         containers.add(bd);
         StorageMetadata storageMetadata = createStorageMetadata();

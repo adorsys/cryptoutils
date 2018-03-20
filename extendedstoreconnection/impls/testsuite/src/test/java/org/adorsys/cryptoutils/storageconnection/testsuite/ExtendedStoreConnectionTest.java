@@ -297,7 +297,7 @@ public class ExtendedStoreConnectionTest {
      */
     @Test
     public void testOverwrite() {
-        BucketDirectory bd = new BucketDirectory("bucketOverwrite/1/2/3");
+        BucketDirectory bd = new BucketDirectory("bucketoverwrite/1/2/3");
         s.createContainer(bd);
         containers.add(bd);
 

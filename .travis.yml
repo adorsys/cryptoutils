@@ -3,11 +3,8 @@ language: java
 jdk:
   - oraclejdk8
 
-install:
-  - mvn --settings .travis/settings.xml install -DskipTests -Dmaven.javadoc.skip=true -B -V
-
 script:
-  - mvn --settings .travis/settings.xml package -DskipTests -B -V
+  - mvn --settings .travis/settings.xml verify -B -V
 
 before_deploy:
   - echo $GPG_SECRET_KEY | base64 --decode | $GPG_EXECUTABLE --import

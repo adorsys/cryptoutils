@@ -58,6 +58,19 @@ public class KeyStore2KeySourceHelper {
         KeySource keySource = new KeyStoreBasedPublicKeySourceImpl(exportKeys);
         return new KeySourceAndKeyID(keySource, keyID);
     }
+    
+    public static JWK getForPublicKeyJWK(KeystorePersistence keystorePersistence, KeyStoreAccess keyStoreAccess){
+        LOGGER.info("get keysource for public key of " + keyStoreAccess.getKeyStorePath());
+        KeyStore userKeystore = keystorePersistence.loadKeystore(keyStoreAccess.getKeyStorePath().getObjectHandle(), keyStoreAccess.getKeyStoreAuth().getReadStoreHandler());
+
+        JWKSet exportKeys = load(userKeystore, null);
+        LOGGER.debug("number of public keys found:" + exportKeys.getKeys().size());
+        List<JWK> encKeys = selectEncKeys(exportKeys);
+        if (encKeys.isEmpty()) {
+            throw new AsymmetricEncryptionException("did not find any public keys in keystore " + keyStoreAccess.getKeyStorePath());
+        }
+        return JwkExport.randomKey(encKeys);
+    }
 
     /**
      *

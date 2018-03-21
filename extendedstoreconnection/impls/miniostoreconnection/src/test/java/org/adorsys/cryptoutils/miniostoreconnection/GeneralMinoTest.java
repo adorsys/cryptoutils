@@ -11,7 +11,7 @@ import java.net.URL;
  * Created by peter on 18.03.18 at 20:02.
  */
 public class GeneralMinoTest {
-    @Test
+    // @Test
     public void a() {
         try {
             String accessKey = "7IVCW3EES6A5L9YV5VO8";

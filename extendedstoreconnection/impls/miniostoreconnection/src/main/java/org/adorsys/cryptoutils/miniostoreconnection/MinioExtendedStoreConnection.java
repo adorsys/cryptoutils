@@ -68,18 +68,6 @@ public class MinioExtendedStoreConnection implements ExtendedStoreConnection {
 
     @Override
     public void putBlobStream(BucketPath bucketPath, PayloadStream payloadStream) {
-        try {
-            // TODO hier wird der Stream komplett in den Speicher gezogen
-            storeMetadata(bucketPath, payloadStream.getStorageMetadata());
-            byte[] bytes = IOUtils.toByteArray(payloadStream.openStream());
-            minioClient.putObject(bucketPath.getObjectHandle().getContainer(),
-                    bucketPath.getObjectHandle().getName(),
-                    new ByteArrayInputStream(bytes),
-                    bytes.length,
-                    CONTENT_TYPE);
-        } catch (Exception e) {
-            throw BaseExceptionHandler.handle(e);
-        }
     }
 
     @Override
@@ -319,6 +307,26 @@ public class MinioExtendedStoreConnection implements ExtendedStoreConnection {
         } catch (Exception e) {
             throw BaseExceptionHandler.handle(e);
         }
+    }
+
+    // ===============================================================================================================
+
+    private void putBlobStreamWithMemory(BucketPath bucketPath, PayloadStream payloadStream) {
+        try {
+            storeMetadata(bucketPath, payloadStream.getStorageMetadata());
+            byte[] bytes = IOUtils.toByteArray(payloadStream.openStream());
+            minioClient.putObject(bucketPath.getObjectHandle().getContainer(),
+                    bucketPath.getObjectHandle().getName(),
+                    new ByteArrayInputStream(bytes),
+                    bytes.length,
+                    CONTENT_TYPE);
+        } catch (Exception e) {
+            throw BaseExceptionHandler.handle(e);
+        }
+    }
+
+    private void putBlobStreamWithTempFile(BucketPath bucketPath, PayloadStream payloadStream) {
+        throw new NYIException();
     }
 
     private void storeMetadata(BucketPath bucketPath, StorageMetadata storageMetadata) {

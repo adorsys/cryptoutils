@@ -21,6 +21,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 /**
@@ -96,13 +97,18 @@ public class ExtendedStoreConnectionTest {
         containers.add(bd);
         BucketPath file = bd.appendName("file1");
 
-        s.putBlob(file, "Inhalt".getBytes());
+        byte[] filecontent = "Inhalt".getBytes();
+        s.putBlob(file, filecontent);
 
         List<StorageMetadata> content = s.list(bd, ListRecursiveFlag.FALSE);
         List<BucketPath> files = getFilesOnly(content);
         Assert.assertEquals(1, files.size());
         List<BucketDirectory> dirs = getDirectoresOnly(content);
         Assert.assertEquals(1, dirs.size());
+
+        Payload loadedPayload = s.getBlob(file);
+        byte[] loadedFileContent = loadedPayload.getData();
+        Assert.assertTrue(Arrays.equals(filecontent, loadedFileContent));
     }
 
     /**

@@ -21,13 +21,17 @@ import org.adorsys.encobject.service.impl.SimplePayloadStreamImpl;
 import org.adorsys.encobject.service.impl.SimpleStorageMetadataImpl;
 import org.adorsys.encobject.service.impl.StoreConnectionListHelper;
 import org.adorsys.encobject.types.ListRecursiveFlag;
+import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.ByteArrayInputStream;
+import java.io.File;
+import java.io.FileInputStream;
 import java.io.InputStream;
 import java.net.URL;
+import java.nio.file.StandardCopyOption;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
@@ -39,6 +43,8 @@ public class MinioExtendedStoreConnection implements ExtendedStoreConnection {
     private final static Logger LOGGER = LoggerFactory.getLogger(MinioExtendedStoreConnection.class);
     private final static String CONTENT_TYPE = "";
     private final static String METADATA_EXT = ".metadata.extension.";
+    private static final String MINIO_TMP_FILE_PREFIX = "MINIO_TMP_FILE_";
+    private static final String MINIO_TMP_FILE_SUFFIX = "";
 
     private final MinioClient minioClient;
     private final StorageMetadataFlattenerGSON storageMetadataFlattenerGSON = new StorageMetadataFlattenerGSON();
@@ -53,7 +59,7 @@ public class MinioExtendedStoreConnection implements ExtendedStoreConnection {
 
     @Override
     public void putBlob(BucketPath bucketPath, Payload payload) {
-        putBlobStream(bucketPath, new SimplePayloadStreamImpl(payload.getStorageMetadata(), new ByteArrayInputStream(payload.getData())));
+        putBlobStreamWithMemory(bucketPath, new SimplePayloadStreamImpl(payload.getStorageMetadata(), new ByteArrayInputStream(payload.getData())), payload.getData().length);
     }
 
     @Override
@@ -68,6 +74,8 @@ public class MinioExtendedStoreConnection implements ExtendedStoreConnection {
 
     @Override
     public void putBlobStream(BucketPath bucketPath, PayloadStream payloadStream) {
+        putBlobStreamWithTempFile(bucketPath, payloadStream);
+        storeMetadata(bucketPath, payloadStream.getStorageMetadata());
     }
 
     @Override
@@ -311,7 +319,8 @@ public class MinioExtendedStoreConnection implements ExtendedStoreConnection {
 
     // ===============================================================================================================
 
-    private void putBlobStreamWithMemory(BucketPath bucketPath, PayloadStream payloadStream) {
+    private void putBlobStreamWithMemory(BucketPath bucketPath, PayloadStream payloadStream, int size) {
+        LOGGER.info("store to minio with known size of " + size);
         try {
             storeMetadata(bucketPath, payloadStream.getStorageMetadata());
             byte[] bytes = IOUtils.toByteArray(payloadStream.openStream());
@@ -326,7 +335,28 @@ public class MinioExtendedStoreConnection implements ExtendedStoreConnection {
     }
 
     private void putBlobStreamWithTempFile(BucketPath bucketPath, PayloadStream payloadStream) {
-        throw new NYIException();
+        try {
+            LOGGER.info("store " + bucketPath + " to tmpfile with unknown size");
+            InputStream is = payloadStream.openStream();
+            File targetFile = File.createTempFile(MINIO_TMP_FILE_PREFIX, MINIO_TMP_FILE_SUFFIX);
+            java.nio.file.Files.copy(
+                    is,
+                    targetFile.toPath(),
+                    StandardCopyOption.REPLACE_EXISTING);
+            IOUtils.closeQuietly(is);
+            LOGGER.info(bucketPath + " with tmpfile " + targetFile.getAbsolutePath() + " written with " + targetFile.length() + " bytes -> will now be copied to minio");
+            FileInputStream fis = new FileInputStream(targetFile);
+            minioClient.putObject(bucketPath.getObjectHandle().getContainer(),
+                    bucketPath.getObjectHandle().getName(),
+                    fis,
+                    targetFile.length(),
+                    CONTENT_TYPE);
+            IOUtils.closeQuietly(fis);
+            LOGGER.info("stored " + bucketPath + " to minio with size " + targetFile.length());
+            targetFile.delete();
+        } catch (Exception e) {
+            throw BaseExceptionHandler.handle(e);
+        }
     }
 
     private void storeMetadata(BucketPath bucketPath, StorageMetadata storageMetadata) {

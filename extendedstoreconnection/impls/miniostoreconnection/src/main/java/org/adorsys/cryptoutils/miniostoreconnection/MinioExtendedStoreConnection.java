@@ -306,12 +306,12 @@ public class MinioExtendedStoreConnection implements ExtendedStoreConnection {
         return returnList;
     }
 
-    public void deleteAllBuckets() {
+    @Override
+    public List<BucketDirectory> listAllBuckets() {
         try {
-            LOGGER.info("******************************************************");
-            LOGGER.info("DELETE ALL BUCKETS OF DATABASE - FOR TEST PURPOSE ONLY");
-            minioClient.listBuckets().forEach(bucket -> deleteContainer(new BucketDirectory(bucket.name())));
-            LOGGER.info("******************************************************");
+            List<BucketDirectory> list = new ArrayList<>();
+            minioClient.listBuckets().forEach(bucket -> list.add(new BucketDirectory(bucket.name())));
+            return list;
         } catch (Exception e) {
             throw BaseExceptionHandler.handle(e);
         }

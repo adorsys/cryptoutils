@@ -268,6 +268,18 @@ public class MongoDBExtendedStoreConnection implements ExtendedStoreConnection {
         return list;
     }
 
+    @Override
+    public List<BucketDirectory> listAllBuckets() {
+        List<BucketDirectory> list = new ArrayList<>();
+        databaseDeprecated.getCollectionNames().forEach(el -> {
+            if (el.endsWith(".files")) {
+                String collectionName= el.substring(0, el.length() - ".files".length());
+                list.add(new BucketDirectory(collectionName));
+            }
+        });
+        return list;
+    }
+
 
     // =========================================================================================
 

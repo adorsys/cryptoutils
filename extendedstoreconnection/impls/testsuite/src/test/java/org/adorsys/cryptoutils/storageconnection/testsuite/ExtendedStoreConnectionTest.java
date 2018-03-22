@@ -49,13 +49,9 @@ public class ExtendedStoreConnectionTest {
         }
     }
 
-    // @Test
-    public void cleanMinioDB() {
-        ExtendedStoreConnection storeConnection = ExtendedStoreConnectionFactory.get();
-        if (storeConnection instanceof MinioExtendedStoreConnection) {
-            MinioExtendedStoreConnection minio = (MinioExtendedStoreConnection) storeConnection;
-            minio.deleteAllBuckets();
-        }
+    public void cleanDB() {
+        ExtendedStoreConnection c = ExtendedStoreConnectionFactory.get();
+        c.listAllBuckets().forEach(el -> c.deleteContainer(el));
     }
 
     /**
@@ -328,6 +324,33 @@ public class ExtendedStoreConnectionTest {
         LOGGER.info("ok, inhalt nach dem zweiten Schreiben auch ok");
     }
 
+    @Test
+    public void testListAllBuckets() {
+        cleanDB();
+
+        List<BucketDirectory> mybuckets = new ArrayList<>();
+        for (int i = 0; i<10; i++) {
+            BucketDirectory bd = new BucketDirectory("bucket" + i);
+            mybuckets.add(bd);
+            containers.add(bd);
+            s.createContainer(bd);
+
+            StorageMetadata storageMetadata = new SimpleStorageMetadataImpl();
+            storageMetadata.getUserMetadata().put("myinfo", "first time");
+            Payload origPayload = new SimplePayloadImpl(storageMetadata, "1".getBytes());
+            BucketPath file1 = bd.append(new BucketPath("dir1/file1"));
+            s.putBlob(file1, origPayload);
+            BucketPath file2 = bd.append(new BucketPath("dir1/file2"));
+            s.putBlob(file2, origPayload);
+
+        }
+        List<BucketDirectory> foundBuckets = s.listAllBuckets();
+        mybuckets.forEach(b -> LOGGER.debug("created bucket " + b));
+        foundBuckets.forEach(b -> LOGGER.debug("found bucket " + b));
+        Assert.assertTrue(foundBuckets.containsAll(mybuckets));
+        Assert.assertTrue(mybuckets.containsAll(foundBuckets));
+
+    }
     @Test
     public void testFileExists() {
         BucketDirectory bd = new BucketDirectory("bucketfileexiststest");

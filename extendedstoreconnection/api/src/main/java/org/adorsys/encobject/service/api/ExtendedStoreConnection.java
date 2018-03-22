@@ -38,4 +38,7 @@ public interface ExtendedStoreConnection {
     void deleteContainer(BucketDirectory bucketDirectory);
 
     List<StorageMetadata> list(BucketDirectory bucketDirectory, ListRecursiveFlag listRecursiveFlag);
+
+    List<BucketDirectory> listAllBuckets();
+
 }

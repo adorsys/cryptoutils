@@ -28,6 +28,7 @@ import java.io.File;
 import java.io.FilenameFilter;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
 
@@ -115,7 +116,6 @@ public class FileSystemExtendedStorageConnection implements ExtendedStoreConnect
         return false;
     }
 
-
     @Override
     public List<StorageMetadata> list(BucketDirectory bucketDirectory, ListRecursiveFlag listRecursiveFlag) {
         List<StorageMetadata> result = new ArrayList<>();
@@ -129,6 +129,18 @@ public class FileSystemExtendedStorageConnection implements ExtendedStoreConnect
         DirectoryContent content = listContent(bucketDirectory, listRecursiveFlag);
         addStorageMetaData(result, content);
         return result;
+    }
+
+    @Override
+    public List<BucketDirectory> listAllBuckets() {
+        try {
+            List<BucketDirectory> list = new ArrayList<>();
+            String[] dirs = BucketPathFileHelper.getAsFile(baseDir).list(new DirectoryFilenameFilter());
+            Arrays.stream(dirs).forEach(dir -> list.add(new BucketDirectory(dir)));
+            return list;
+        } catch (Exception e) {
+            throw BaseExceptionHandler.handle(e);
+        }
     }
 
     @Override
@@ -211,12 +223,13 @@ public class FileSystemExtendedStorageConnection implements ExtendedStoreConnect
      */
 
     private void checkContainerExists(BucketPath bucketPath) {
-        if (! containerExists(bucketPath.getBucketDirectory())) {
+        if (!containerExists(bucketPath.getBucketDirectory())) {
             throw new BaseException("Container " + bucketPath.getObjectHandle().getContainer() + " does not exist");
         }
     }
+
     private void checkContainerExists(BucketDirectory bucketDirectory) {
-        if (! containerExists(bucketDirectory)) {
+        if (!containerExists(bucketDirectory)) {
             throw new BaseException("Container " + bucketDirectory.getObjectHandle().getContainer() + " does not exist");
         }
     }
@@ -241,7 +254,6 @@ public class FileSystemExtendedStorageConnection implements ExtendedStoreConnect
     }
 
 
-    
     private void files2content(DirectoryContent content, BucketDirectory bucketDirectory, Collection<File> files) {
         String knownPrefix = BucketPathFileHelper.getAsFile(baseDir.append(bucketDirectory)).getAbsolutePath();
 

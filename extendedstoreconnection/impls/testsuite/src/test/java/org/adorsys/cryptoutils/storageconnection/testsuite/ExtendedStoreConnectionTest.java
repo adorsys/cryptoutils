@@ -1,5 +1,6 @@
 package org.adorsys.cryptoutils.storageconnection.testsuite;
 
+import com.fasterxml.jackson.databind.exc.MismatchedInputException;
 import junit.framework.Assert;
 import org.adorsys.cryptoutils.miniostoreconnection.MinioExtendedStoreConnection;
 import org.adorsys.cryptoutils.mongodbstoreconnection.MongoDBExtendedStoreConnection;
@@ -71,9 +72,18 @@ public class ExtendedStoreConnectionTest {
      */
     @Test
     public void testList2() {
+        if (s instanceof MinioExtendedStoreConnection) {
+            ((MinioExtendedStoreConnection) s).cleanDatabase();
+        }
+
         BucketDirectory bd = new BucketDirectory("affe2");
         s.createContainer(bd);
         containers.add(bd);
+
+        if (s instanceof MinioExtendedStoreConnection) {
+            ((MinioExtendedStoreConnection) s).showDatabase();
+        }
+
         List<StorageMetadata> content = s.list(bd, ListRecursiveFlag.FALSE);
         LOGGER.debug(show(content));
         List<BucketPath> files = getFilesOnly(content);
@@ -217,13 +227,21 @@ public class ExtendedStoreConnectionTest {
     public void testList8() {
         LOGGER.debug("START TEST " + new RuntimeException("").getStackTrace()[0].getMethodName());
 
+        if (s instanceof MinioExtendedStoreConnection) {
+            ((MinioExtendedStoreConnection) s).cleanDatabase();
+        }
+
         BucketDirectory bd = new BucketDirectory("bucket8");
         s.createContainer(bd);
         containers.add(bd);
 
         createFiles(s, bd, 3, 2);
+        if (s instanceof MinioExtendedStoreConnection) {
+            ((MinioExtendedStoreConnection) s).showDatabase();
+        }
 
         {
+            LOGGER.debug("test8 start subtest 1");
             List<StorageMetadata> list = s.list(bd, ListRecursiveFlag.FALSE);
             LOGGER.debug("1 einfaches listing");
             LOGGER.debug(show(list));
@@ -234,6 +252,7 @@ public class ExtendedStoreConnectionTest {
             Assert.assertEquals(2, files.size());
         }
         {
+            LOGGER.debug("test8 start subtest 2");
             List<StorageMetadata> list = s.list(bd, ListRecursiveFlag.TRUE);
             LOGGER.debug("2 recursives listing");
             LOGGER.debug(show(list));
@@ -245,6 +264,7 @@ public class ExtendedStoreConnectionTest {
         }
 
         {
+            LOGGER.debug("test8 start subtest 3");
             BucketDirectory bp = bd.appendDirectory("subdir1");
             List<StorageMetadata> list = s.list(bp, ListRecursiveFlag.FALSE);
             LOGGER.debug("3 einfaches listing");
@@ -257,6 +277,7 @@ public class ExtendedStoreConnectionTest {
         }
 
         {
+            LOGGER.debug("test8 start subtest 4");
             BucketDirectory bp = bd.appendDirectory("subdir1");
             List<StorageMetadata> list = s.list(bp, ListRecursiveFlag.TRUE);
             LOGGER.debug("4 recursives listing");
@@ -269,6 +290,7 @@ public class ExtendedStoreConnectionTest {
         }
 
         {
+            LOGGER.debug("test8 start subtest 5");
             BucketDirectory subdirectory1 = bd.appendDirectory("subdir1");
             s.removeBlobFolder(subdirectory1);
             List<StorageMetadata> list = s.list(bd, ListRecursiveFlag.TRUE);
@@ -281,6 +303,7 @@ public class ExtendedStoreConnectionTest {
             Assert.assertEquals(18, files.size());
         }
         {
+            LOGGER.debug("test8 start subtest 6");
             s.list(bd, ListRecursiveFlag.TRUE).forEach(el -> LOGGER.debug("found. " + el.getName() + " " + el.getType()));
             Assert.assertFalse(s.blobExists(bd.appendDirectory("subdir1").appendName("file1")));
             Assert.assertTrue(s.blobExists(bd.appendDirectory("subdir2").appendName("file1")));
@@ -391,7 +414,7 @@ public class ExtendedStoreConnectionTest {
 
     private String show(List<StorageMetadata> list) {
         StringBuilder sb = new StringBuilder();
-        sb.append("List of StorageMetadata");
+        sb.append("List (" + list.size() + ")");
         sb.append("\n");
         for (StorageMetadata m : list) {
             sb.append("( ");

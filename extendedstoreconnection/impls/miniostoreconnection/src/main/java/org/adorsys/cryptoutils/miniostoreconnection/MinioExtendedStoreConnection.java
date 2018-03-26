@@ -51,6 +51,8 @@ public class MinioExtendedStoreConnection implements ExtendedStoreConnection {
     private final static String MINIO_TMP_FILE_SUFFIX = "";
     private final static BucketDirectory rootBucket = new BucketDirectory(ROOT_BUCKET);
     private final static BucketDirectory containerBucket = new BucketDirectory(CONTAINER_BUCKET);
+    public static final String CHARSET_NAME = "UTF-8";
+
 
     private final MinioClient minioClient;
     private final StorageMetadataFlattenerGSON storageMetadataFlattenerGSON = new StorageMetadataFlattenerGSON();
@@ -123,7 +125,7 @@ public class MinioExtendedStoreConnection implements ExtendedStoreConnection {
                     rootBucket.append(bucketPath).getObjectHandle().getContainer(),
                     rootBucket.append(bucketPath).add(METADATA_EXT).getObjectHandle().getName());
             byte[] bytes = IOUtils.toByteArray(is);
-            String jsonString = new String(bytes);
+            String jsonString = new String(bytes, CHARSET_NAME);
             StorageMetadata storageMetadata = storageMetadataFlattenerGSON.fromJson(jsonString);
             // LOGGER.debug("meta data for " + bucketPath + " is " + jsonString);
             return storageMetadata;
@@ -472,7 +474,7 @@ public class MinioExtendedStoreConnection implements ExtendedStoreConnection {
             metaData.setType(StorageType.BLOB);
             metaData.setName(BucketPathUtil.getAsString(bucketPath));
             String jsonString = storageMetadataFlattenerGSON.toJson(metaData);
-            byte[] bytes = jsonString.getBytes();
+            byte[] bytes = jsonString.getBytes(CHARSET_NAME);
             InputStream is = new ByteArrayInputStream(bytes);
             minioClient.putObject(
                     rootBucket.append(bucketPath).getObjectHandle().getContainer(),

@@ -47,7 +47,7 @@ public class ConnectToMongoTest {
     private final static Logger LOGGER = LoggerFactory.getLogger(ConnectToMongoTest.class);
     public static final String DATABASE_NAME = "testgrid";
 
-    @Test
+    // @Test
     public void createSimpleCollection() {
         LOGGER.info("test");
 
@@ -78,14 +78,14 @@ public class ConnectToMongoTest {
         Assert.assertEquals(number, collection.count());
     }
 
-    @Test
+    // @Test
     public void createSimpleDocumentWithStream() {
         GridFSBucket bucket = createBucket("bucket");
         String filename = "file1";
         streamDocument(bucket, filename);
     }
 
-    @Test
+    // @Test
     public void withoudAnyFiles() {
         GridFSBucket bucket = createBucket("bucket");
         String pattern1 = ".*";
@@ -95,7 +95,7 @@ public class ConnectToMongoTest {
         });
     }
 
-    @Test
+    // @Test
     public void listDirectoryStucture() {
         int dir1 = 3;
         int dir2 = 4;
@@ -172,7 +172,7 @@ public class ConnectToMongoTest {
         }
     }
 
-    @Test
+    // @Test
     public void testStreamVersions() {
         try {
             {

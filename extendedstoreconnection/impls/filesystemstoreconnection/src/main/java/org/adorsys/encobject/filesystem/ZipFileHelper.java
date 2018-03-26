@@ -36,26 +36,27 @@ public class ZipFileHelper {
     protected static final String ZIP_STORAGE_METADATA_JSON = "StorageMetadata.json";
     protected static final String ZIP_CONTENT_BINARY = "Content.binary";
     protected static final String ZIP_SUFFIX = ".zip";
+    public static final String CHARSET_NAME = "UTF-8";
 
 
     protected BucketDirectory baseDir;
     protected StorageMetadataFlattenerGSON gsonHelper = new StorageMetadataFlattenerGSON();
-    
+
     public ZipFileHelper(BucketDirectory bucketDirectory) {
         this.baseDir = bucketDirectory;
-    } 
-        
+    }
+
     /**
      * https://stackoverflow.com/questions/14462371/preferred-way-to-use-java-zipoutputstream-and-bufferedoutputstream
      */
     public void writeZip(BucketPath bucketPath, SimplePayloadImpl payload) {
-        payload.getStorageMetadata().setType(StorageType.BLOB);
-        payload.getStorageMetadata().setName(BucketPathUtil.getAsString(bucketPath));
-        byte[] content = payload.getData();
-        byte[] storageMetadata = gsonHelper.toJson(payload.getStorageMetadata()).getBytes();
 
         ZipOutputStream zos = null;
         try {
+            payload.getStorageMetadata().setType(StorageType.BLOB);
+            payload.getStorageMetadata().setName(BucketPathUtil.getAsString(bucketPath));
+            byte[] content = payload.getData();
+
             createDirectoryIfNecessary(bucketPath);
             File tempFile = BucketPathFileHelper.getAsFile(baseDir.append(bucketPath.add(ZIP_SUFFIX).add("." + UUID.randomUUID().toString())));
             if (tempFile.exists()) {
@@ -66,6 +67,9 @@ public class ZipFileHelper {
             zos = new ZipOutputStream(new BufferedOutputStream(new FileOutputStream(tempFile)));
 
             zos.putNextEntry(new ZipEntry(ZIP_STORAGE_METADATA_JSON));
+            String jsonString = gsonHelper.toJson(payload.getStorageMetadata());
+            LOGGER.debug("WRITE metadata " + jsonString + " with charset " + CHARSET_NAME);
+            byte[] storageMetadata = jsonString.getBytes(CHARSET_NAME);
             zos.write(storageMetadata, 0, storageMetadata.length);
             zos.closeEntry();
 
@@ -96,13 +100,16 @@ public class ZipFileHelper {
     }
 
     public void writeZipStream(BucketPath bucketPath, SimplePayloadStreamImpl payloadStream) {
-        payloadStream.getStorageMetadata().setType(StorageType.BLOB);
-        payloadStream.getStorageMetadata().setName(BucketPathUtil.getAsString(bucketPath));
-        byte[] storageMetadata = gsonHelper.toJson(payloadStream.getStorageMetadata()).getBytes();
 
         ZipOutputStream zos = null;
         InputStream is = null;
         try {
+            payloadStream.getStorageMetadata().setType(StorageType.BLOB);
+            payloadStream.getStorageMetadata().setName(BucketPathUtil.getAsString(bucketPath));
+            String jsonString = gsonHelper.toJson(payloadStream.getStorageMetadata());
+            byte[] storageMetadata = jsonString.getBytes(CHARSET_NAME);
+            LOGGER.debug("WRITE metadata string " + jsonString + "with " + CHARSET_NAME);
+
             createDirectoryIfNecessary(bucketPath);
             File tempFile = BucketPathFileHelper.getAsFile(baseDir.append(bucketPath.add(ZIP_SUFFIX).add("." + UUID.randomUUID().toString())));
             if (tempFile.exists()) {
@@ -199,7 +206,8 @@ public class ZipFileHelper {
             String jsonString = null;
             while ((entry = zis.getNextEntry()) != null) {
                 if (entry.getName().equals(ZIP_STORAGE_METADATA_JSON)) {
-                    jsonString = new String(IOUtils.toByteArray(zis));
+                    jsonString = new String(IOUtils.toByteArray(zis), CHARSET_NAME);
+                    LOGGER.debug("READ metadata string " + jsonString + "with " + CHARSET_NAME);
                 }
                 zis.closeEntry();
             }

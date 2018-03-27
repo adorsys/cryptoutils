@@ -21,12 +21,12 @@ public class ReadArguments {
     private final static Logger LOGGER = LoggerFactory.getLogger(ReadArguments.class);
     private static final String SYSTEM_PROPERTY_PREFIX = "-D";
     public static final String MONGO = "SC-MONGO";
-    public static final String MINIO = "SC-MINIO=";
+    public static final String MINIO = "SC-MINIO";
     public static final String FILESYSTEM = "SC-FILESYSTEM";
 
-    public static final String MONGO_ARG = SYSTEM_PROPERTY_PREFIX + "SC-MONGO";
-    public static final String MINIO_ARG = SYSTEM_PROPERTY_PREFIX + "SC-MINIO=";
-    public static final String FILESYSTEM_ARG = SYSTEM_PROPERTY_PREFIX + "SC-FILESYSTEM";
+    public static final String MONGO_ARG = SYSTEM_PROPERTY_PREFIX + MONGO;
+    public static final String MINIO_ARG = SYSTEM_PROPERTY_PREFIX + MINIO + "=";
+    public static final String FILESYSTEM_ARG = SYSTEM_PROPERTY_PREFIX + FILESYSTEM;
 
     public ArgsAndConfig readArguments(String[] args) {
         List<String> remainingArgs = new ArrayList<>();

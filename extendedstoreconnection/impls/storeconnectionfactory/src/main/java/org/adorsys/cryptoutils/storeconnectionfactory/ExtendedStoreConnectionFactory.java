@@ -57,7 +57,7 @@ public class ExtendedStoreConnectionFactory {
      * @param args
      * @return die Argumente, die nicht verwertet werden konnten
      */
-    static String[] readArguments(String[] args) {
+    public static String[] readArguments(String[] args) {
         ReadArguments.ArgsAndConfig argsAndConfig = new ReadArguments().readArguments(args);
         config = argsAndConfig.config;
         return argsAndConfig.remainingArgs;

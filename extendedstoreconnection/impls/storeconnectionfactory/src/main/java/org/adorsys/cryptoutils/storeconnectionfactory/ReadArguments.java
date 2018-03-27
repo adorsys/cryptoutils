@@ -46,7 +46,9 @@ public class ReadArguments {
                     }
                 }
         );
-        return new ArgsAndConfig(config, (String[]) remainingArgs.toArray());
+        String[] remainingArgArray = new String[remainingArgs.size()];
+        remainingArgArray = remainingArgs.toArray(remainingArgArray);
+        return new ArgsAndConfig(config, remainingArgArray);
     }
 
     public StoreConnectionFactoryConfig readEnvironment() {

@@ -80,27 +80,7 @@
 
         <dependency>
             <groupId>de.adorsys.cryptoutils</groupId>
-            <artifactId>filesystemstoreconnection</artifactId>
-            <scope>test</scope>
-        </dependency>
-        <dependency>
-            <groupId>de.adorsys.cryptoutils</groupId>
-            <artifactId>mongodbstoreconnection</artifactId>
-            <scope>test</scope>
-        </dependency>
-
-        <dependency>
-            <groupId>de.adorsys.cryptoutils</groupId>
-            <artifactId>miniostoreconnection</artifactId>
-            <scope>test</scope>
-        </dependency>
-
-
-        <dependency>
-            <groupId>de.adorsys.cryptoutils</groupId>
-            <artifactId>storeconnection-testsuite</artifactId>
-            <version>${project.version}</version>
-            <type>test-jar</type>
+            <artifactId>storeconnectionfactory</artifactId>
             <scope>test</scope>
         </dependency>
 

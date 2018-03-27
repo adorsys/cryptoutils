@@ -1,16 +1,14 @@
 package org.adorsys.cryptoutils.storageconnection.testsuite;
 
-import com.fasterxml.jackson.databind.exc.MismatchedInputException;
 import junit.framework.Assert;
 import org.adorsys.cryptoutils.miniostoreconnection.MinioExtendedStoreConnection;
-import org.adorsys.cryptoutils.mongodbstoreconnection.MongoDBExtendedStoreConnection;
+import org.adorsys.cryptoutils.storeconnectionfactory.ExtendedStoreConnectionFactory;
 import org.adorsys.encobject.complextypes.BucketDirectory;
 import org.adorsys.encobject.complextypes.BucketPath;
 import org.adorsys.encobject.domain.Payload;
 import org.adorsys.encobject.domain.StorageMetadata;
 import org.adorsys.encobject.domain.StorageType;
 import org.adorsys.encobject.exceptions.StorageConnectionException;
-import org.adorsys.encobject.filesystem.FileSystemExtendedStorageConnection;
 import org.adorsys.encobject.service.api.ExtendedStoreConnection;
 import org.adorsys.encobject.service.impl.SimplePayloadImpl;
 import org.adorsys.encobject.service.impl.SimpleStorageMetadataImpl;

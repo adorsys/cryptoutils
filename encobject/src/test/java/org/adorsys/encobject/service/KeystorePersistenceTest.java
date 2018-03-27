@@ -1,19 +1,16 @@
 package org.adorsys.encobject.service;
 
 import org.adorsys.cryptoutils.exceptions.BaseExceptionHandler;
-import org.adorsys.cryptoutils.storageconnection.testsuite.ExtendedStoreConnectionFactory;
+import org.adorsys.cryptoutils.storeconnectionfactory.ExtendedStoreConnectionFactory;
 import org.adorsys.encobject.complextypes.BucketDirectory;
-import org.adorsys.encobject.complextypes.BucketPath;
-import org.adorsys.encobject.domain.ObjectHandle;
 import org.adorsys.encobject.domain.Tuple;
 import org.adorsys.encobject.domain.UserMetaData;
 import org.adorsys.encobject.exceptions.ContainerExistsException;
 import org.adorsys.encobject.exceptions.UnknownContainerException;
-import org.adorsys.encobject.filesystem.FileSystemExtendedStorageConnection;
+import org.adorsys.encobject.service.api.ContainerPersistence;
 import org.adorsys.encobject.service.api.ExtendedStoreConnection;
 import org.adorsys.encobject.service.api.KeystorePersistence;
 import org.adorsys.encobject.service.impl.BlobStoreKeystorePersistenceImpl;
-import org.adorsys.encobject.service.api.ContainerPersistence;
 import org.adorsys.encobject.service.impl.ContainerPersistenceImpl;
 import org.adorsys.encobject.utils.TestKeyUtils;
 import org.junit.AfterClass;

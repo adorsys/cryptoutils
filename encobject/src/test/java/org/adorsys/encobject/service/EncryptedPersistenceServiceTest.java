@@ -2,12 +2,11 @@ package org.adorsys.encobject.service;
 
 import junit.framework.Assert;
 import org.adorsys.cryptoutils.exceptions.BaseExceptionHandler;
-import org.adorsys.cryptoutils.storageconnection.testsuite.ExtendedStoreConnectionFactory;
+import org.adorsys.cryptoutils.storeconnectionfactory.ExtendedStoreConnectionFactory;
 import org.adorsys.encobject.complextypes.BucketDirectory;
 import org.adorsys.encobject.complextypes.BucketPath;
 import org.adorsys.encobject.domain.Payload;
 import org.adorsys.encobject.domain.PayloadStream;
-import org.adorsys.encobject.filesystem.FileSystemExtendedStorageConnection;
 import org.adorsys.encobject.service.api.ContainerPersistence;
 import org.adorsys.encobject.service.api.EncryptionStreamService;
 import org.adorsys.encobject.service.api.ExtendedStoreConnection;

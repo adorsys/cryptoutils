@@ -10,29 +10,37 @@
 
     <modelVersion>4.0.0</modelVersion>
 
-    <artifactId>storeconnection-testsuite</artifactId>
+    <artifactId>storeconnectionfactory</artifactId>
 
     <dependencies>
         <dependency>
             <groupId>de.adorsys.cryptoutils</groupId>
             <artifactId>filesystemstoreconnection</artifactId>
-            <scope>test</scope>
         </dependency>
         <dependency>
             <groupId>de.adorsys.cryptoutils</groupId>
             <artifactId>mongodbstoreconnection</artifactId>
-            <scope>test</scope>
         </dependency>
         <dependency>
             <groupId>de.adorsys.cryptoutils</groupId>
             <artifactId>miniostoreconnection</artifactId>
-            <scope>test</scope>
         </dependency>
 
         <dependency>
             <groupId>commons-io</groupId>
             <artifactId>commons-io</artifactId>
-            <scope>test</scope>
+        </dependency>
+
+        <dependency>
+            <groupId>org.apache.logging.log4j</groupId>
+            <artifactId>log4j-slf4j-impl</artifactId>
+            <version>2.7</version>
+        </dependency>
+
+        <dependency>
+            <groupId>org.apache.logging.log4j</groupId>
+            <artifactId>log4j-core</artifactId>
+            <version>2.7</version>
         </dependency>
 
         <dependency>
@@ -41,41 +49,6 @@
             <scope>test</scope>
         </dependency>
 
-        <dependency>
-            <groupId>org.apache.logging.log4j</groupId>
-            <artifactId>log4j-slf4j-impl</artifactId>
-            <version>2.7</version>
-            <scope>test</scope>
-        </dependency>
-
-        <dependency>
-            <groupId>org.apache.logging.log4j</groupId>
-            <artifactId>log4j-core</artifactId>
-            <version>2.7</version>
-            <scope>test</scope>
-        </dependency>
-
     </dependencies>
-
-    <build>
-        <plugins>
-
-        <!-- Damit die Factory auch in anderen Tests benutzt werden kann -->
-        <plugin>
-            <groupId>org.apache.maven.plugins</groupId>
-            <artifactId>maven-jar-plugin</artifactId>
-            <version>2.4</version>
-            <executions>
-                <execution>
-                    <goals>
-                        <goal>test-jar</goal>
-                    </goals>
-                </execution>
-            </executions>
-        </plugin>
-
-        </plugins>
-
-    </build>
 
 </project>

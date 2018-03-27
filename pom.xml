@@ -84,7 +84,7 @@
 			</dependency>
 			<dependency>
 				<groupId>de.adorsys.cryptoutils</groupId>
-				<artifactId>storeconnection-testsuite</artifactId>
+				<artifactId>storeconnectionfactory</artifactId>
 				<version>${project.version}</version>
 			</dependency>
 

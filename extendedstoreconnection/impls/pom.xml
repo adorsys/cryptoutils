@@ -15,7 +15,7 @@
         <module>filesystemstoreconnection</module>
         <module>mongodbstoreconnection</module>
         <module>miniostoreconnection</module>
-        <module>testsuite</module>
+        <module>storeconnectionfactory</module>
     </modules>
 
     <packaging>pom</packaging>

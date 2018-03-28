@@ -1,15 +1,10 @@
 package org.adorsys.cryptoutils.storeconnectionfactory;
 
-import org.adorsys.cryptoutils.exceptions.BaseException;
 import org.adorsys.cryptoutils.exceptions.BaseExceptionHandler;
-import org.adorsys.cryptoutils.miniostoreconnection.MinioExtendedStoreConnection;
 import org.adorsys.cryptoutils.miniostoreconnection.MinioParamParser;
-import org.adorsys.cryptoutils.mongodbstoreconnection.MongoDBExtendedStoreConnection;
-import org.adorsys.encobject.filesystem.FileSystemExtendedStorageConnection;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;

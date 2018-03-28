@@ -22,6 +22,7 @@ import org.adorsys.encobject.domain.Payload;
 import org.adorsys.encobject.domain.PayloadStream;
 import org.adorsys.encobject.domain.StorageMetadata;
 import org.adorsys.encobject.domain.StorageType;
+import org.adorsys.encobject.exceptions.ResourceNotFoundException;
 import org.adorsys.encobject.exceptions.StorageConnectionException;
 import org.adorsys.encobject.filesystem.StorageMetadataFlattenerGSON;
 import org.adorsys.encobject.service.api.ExtendedStoreConnection;
@@ -141,7 +142,9 @@ public class MongoDBExtendedStoreConnection implements ExtendedStoreConnection {
     public boolean blobExists(BucketPath bucketPath) {
         LOGGER.info("start blob Exists for " + bucketPath);
         GridFSBucket bucket = getGridFSBucket(bucketPath);
-        checkBucketExists(bucket);
+        if (! containerExists(bucket)) {
+            return false;
+        }
         String filename = bucketPath.getObjectHandle().getName();
         List<ObjectId> ids = new ArrayList<>();
         bucket.find(Filters.eq(FILENAME_TAG, filename)).forEach((Consumer<GridFSFile>) file -> ids.add(file.getObjectId()));
@@ -355,7 +358,7 @@ public class MongoDBExtendedStoreConnection implements ExtendedStoreConnection {
 
     private void checkBucketExists(GridFSBucket bucket) {
         if (!containerExists(bucket)) {
-            throw new BaseException("Container " + bucket.getBucketName() + " does not exist yet");
+            throw new ResourceNotFoundException("Container " + bucket.getBucketName() + " does not exist yet");
         }
     }
 

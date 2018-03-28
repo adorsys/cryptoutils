@@ -15,6 +15,7 @@ import org.adorsys.encobject.domain.PayloadStream;
 import org.adorsys.encobject.domain.StorageMetadata;
 import org.adorsys.encobject.domain.StorageType;
 import org.adorsys.encobject.exceptions.BucketException;
+import org.adorsys.encobject.exceptions.ResourceNotFoundException;
 import org.adorsys.encobject.exceptions.StorageConnectionException;
 import org.adorsys.encobject.filesystem.StorageMetadataFlattenerGSON;
 import org.adorsys.encobject.service.api.ExtendedStoreConnection;
@@ -120,6 +121,9 @@ public class MinioExtendedStoreConnection implements ExtendedStoreConnection {
     @Override
     public StorageMetadata getStorageMetadata(BucketPath bucketPath) {
         try {
+            if (!blobExists(bucketPath)) {
+                throw new ResourceNotFoundException(bucketPath.toString());
+            }
             LOGGER.debug("load metadata for " + bucketPath);
             InputStream is = minioClient.getObject(
                     rootBucket.append(bucketPath).getObjectHandle().getContainer(),

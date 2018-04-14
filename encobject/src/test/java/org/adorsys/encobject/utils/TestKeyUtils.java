@@ -27,7 +27,7 @@ public class TestKeyUtils {
 	        field.setAccessible(true);
 	        field.set(null, Boolean.FALSE);
 	    } catch (ClassNotFoundException | NoSuchFieldException | SecurityException | IllegalArgumentException | IllegalAccessException ex) {
-	        ex.printStackTrace(System.err);
+//	        ex.printStackTrace(System.err);
 	    }		
 	}
 

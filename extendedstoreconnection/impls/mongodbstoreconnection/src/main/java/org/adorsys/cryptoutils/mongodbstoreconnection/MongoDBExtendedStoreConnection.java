@@ -61,16 +61,10 @@ public class MongoDBExtendedStoreConnection implements ExtendedStoreConnection {
     private DB databaseDeprecated;
     protected StorageMetadataFlattenerGSON gsonHelper = new StorageMetadataFlattenerGSON();
 
-
-    public MongoDBExtendedStoreConnection(String databasename) {
-        MongoClient mongoClient = new MongoClient();
+    public MongoDBExtendedStoreConnection(String host, Integer port, String databasename) {
+        MongoClient mongoClient = new MongoClient(host, port);
         database = mongoClient.getDatabase(databasename);
         databaseDeprecated = mongoClient.getDB(databasename);
-    }
-
-
-    public MongoDBExtendedStoreConnection() {
-        this("default-database");
     }
 
     @Override

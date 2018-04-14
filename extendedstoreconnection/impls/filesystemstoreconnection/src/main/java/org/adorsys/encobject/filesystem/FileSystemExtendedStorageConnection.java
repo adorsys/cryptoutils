@@ -37,12 +37,11 @@ import java.util.List;
  */
 public class FileSystemExtendedStorageConnection implements ExtendedStoreConnection {
     private final static Logger LOGGER = LoggerFactory.getLogger(FileSystemExtendedStorageConnection.class);
-    private final static String DEFAULT_BASE = "target/filesystemstorage";
     protected final BucketDirectory baseDir;
     private ZipFileHelper zipFileHelper;
 
     public FileSystemExtendedStorageConnection() {
-        this(DEFAULT_BASE);
+        this(new FileSystemParamParser("").getFilesystembase());
     }
 
     public FileSystemExtendedStorageConnection(String basedir) {

@@ -135,6 +135,9 @@ public class FileSystemExtendedStorageConnection implements ExtendedStoreConnect
         try {
             List<BucketDirectory> list = new ArrayList<>();
             String[] dirs = BucketPathFileHelper.getAsFile(baseDir).list(new DirectoryFilenameFilter());
+            if (dirs == null) {
+                return list;
+            }
             Arrays.stream(dirs).forEach(dir -> list.add(new BucketDirectory(dir)));
             return list;
         } catch (Exception e) {

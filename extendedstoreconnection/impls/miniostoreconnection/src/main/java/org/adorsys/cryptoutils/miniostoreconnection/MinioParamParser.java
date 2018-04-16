@@ -19,7 +19,7 @@ public class MinioParamParser {
     public MinioParamParser(String params) {
         LOGGER.info("parse:" + params);
         try {
-            StringTokenizer st = new StringTokenizer(params, ",");
+            StringTokenizer st = new StringTokenizer(params, "|");
             String urlString = st.nextToken();
             String accessKey = st.nextToken();
             String secretKey = st.nextToken();

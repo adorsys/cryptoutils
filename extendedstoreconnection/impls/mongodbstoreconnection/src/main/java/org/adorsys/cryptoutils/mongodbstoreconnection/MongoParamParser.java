@@ -19,7 +19,7 @@ public class MongoParamParser {
         LOGGER.info("parse:" + params);
         try {
             if (params.length() > 0) {
-                StringTokenizer st = new StringTokenizer(params, ",");
+                StringTokenizer st = new StringTokenizer(params, "|");
                 host = st.nextToken();
                 String portString = st.nextToken();
                 port = Integer.parseInt(portString);

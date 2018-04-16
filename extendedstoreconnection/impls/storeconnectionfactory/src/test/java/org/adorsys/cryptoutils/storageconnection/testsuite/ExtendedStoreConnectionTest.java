@@ -53,6 +53,16 @@ public class ExtendedStoreConnectionTest {
         c.listAllBuckets().forEach(el -> c.deleteContainer(el));
     }
 
+    @Test
+    public void createManyBuckets() {
+        ExtendedStoreConnection c = ExtendedStoreConnectionFactory.get();
+        for (int i = 0; i<200; i++) {
+            BucketDirectory bd = new BucketDirectory("bucket" + i);
+            containers.add(bd);
+            c.createContainer(bd);
+        }
+    }
+
     /**
      * Suche in einem nicht vorhandenem Bucket sollte einfach eine leere Liste zurückgeben
      */

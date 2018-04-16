@@ -2,6 +2,7 @@ package org.adorsys.cryptoutils.mongodbstoreconnection;
 
 import com.mongodb.DB;
 import com.mongodb.MongoClient;
+import com.mongodb.MongoCommandException;
 import com.mongodb.client.MongoDatabase;
 import com.mongodb.client.gridfs.GridFSBucket;
 import com.mongodb.client.gridfs.GridFSBuckets;
@@ -91,10 +92,10 @@ public class MongoDBExtendedStoreConnection implements ExtendedStoreConnection {
 
         GridFSUploadOptions uploadOptions = new GridFSUploadOptions();
         uploadOptions.metadata(new Document());
-        SimpleStorageMetadataImpl storareMetaData = new SimpleStorageMetadataImpl(payloadStream.getStorageMetadata());
-        storareMetaData.setType(StorageType.BLOB);
-        storareMetaData.setName(BucketPathUtil.getAsString(bucketPath));
-        uploadOptions.getMetadata().put(STORAGE_METADATA_KEY, gsonHelper.toJson(storareMetaData));
+        SimpleStorageMetadataImpl storageMetadata = new SimpleStorageMetadataImpl(payloadStream.getStorageMetadata());
+        storageMetadata.setType(StorageType.BLOB);
+        storageMetadata.setName(BucketPathUtil.getAsString(bucketPath));
+        uploadOptions.getMetadata().put(STORAGE_METADATA_KEY, gsonHelper.toJson(storageMetadata));
         InputStream is = payloadStream.openStream();
         ObjectId objectId = bucket.uploadFromStream(filename, is, uploadOptions);
         IOUtils.closeQuietly(is);
@@ -184,9 +185,21 @@ public class MongoDBExtendedStoreConnection implements ExtendedStoreConnection {
 
     @Override
     public void createContainer(BucketDirectory bucketDirectory) {
+        LOGGER.info("createContainer:" + bucketDirectory);
         GridFSBucket bucket = GridFSBuckets.create(database, bucketDirectory.getObjectHandle().getContainer());
         InputStream is = new ByteArrayInputStream(new Date().toString().getBytes());
-        bucket.uploadFromStream(BUCKET_ID_FILENAME, is);
+        try {
+            ObjectId objectId = bucket.uploadFromStream(BUCKET_ID_FILENAME, is);
+            LOGGER.debug(" container file has been created " + BUCKET_ID_FILENAME + " with mongo id " + objectId.toString());
+        } catch (MongoCommandException e) {
+            if (e.getErrorMessage().contains("Too many open files")) {
+                LOGGER.error("****************************************************");
+                LOGGER.error("Due to the following \"Too many open files exception\"");
+                LOGGER.error("PLEASE READ https://jira.adorsys.de/browse/DOC-22");
+                LOGGER.error("****************************************************");
+                throw BaseExceptionHandler.handle(e);
+            }
+        }
         IOUtils.closeQuietly(is);
     }
 

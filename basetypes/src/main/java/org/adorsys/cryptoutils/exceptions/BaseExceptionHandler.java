@@ -1,10 +1,13 @@
 package org.adorsys.cryptoutils.exceptions;
 
+import java.util.Arrays;
+import java.util.stream.Stream;
+
 /**
  * Created by peter on 23.12.17 at 18:11.
  */
 public class BaseExceptionHandler {
-    private final static String FILTER_PREFIX = "org.adorsys";
+    private final static String[] FILTER_PREFIX = {"org.adorsys", "de.adorsys"};
 
     static public BaseException handle (Throwable t) {
         if (t instanceof BaseException) {
@@ -38,7 +41,7 @@ public class BaseExceptionHandler {
         sb.append("Exception stack:");
         sb.append("\n");
         for (StackTraceElement el : t.getStackTrace()) {
-            if (el.toString().startsWith(FILTER_PREFIX)) {
+            if (startWithAdorsys(el.toString())) {
                 sb.append("\t");
                 sb.append(el.toString());
                 sb.append("\n");
@@ -73,13 +76,13 @@ public class BaseExceptionHandler {
             for (StackTraceElement el : t.getStackTrace()) {
                 sb.append(tab);
                 sb.append("\t");
-                sb.append(el.toString().startsWith(FILTER_PREFIX) ? "-> " : "   ");
+                sb.append(startWithAdorsys(el.toString()) ? "-> " : "   ");
                 sb.append(el.toString());
                 sb.append("\n");
             }
         } else {
             for (StackTraceElement el : t.getStackTrace()) {
-                if (el.toString().startsWith(FILTER_PREFIX)) {
+                if (startWithAdorsys(el.toString())) {
                     sb.append(tab);
                     sb.append("\t");
                     sb.append(el.toString());
@@ -95,6 +98,15 @@ public class BaseExceptionHandler {
         }
 
         return sb.toString();
+    }
+
+    private static boolean startWithAdorsys(String s) {
+        for (String prefix : FILTER_PREFIX) {
+            if (s.startsWith(prefix)) {
+                return true;
+            }
+        };
+        return false;
     }
 }
 

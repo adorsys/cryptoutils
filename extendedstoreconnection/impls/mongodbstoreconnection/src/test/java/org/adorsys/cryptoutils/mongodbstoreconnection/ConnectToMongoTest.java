@@ -49,7 +49,7 @@ public class ConnectToMongoTest {
 
     // @Test
     public void createSimpleCollection() {
-        LOGGER.info("test");
+        LOGGER.debug("test");
 
         int number = 10;
         MongoClient mongoClient = new MongoClient();
@@ -57,7 +57,7 @@ public class ConnectToMongoTest {
         MongoDatabase database = mongoClient.getDatabase(DATABASE_NAME);
         MongoIterable<String> strings = database.listCollectionNames();
         for (String name : strings) {
-            LOGGER.info("name:" + name);
+            LOGGER.debug("name:" + name);
         }
         MongoCollection<Document> collection = database.getCollection("animals");
         collection.drop();
@@ -72,7 +72,7 @@ public class ConnectToMongoTest {
         LOGGER.debug("size of collections: " + collection.count());
         MongoCursor<Document> iterator = collection.find().iterator();
         while (iterator.hasNext()) {
-            LOGGER.info("element:" + iterator.next());
+            LOGGER.debug("element:" + iterator.next());
         }
 
         Assert.assertEquals(number, collection.count());
@@ -91,7 +91,7 @@ public class ConnectToMongoTest {
         String pattern1 = ".*";
         GridFSFindIterable gridFSFiles = bucket.find(regex("filename", pattern1, "i"));
         gridFSFiles.forEach((Consumer<GridFSFile>) file -> {
-            LOGGER.info("element " + pattern1 + ": " + file.getFilename());
+            LOGGER.debug("element " + pattern1 + ": " + file.getFilename());
         });
     }
 
@@ -126,7 +126,7 @@ public class ConnectToMongoTest {
             List<GridFSFile> list = new ArrayList<>();
             gridFSFiles.forEach((Consumer<GridFSFile>) file -> {
                 list.add(file);
-                LOGGER.info("element " + pattern1 + ": " + file.getFilename());
+                LOGGER.debug("element " + pattern1 + ": " + file.getFilename());
             });
             Assert.assertEquals(dir2 * files + files, list.size());
         }
@@ -136,7 +136,7 @@ public class ConnectToMongoTest {
             List<GridFSFile> list = new ArrayList<>();
             gridFSFiles.forEach((Consumer<GridFSFile>) file -> {
                 list.add(file);
-                LOGGER.info("element " + pattern1 + ": " + file.getFilename());
+                LOGGER.debug("element " + pattern1 + ": " + file.getFilename());
             });
             Assert.assertEquals(dir1 * dir2 * files + dir1 * files + files, list.size());
         }
@@ -146,7 +146,7 @@ public class ConnectToMongoTest {
             List<GridFSFile> list = new ArrayList<>();
             gridFSFiles.forEach((Consumer<GridFSFile>) file -> {
                 list.add(file);
-                LOGGER.info("element " + pattern1 + ": " + file.getFilename());
+                LOGGER.debug("element " + pattern1 + ": " + file.getFilename());
             });
             Assert.assertEquals(files, list.size());
         }
@@ -156,18 +156,18 @@ public class ConnectToMongoTest {
             List<GridFSFile> list = new ArrayList<>();
             gridFSFiles.forEach((Consumer<GridFSFile>) file -> {
                 list.add(file);
-                LOGGER.info("element- " + pattern1 + ": " + file.getFilename());
+                LOGGER.debug("element- " + pattern1 + ": " + file.getFilename());
             });
             Assert.assertEquals(0, list.size());
         }
         {
             Set<String> folder = findSubdirs(new BucketDirectory("bucket/folder"));
-            folder.forEach(file -> LOGGER.info("folder -> " + file));
+            folder.forEach(file -> LOGGER.debug("folder -> " + file));
             Assert.assertEquals(dir1, folder.size());
         }
         {
             Set<String> folder = findSubdirs(new BucketDirectory("bucket/folder/1"));
-            folder.forEach(file -> LOGGER.info("folder -> " + file));
+            folder.forEach(file -> LOGGER.debug("folder -> " + file));
             Assert.assertEquals(dir2, folder.size());
         }
     }
@@ -202,7 +202,7 @@ public class ConnectToMongoTest {
                 int counter = 0;
                 while (iterator.hasNext()) {
                     GridFSFile file = iterator.next();
-                    LOGGER.info("element:" + file);
+                    LOGGER.debug("element:" + file);
                     counter++;
                 }
                 Assert.assertEquals(2, counter);
@@ -260,7 +260,7 @@ public class ConnectToMongoTest {
                 int counter = 0;
                 while (iterator.hasNext()) {
                     GridFSFile file = iterator.next();
-                    LOGGER.info("element:" + file);
+                    LOGGER.debug("element:" + file);
                     counter++;
                 }
                 Assert.assertEquals(1, counter);
@@ -288,7 +288,7 @@ public class ConnectToMongoTest {
             String value = getMetadata(DATABASE_NAME,
                     new BucketPath(bucket.getBucketName() + BucketPath.BUCKET_SEPARATOR + filename),
                     "KEY");
-            LOGGER.info("KEY ist " + value);
+            LOGGER.debug("KEY ist " + value);
 
         } catch (Exception e) {
             throw BaseExceptionHandler.handle(e);

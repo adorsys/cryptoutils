@@ -35,15 +35,17 @@ public class KeyStoreGenerator {
     ) {
         this.config = config;
         this.keyStoreType = keyStoreType;
-        this.serverKeyPairAliasPrefix = serverKeyPairAliasPrefix;
+        // this.serverKeyPairAliasPrefix = serverKeyPairAliasPrefix;
+        this.serverKeyPairAliasPrefix = "KEYSTORE-ID-0";
         this.readKeyPassword = readKeyPassword;
+        LOGGER.debug("Keystore ID ignored " + serverKeyPairAliasPrefix);
     }
 
     public KeyStore generate() {
-        if (System.getProperty(UGLY_KEY_STORE_CACHE) != null) {
-            KeyStore keyStore = TESTKeyStoreCache.INSTANCE.getCachedKeyStoreFor(keyStoreType, serverKeyPairAliasPrefix, readKeyPassword, config);
+        if (UglyKeyStoreCache.INSTANCE.isActive()) {
+            KeyStore keyStore = UglyKeyStoreCache.INSTANCE.getCachedKeyStoreFor(keyStoreType, serverKeyPairAliasPrefix, readKeyPassword, config);
             if (keyStore != null) {
-                LOGGER.info("KeyStoreGeneration (milliseconds) DURATION WAS 0");
+                LOGGER.debug("KeyStoreGeneration (milliseconds) DURATION WAS 0");
                 return keyStore;
             }
         }
@@ -97,9 +99,9 @@ public class KeyStoreGenerator {
         } finally {
             Date stopTime = new Date();
             long duration = stopTime.getTime() - startTime.getTime();
-            LOGGER.info("KeyStoreGeneration (milliseconds) DURATION WAS " + duration);
-            if (System.getProperty(UGLY_KEY_STORE_CACHE) != null) {
-                TESTKeyStoreCache.INSTANCE.cacheKeyStoreFor(keyStore, keyStoreType, serverKeyPairAliasPrefix, readKeyPassword, config);
+            LOGGER.debug("KeyStoreGeneration (milliseconds) DURATION WAS " + duration);
+            if (UglyKeyStoreCache.INSTANCE.isActive()) {
+                UglyKeyStoreCache.INSTANCE.cacheKeyStoreFor(keyStore, keyStoreType, serverKeyPairAliasPrefix, readKeyPassword, config);
             }
         }
     }

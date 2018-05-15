@@ -14,7 +14,7 @@ public class ReadArgumentsTest {
 
     @Before
     public void before() {
-        LOGGER.info("----------------");
+        LOGGER.debug("----------------");
         System.clearProperty("SC-MINIO");
         System.clearProperty("SC-MONGO");
         System.clearProperty("SC-FILESYSTEM");

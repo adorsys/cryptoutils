@@ -73,7 +73,7 @@ public class StorageMetaDataTest {
         StorageMetadata loadedStorageMetadata = s.getStorageMetadata(filea);
         int fehler = compareStorageMetadata(storageMetadata, loadedStorageMetadata);
 
-        LOGGER.info("Es werden drei Fehler erwartet für Name, StorageType");
+        LOGGER.debug("Es werden drei Fehler erwartet für Name, StorageType");
         Assert.assertEquals("number of fehlers", 2, fehler);
     }
 

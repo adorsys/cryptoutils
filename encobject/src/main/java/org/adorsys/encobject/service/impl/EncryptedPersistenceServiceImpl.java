@@ -39,7 +39,7 @@ public class EncryptedPersistenceServiceImpl implements EncryptedPersistenceServ
         InputStream encryptedInputStream = encryptionStreamService.getEncryptedInputStream(inputStream, keySource, keyID, payload.getStorageMetadata().getShouldBeCompressed());
         payload.getStorageMetadata().getUserMetadata().put(ENCRYPTION_SERVICE, encryptionStreamService.getClass().toString());
         payload.getStorageMetadata().getUserMetadata().put(ENCRYPTION_KEY_ID, keyID.getValue());
-        LOGGER.info("ENCRYPT BYTES WITH " + keyID);
+        LOGGER.debug("ENCRYPT BYTES WITH " + keyID);
         SimplePayloadStreamImpl newPayload = new SimplePayloadStreamImpl(payload.getStorageMetadata(), encryptedInputStream);
         extendedStoreConnection.putBlobStream(bucketPath, newPayload);
     }
@@ -56,7 +56,7 @@ public class EncryptedPersistenceServiceImpl implements EncryptedPersistenceServ
             String keyIDString = payload.getStorageMetadata().getUserMetadata().get(ENCRYPTION_KEY_ID);
             payload.getStorageMetadata().getUserMetadata().remove(ENCRYPTION_KEY_ID);
             KeyID keyID = new KeyID(keyIDString);
-            LOGGER.info("DECRYPT BYTES WITH " + keyID);
+            LOGGER.debug("DECRYPT BYTES WITH " + keyID);
             InputStream encryptedInputStream = new ByteArrayInputStream(payload.getData());
             InputStream decryptedInputStream = encryptionStreamService.getDecryptedInputStream(encryptedInputStream, keySource, keyID);
             byte[] decryptData = IOUtils.toByteArray(decryptedInputStream);
@@ -71,7 +71,7 @@ public class EncryptedPersistenceServiceImpl implements EncryptedPersistenceServ
     public void encryptAndPersistStream(BucketPath bucketPath, PayloadStream payloadStream, KeySource keySource, KeyID keyID) {
         payloadStream.getStorageMetadata().getUserMetadata().put(ENCRYPTION_SERVICE, encryptionStreamService.getClass().toString());
         payloadStream.getStorageMetadata().getUserMetadata().put(ENCRYPTION_KEY_ID, keyID.getValue());
-        LOGGER.info("ENCRYPT STREAM WITH " + keyID);
+        LOGGER.debug("ENCRYPT STREAM WITH " + keyID);
         InputStream encryptedStream = encryptionStreamService.getEncryptedInputStream(payloadStream.openStream(), keySource, keyID, payloadStream.getStorageMetadata().getShouldBeCompressed());
         extendedStoreConnection.putBlobStream(bucketPath, new SimplePayloadStreamImpl(payloadStream.getStorageMetadata(), encryptedStream));
     }
@@ -87,7 +87,7 @@ public class EncryptedPersistenceServiceImpl implements EncryptedPersistenceServ
         String keyIDString = payloadStream.getStorageMetadata().getUserMetadata().get(ENCRYPTION_KEY_ID);
         payloadStream.getStorageMetadata().getUserMetadata().remove(ENCRYPTION_KEY_ID);
         KeyID keyID = new KeyID(keyIDString);
-        LOGGER.info("DECRYPT STREAM WITH " + keyID);
+        LOGGER.debug("DECRYPT STREAM WITH " + keyID);
 
         InputStream encryptedInputStream = payloadStream.openStream();
         InputStream decryptedInputStream = encryptionStreamService.getDecryptedInputStream(encryptedInputStream, keySource, keyID);

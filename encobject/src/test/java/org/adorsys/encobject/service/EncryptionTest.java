@@ -30,7 +30,7 @@ public class EncryptionTest {
     public void a() {
         try {
             KeyIDWithKey t = createDocumentKeyIdWithKey();
-            LOGGER.info(t.toString());
+            LOGGER.debug(t.toString());
 
             byte[] decrypted = "Der Affe ist ein Affe und das bleibt auch so".getBytes();
             InputStream decryptedStream = new ByteArrayInputStream(decrypted);
@@ -41,9 +41,9 @@ public class EncryptionTest {
             CipherInputStream decryptionStream = AESEncryptionStreamServiceImpl.createCipherInputStream(t.getSecretKey().getEncoded(), encryptedInputStream, Cipher.DECRYPT_MODE);
             byte[] redecrypted = IOUtils.toByteArray(decryptionStream);
 
-            LOGGER.info("  decrypted : " + HexUtil.convertBytesToHexString(decrypted));
-            LOGGER.info("  encrypted : " + HexUtil.convertBytesToHexString(encrypted));
-            LOGGER.info("redecrypted : " + HexUtil.convertBytesToHexString(redecrypted));
+            LOGGER.debug("  decrypted : " + HexUtil.convertBytesToHexString(decrypted));
+            LOGGER.debug("  encrypted : " + HexUtil.convertBytesToHexString(encrypted));
+            LOGGER.debug("redecrypted : " + HexUtil.convertBytesToHexString(redecrypted));
 
             Assert.assertTrue(Arrays.equals(decrypted, redecrypted));
         } catch (Exception e) {

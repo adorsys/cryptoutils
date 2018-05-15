@@ -31,7 +31,7 @@ public class ExtendedStoreConnectionFactory {
                 frame.add("host: " + config.mongoParams.getHost());
                 frame.add("port: " + config.mongoParams.getPort());
                 frame.add("database: " + config.mongoParams.getDatabasename());
-                LOGGER.info(frame.toString());
+                LOGGER.debug(frame.toString());
                 return new MongoDBExtendedStoreConnection(
                         config.mongoParams.getHost(),
                         config.mongoParams.getPort(),
@@ -43,7 +43,7 @@ public class ExtendedStoreConnectionFactory {
                 frame.add("url: " + config.minioParams.getUrl().toString());
                 frame.add("accessKey: " + config.minioParams.getMinioAccessKey().getValue());
                 frame.add("secretKey: " + config.minioParams.getMinioSecretKey().getValue());
-                LOGGER.info(frame.toString());
+                LOGGER.debug(frame.toString());
                 return new MinioExtendedStoreConnection(
                         config.minioParams.getUrl(),
                         config.minioParams.getMinioAccessKey(),
@@ -52,7 +52,7 @@ public class ExtendedStoreConnectionFactory {
             case FILE_SYSTEM:
                 frame.add("USE FILE SYSTEM");
                 frame.add("basedir: " + config.fileSystemParamParser.getFilesystembase());
-                LOGGER.info(frame.toString());
+                LOGGER.debug(frame.toString());
                 return new FileSystemExtendedStorageConnection(
                         config.fileSystemParamParser.getFilesystembase());
 

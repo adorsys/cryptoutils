@@ -62,16 +62,16 @@ public class MinioExtendedStoreConnection implements ExtendedStoreConnection {
         try {
             this.minioClient = new MinioClient(url, minioAccessKey.getValue(), minioSecretKey.getValue());
             if (!minioClient.bucketExists(rootBucket.getObjectHandle().getContainer())) {
-                LOGGER.info("real bucket " + rootBucket + " wird angelegt ");
+                LOGGER.debug("real bucket " + rootBucket + " wird angelegt ");
                 minioClient.makeBucket(rootBucket.getObjectHandle().getContainer());
             } else {
-                LOGGER.info("real bucket " + rootBucket + " wird existiert bereits ");
+                LOGGER.debug("real bucket " + rootBucket + " wird existiert bereits ");
             }
             if (!minioClient.bucketExists(containerBucket.getObjectHandle().getContainer())) {
-                LOGGER.info("container bucket " + containerBucket + " wird angelegt ");
+                LOGGER.debug("container bucket " + containerBucket + " wird angelegt ");
                 minioClient.makeBucket(containerBucket.getObjectHandle().getContainer());
             } else {
-                LOGGER.info("container bucket " + containerBucket + " wird existiert bereits ");
+                LOGGER.debug("container bucket " + containerBucket + " wird existiert bereits ");
             }
         } catch (Exception e) {
             throw BaseExceptionHandler.handle(e);
@@ -154,7 +154,7 @@ public class MinioExtendedStoreConnection implements ExtendedStoreConnection {
         );
         list.forEach(el -> LOGGER.debug("FOUND :" + el));
         boolean value = !list.isEmpty();
-        LOGGER.info("blobExists:" + bucketPath + " -> " + value);
+        LOGGER.debug("blobExists:" + bucketPath + " -> " + value);
         return value;
     }
 
@@ -168,7 +168,7 @@ public class MinioExtendedStoreConnection implements ExtendedStoreConnection {
             minioClient.removeObject(
                     rootBucket.append(bucketPath).getObjectHandle().getContainer(),
                     rootBucket.append(bucketPath).add(METADATA_EXT).getObjectHandle().getName());
-            LOGGER.info("removeBlob done " + bucketPath);
+            LOGGER.debug("removeBlob done " + bucketPath);
         } catch (Exception e) {
             throw BaseExceptionHandler.handle(e);
         }
@@ -200,7 +200,7 @@ public class MinioExtendedStoreConnection implements ExtendedStoreConnection {
     @Override
     public void createContainer(BucketDirectory bucketDirectory) {
         try {
-            LOGGER.info("create container " + bucketDirectory);
+            LOGGER.debug("create container " + bucketDirectory);
             if (!containerExists(bucketDirectory)) {
                 byte[] bytes = "X".getBytes();
                 minioClient.putObject(
@@ -231,7 +231,7 @@ public class MinioExtendedStoreConnection implements ExtendedStoreConnection {
                     }
             );
             boolean value = !list.isEmpty();
-            LOGGER.info("containerExists:" + bucketDirectory + " -> " + value);
+            LOGGER.debug("containerExists:" + bucketDirectory + " -> " + value);
             return value;
         } catch (Exception e) {
             throw BaseExceptionHandler.handle(e);
@@ -240,21 +240,21 @@ public class MinioExtendedStoreConnection implements ExtendedStoreConnection {
 
     @Override
     public void deleteContainer(BucketDirectory bucketDirectory) {
-        LOGGER.info("deleteContainer " + bucketDirectory);
+        LOGGER.debug("deleteContainer " + bucketDirectory);
         try {
             List<String> objectNames = new ArrayList<>();
             minioClient.listObjects(
                     rootBucket.getObjectHandle().getContainer(),
                     rootBucket.append(bucketDirectory).getObjectHandle().getName()).forEach(el -> {
                 try {
-                    // LOGGER.info("container " + bucketDirectory + " contains: " + el.get().objectName());
+                    // LOGGER.debug("container " + bucketDirectory + " contains: " + el.get().objectName());
                     objectNames.add(el.get().objectName());
                 } catch (Exception e) {
                     throw BaseExceptionHandler.handle(e);
                 }
             });
 
-            LOGGER.info("delete " + objectNames.size() + " Elements of Container " + bucketDirectory);
+            LOGGER.debug("delete " + objectNames.size() + " Elements of Container " + bucketDirectory);
             minioClient.removeObject(
                     rootBucket.getObjectHandle().getContainer(),
                     objectNames).forEach(error -> {
@@ -270,7 +270,7 @@ public class MinioExtendedStoreConnection implements ExtendedStoreConnection {
                     containerBucket.getObjectHandle().getContainer(),
                     bucketDirectory.getObjectHandle().getContainer());
 
-            LOGGER.info("eventually delete empty Container " + bucketDirectory);
+            LOGGER.debug("eventually delete empty Container " + bucketDirectory);
         } catch (Exception e) {
             throw BaseExceptionHandler.handle(e);
         }
@@ -283,7 +283,7 @@ public class MinioExtendedStoreConnection implements ExtendedStoreConnection {
             return returnList;
         }
         String container = bucketDirectory.getObjectHandle().getContainer();
-        LOGGER.info("container ist hier:" + container);
+        LOGGER.debug("container ist hier:" + container);
         String directoryname = null;
         String prefix = bucketDirectory.getObjectHandle().getName();
         if (prefix == null) {
@@ -397,12 +397,12 @@ public class MinioExtendedStoreConnection implements ExtendedStoreConnection {
                 Iterator<Result<Item>> iterator1 = minioClient.listObjects(realBucketName).iterator();
                 while (iterator1.hasNext()) {
                     Result<Item> el = iterator1.next();
-                    LOGGER.info("remove " + realBucketName + "->" + el.get().objectName());
+                    LOGGER.debug("remove " + realBucketName + "->" + el.get().objectName());
                     minioClient.removeObject(realBucketName, el.get().objectName());
                 }
                 if (!realBucketName.equals(rootBucket.getObjectHandle().getContainer()) &&
                         !realBucketName.equals(containerBucket.getObjectHandle().getContainer())) {
-                    LOGGER.info("remove bucket " + realBucketName);
+                    LOGGER.debug("remove bucket " + realBucketName);
                     minioClient.removeBucket(realBucketName);
                 }
             }
@@ -420,7 +420,7 @@ public class MinioExtendedStoreConnection implements ExtendedStoreConnection {
                 Iterator<Result<Item>> iterator1 = minioClient.listObjects(realBucketName).iterator();
                 while (iterator1.hasNext()) {
                     Result<Item> el = iterator1.next();
-                    LOGGER.info("found " + realBucketName + "->" + el.get().objectName());
+                    LOGGER.debug("found " + realBucketName + "->" + el.get().objectName());
                 }
             }
         } catch (Exception e) {
@@ -430,7 +430,7 @@ public class MinioExtendedStoreConnection implements ExtendedStoreConnection {
     // ===============================================================================================================
 
     private void putBlobStreamWithMemory(BucketPath bucketPath, PayloadStream payloadStream, int size) {
-        LOGGER.info("store to minio with known size of " + size);
+        LOGGER.debug("store to minio with known size of " + size);
         try {
             storeMetadata(bucketPath, payloadStream.getStorageMetadata());
             byte[] bytes = IOUtils.toByteArray(payloadStream.openStream());
@@ -447,7 +447,7 @@ public class MinioExtendedStoreConnection implements ExtendedStoreConnection {
 
     private void putBlobStreamWithTempFile(BucketPath bucketPath, PayloadStream payloadStream) {
         try {
-            LOGGER.info("store " + bucketPath + " to tmpfile with unknown size");
+            LOGGER.debug("store " + bucketPath + " to tmpfile with unknown size");
             InputStream is = payloadStream.openStream();
             File targetFile = File.createTempFile(MINIO_TMP_FILE_PREFIX, MINIO_TMP_FILE_SUFFIX);
             java.nio.file.Files.copy(
@@ -455,7 +455,7 @@ public class MinioExtendedStoreConnection implements ExtendedStoreConnection {
                     targetFile.toPath(),
                     StandardCopyOption.REPLACE_EXISTING);
             IOUtils.closeQuietly(is);
-            LOGGER.info(bucketPath + " with tmpfile " + targetFile.getAbsolutePath() + " written with " + targetFile.length() + " bytes -> will now be copied to minio");
+            LOGGER.debug(bucketPath + " with tmpfile " + targetFile.getAbsolutePath() + " written with " + targetFile.length() + " bytes -> will now be copied to minio");
             FileInputStream fis = new FileInputStream(targetFile);
             minioClient.putObject(
                     rootBucket.append(bucketPath).getObjectHandle().getContainer(),
@@ -464,7 +464,7 @@ public class MinioExtendedStoreConnection implements ExtendedStoreConnection {
                     targetFile.length(),
                     CONTENT_TYPE);
             IOUtils.closeQuietly(fis);
-            LOGGER.info("stored " + bucketPath + " to minio with size " + targetFile.length());
+            LOGGER.debug("stored " + bucketPath + " to minio with size " + targetFile.length());
             targetFile.delete();
         } catch (Exception e) {
             throw BaseExceptionHandler.handle(e);

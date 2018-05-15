@@ -35,11 +35,11 @@ public class GeneralMinoTest {
             BucketDirectory rootBucket = new BucketDirectory("org.adorsys.cryptoutils");
             String CONTAINER_FILE = ".container.marker.file";
 
-            LOGGER.info("list now " + rootBucket);
+            LOGGER.debug("list now " + rootBucket);
             minioClient.listObjects(rootBucket.getObjectHandle().getContainer(), ".*/" + CONTAINER_FILE, true).forEach(
                     el -> {
                         try {
-                            LOGGER.info("found " + el.get().objectName());
+                            LOGGER.debug("found " + el.get().objectName());
 
                         } catch (Exception e) {
                             throw BaseExceptionHandler.handle(e);

@@ -29,13 +29,13 @@ public class ShowProperties {
                 String ps = System.getProperty("path.separator");
                 StringTokenizer st = new StringTokenizer(value, ps);
                 if (st.hasMoreElements()) {
-                    LOGGER.info(fill(key, ".", max) + " : " + st.nextToken());
+                    LOGGER.debug(fill(key, ".", max) + " : " + st.nextToken());
                 }
                 while (st.hasMoreElements()) {
-                    LOGGER.info(fill(" ", " ", max) + " : " + st.nextToken());
+                    LOGGER.debug(fill(" ", " ", max) + " : " + st.nextToken());
                 }
             } else {
-                LOGGER.info(fill(key, ".", max) + " : " + value);
+                LOGGER.debug(fill(key, ".", max) + " : " + value);
             }
         };
     }

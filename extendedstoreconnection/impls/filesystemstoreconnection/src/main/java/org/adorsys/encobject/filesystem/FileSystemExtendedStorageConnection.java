@@ -63,7 +63,7 @@ public class FileSystemExtendedStorageConnection implements ExtendedStoreConnect
         if (!success) {
             throw new CreateFolderException("Can not create directory " + file);
         }
-        LOGGER.info("created folder " + file);
+        LOGGER.debug("created folder " + file);
     }
 
     @Override

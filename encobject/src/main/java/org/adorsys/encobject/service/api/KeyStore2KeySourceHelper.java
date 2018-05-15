@@ -44,7 +44,7 @@ public class KeyStore2KeySourceHelper {
      * @return
      */
     public static KeySourceAndKeyID getForPublicKey(KeystorePersistence keystorePersistence, KeyStoreAccess keyStoreAccess) {
-        LOGGER.info("get keysource for public key of " + keyStoreAccess.getKeyStorePath());
+        LOGGER.debug("get keysource for public key of " + keyStoreAccess.getKeyStorePath());
         KeyStore userKeystore = keystorePersistence.loadKeystore(keyStoreAccess.getKeyStorePath().getObjectHandle(), keyStoreAccess.getKeyStoreAuth().getReadStoreHandler());
 
         JWKSet exportKeys = load(userKeystore, null);
@@ -60,7 +60,7 @@ public class KeyStore2KeySourceHelper {
     }
     
     public static JWK getForPublicKeyJWK(KeystorePersistence keystorePersistence, KeyStoreAccess keyStoreAccess){
-        LOGGER.info("get keysource for public key of " + keyStoreAccess.getKeyStorePath());
+        LOGGER.debug("get keysource for public key of " + keyStoreAccess.getKeyStorePath());
         KeyStore userKeystore = keystorePersistence.loadKeystore(keyStoreAccess.getKeyStorePath().getObjectHandle(), keyStoreAccess.getKeyStoreAuth().getReadStoreHandler());
 
         JWKSet exportKeys = load(userKeystore, null);
@@ -79,7 +79,7 @@ public class KeyStore2KeySourceHelper {
      * @return
      */
     public static KeySource getForPrivateKey(KeystorePersistence keystorePersistence, KeyStoreAccess keyStoreAccess) {
-        LOGGER.info("get keysource for private key of " + keyStoreAccess.getKeyStorePath());
+        LOGGER.debug("get keysource for private key of " + keyStoreAccess.getKeyStorePath());
         KeyStore userKeystore = keystorePersistence.loadKeystore(keyStoreAccess.getKeyStorePath().getObjectHandle(), keyStoreAccess.getKeyStoreAuth().getReadStoreHandler());
         KeySource keySource = new KeyStoreBasedPrivateKeySourceImpl(userKeystore, keyStoreAccess.getKeyStoreAuth().getReadKeyPassword());
         return keySource;
@@ -92,7 +92,7 @@ public class KeyStore2KeySourceHelper {
      * @return
      */
     public static KeySourceAndKeyID getForSecretKey(KeystorePersistence keystorePersistence, KeyStoreAccess keyStoreAccess) {
-        LOGGER.info("get keysource for secret key of " + keyStoreAccess.getKeyStorePath());
+        LOGGER.debug("get keysource for secret key of " + keyStoreAccess.getKeyStorePath());
         // KeyStore laden
         KeyStore userKeystore = keystorePersistence.loadKeystore(keyStoreAccess.getKeyStorePath().getObjectHandle(), keyStoreAccess.getKeyStoreAuth().getReadStoreHandler());
         KeySource keySource = new KeyStoreBasedSecretKeySourceImpl(userKeystore, keyStoreAccess.getKeyStoreAuth().getReadKeyHandler());

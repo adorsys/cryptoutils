@@ -16,10 +16,10 @@ public class ByteRangeTest {
         int b2 = b & 0xFF;
         int i = b;
         int i2 = (int) b;
-        LOGGER.info("b:" +b) ;
-        LOGGER.info("i:" +i) ;
-        LOGGER.info("i2:" +i2) ;
-        LOGGER.info("b2:" +b2) ;
+        LOGGER.debug("b:" +b) ;
+        LOGGER.debug("i:" +i) ;
+        LOGGER.debug("i2:" +i2) ;
+        LOGGER.debug("b2:" +b2) ;
 
         // Siehe getTrickContent in EncryptedPersistenceServiceTest
     }

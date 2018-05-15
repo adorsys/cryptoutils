@@ -1,5 +1,6 @@
 package org.adorsys.encobject.service.impl.generator;
 
+import lombok.Synchronized;
 import org.adorsys.cryptoutils.exceptions.BaseException;
 import org.adorsys.encobject.domain.ReadKeyPassword;
 import org.adorsys.encobject.service.api.generator.KeyStoreCreationConfig;
@@ -17,19 +18,26 @@ import java.util.Map;
  * The creation of a key store is pretty expensive. For that, this class
  * keeps a map to REUSE Keystores!
  */
-public enum TESTKeyStoreCache {
+public enum UglyKeyStoreCache {
 
+    // Peters Art, ein Singleton zu implementieren ;-)
     INSTANCE;
 
-    private final static Logger LOGGER = LoggerFactory.getLogger(TESTKeyStoreCache.class);
-    TESTKeyStoreCache() {
-        Logger LOGGER = LoggerFactory.getLogger(TESTKeyStoreCache.class);
-        LOGGER.info("UGLY_KEYSTORE_CACHE CREATION");
+    private final static Logger LOGGER = LoggerFactory.getLogger(UglyKeyStoreCache.class);
+    private final static String UGLY_KEYSTORE_CACHE = "UGLY_KEYSTORE_CACHE";
+
+    UglyKeyStoreCache() {
+        Logger LOGGER = LoggerFactory.getLogger(UglyKeyStoreCache.class);
+        LOGGER.debug("UGLY_KEYSTORE_CACHE CREATION");
     }
 
     Map<String, KeyStore> map = new HashMap<>();
 
-    public KeyStore getCachedKeyStoreFor(KeyStoreType keyStoreType,
+    public boolean isActive() {
+        return System.getProperty(UGLY_KEYSTORE_CACHE) != null;
+    }
+
+    synchronized public KeyStore getCachedKeyStoreFor(KeyStoreType keyStoreType,
                                          String serverKeyPairAliasPrefix,
                                          ReadKeyPassword readKeyPassword,
                                          KeyStoreCreationConfig config) {
@@ -42,7 +50,7 @@ public enum TESTKeyStoreCache {
         return null;
     }
 
-    public KeyStore cacheKeyStoreFor(KeyStore keyStore,
+    synchronized public KeyStore cacheKeyStoreFor(KeyStore keyStore,
                                      KeyStoreType keyStoreType,
                                      String serverKeyPairAliasPrefix,
                                      ReadKeyPassword readKeyPassword,

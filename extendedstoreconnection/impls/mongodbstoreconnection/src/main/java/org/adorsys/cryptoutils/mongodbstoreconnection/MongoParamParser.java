@@ -16,7 +16,7 @@ public class MongoParamParser {
     private String databasename = "mongodb";
 
     public MongoParamParser(String params) {
-        LOGGER.info("parse:" + params);
+        LOGGER.debug("parse:" + params);
         try {
             if (params.length() > 0) {
                 StringTokenizer st = new StringTokenizer(params, "|");

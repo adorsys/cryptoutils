@@ -11,16 +11,21 @@ import org.adorsys.jkeygen.keystore.KeystoreBuilder;
 import org.adorsys.jkeygen.keystore.SecretKeyData;
 import org.adorsys.jkeygen.pwd.PasswordCallbackHandler;
 import org.apache.commons.lang3.RandomStringUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import javax.security.auth.callback.CallbackHandler;
 import java.security.KeyStore;
+import java.util.Date;
 import java.util.UUID;
 
 public class KeyStoreGenerator {
+    private final static Logger LOGGER = LoggerFactory.getLogger(KeyStoreGenerator.class);
+    public static final String UGLY_KEY_STORE_CACHE = "UGLY_KEY_STORE_CACHE";
     private final KeyStoreType keyStoreType;
     private final String serverKeyPairAliasPrefix;
-    private final CallbackHandler readKeyHandler;
     private final KeyStoreCreationConfig config;
+    private final ReadKeyPassword readKeyPassword;
 
     public KeyStoreGenerator(
             KeyStoreCreationConfig config,
@@ -31,14 +36,23 @@ public class KeyStoreGenerator {
         this.config = config;
         this.keyStoreType = keyStoreType;
         this.serverKeyPairAliasPrefix = serverKeyPairAliasPrefix;
-        this.readKeyHandler = new PasswordCallbackHandler(readKeyPassword.getValue().toCharArray());
+        this.readKeyPassword = readKeyPassword;
     }
 
     public KeyStore generate() {
-        String keyStoreID = serverKeyPairAliasPrefix;
+        if (System.getProperty(UGLY_KEY_STORE_CACHE) != null) {
+            KeyStore keyStore = TESTKeyStoreCache.INSTANCE.getCachedKeyStoreFor(keyStoreType, serverKeyPairAliasPrefix, readKeyPassword, config);
+            if (keyStore != null) {
+                LOGGER.info("KeyStoreGeneration (milliseconds) DURATION WAS 0");
+                return keyStore;
+            }
+        }
+        KeyStore keyStore = null;
+        Date startTime = new Date();
         try {
+            String keyStoreID = serverKeyPairAliasPrefix;
+            CallbackHandler readKeyHandler = new PasswordCallbackHandler(readKeyPassword.getValue().toCharArray());
             KeystoreBuilder keystoreBuilder = new KeystoreBuilder().withStoreType(keyStoreType);
-            PasswordCallbackHandler dummyKeyHandler = new PasswordCallbackHandler("".toCharArray());
 
             {
                 KeyPairGenerator encKeyPairGenerator = config.getEncKeyPairGenerator(keyStoreID);
@@ -76,9 +90,17 @@ public class KeyStoreGenerator {
                     keystoreBuilder = keystoreBuilder.withKeyEntry(secretKeyData);
                 }
             }
-            return keystoreBuilder.build();
+            keyStore = keystoreBuilder.build();
+            return keyStore;
         } catch (Exception e) {
             throw BaseExceptionHandler.handle(e);
+        } finally {
+            Date stopTime = new Date();
+            long duration = stopTime.getTime() - startTime.getTime();
+            LOGGER.info("KeyStoreGeneration (milliseconds) DURATION WAS " + duration);
+            if (System.getProperty(UGLY_KEY_STORE_CACHE) != null) {
+                TESTKeyStoreCache.INSTANCE.cacheKeyStoreFor(keyStore, keyStoreType, serverKeyPairAliasPrefix, readKeyPassword, config);
+            }
         }
     }
 }

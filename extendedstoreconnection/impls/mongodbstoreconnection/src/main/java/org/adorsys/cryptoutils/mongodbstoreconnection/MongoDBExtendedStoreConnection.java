@@ -85,7 +85,7 @@ public class MongoDBExtendedStoreConnection implements ExtendedStoreConnection {
 
     @Override
     public void putBlobStream(BucketPath bucketPath, PayloadStream payloadStream) {
-        LOGGER.info("start putBlobStream for " + bucketPath);
+        LOGGER.debug("start putBlobStream for " + bucketPath);
         GridFSBucket bucket = getGridFSBucket(bucketPath);
         checkBucketExists(bucket);
         String filename = bucketPath.getObjectHandle().getName();
@@ -101,12 +101,12 @@ public class MongoDBExtendedStoreConnection implements ExtendedStoreConnection {
         IOUtils.closeQuietly(is);
         deleteAllExcept(bucket, filename, objectId);
 
-        LOGGER.info("finished putBlobStream for " + bucketPath);
+        LOGGER.debug("finished putBlobStream for " + bucketPath);
     }
 
     @Override
     public PayloadStream getBlobStream(BucketPath bucketPath) {
-        LOGGER.info("start getBlobStream for " + bucketPath);
+        LOGGER.debug("start getBlobStream for " + bucketPath);
         GridFSBucket bucket = getGridFSBucket(bucketPath);
         checkBucketExists(bucket);
         String filename = bucketPath.getObjectHandle().getName();
@@ -114,7 +114,7 @@ public class MongoDBExtendedStoreConnection implements ExtendedStoreConnection {
         GridFSDownloadOptions options = new GridFSDownloadOptions();
         GridFSDownloadStream fileStream = bucket.openDownloadStream(filename, options);
         PayloadStream payloadStream = new SimplePayloadStreamImpl(getStorageMetadata(bucketPath), fileStream);
-        LOGGER.info("finished getBlobStream for " + bucketPath);
+        LOGGER.debug("finished getBlobStream for " + bucketPath);
         return payloadStream;
     }
 
@@ -135,7 +135,7 @@ public class MongoDBExtendedStoreConnection implements ExtendedStoreConnection {
 
     @Override
     public boolean blobExists(BucketPath bucketPath) {
-        LOGGER.info("start blob Exists for " + bucketPath);
+        LOGGER.debug("start blob Exists for " + bucketPath);
         GridFSBucket bucket = getGridFSBucket(bucketPath);
         if (! containerExists(bucket)) {
             return false;
@@ -143,25 +143,25 @@ public class MongoDBExtendedStoreConnection implements ExtendedStoreConnection {
         String filename = bucketPath.getObjectHandle().getName();
         List<ObjectId> ids = new ArrayList<>();
         bucket.find(Filters.eq(FILENAME_TAG, filename)).forEach((Consumer<GridFSFile>) file -> ids.add(file.getObjectId()));
-        LOGGER.info("finished blob Exists for " + bucketPath);
+        LOGGER.debug("finished blob Exists for " + bucketPath);
         return !ids.isEmpty();
     }
 
     @Override
     public void removeBlob(BucketPath bucketPath) {
-        LOGGER.info("start removeBlob for " + bucketPath);
+        LOGGER.debug("start removeBlob for " + bucketPath);
         GridFSBucket bucket = getGridFSBucket(bucketPath);
         checkBucketExists(bucket);
         String filename = bucketPath.getObjectHandle().getName();
         List<ObjectId> ids = new ArrayList<>();
         bucket.find(Filters.eq(FILENAME_TAG, filename)).forEach((Consumer<GridFSFile>) file -> ids.add(file.getObjectId()));
         ids.forEach(id -> bucket.delete(id));
-        LOGGER.info("finished removeBlob for " + bucketPath);
+        LOGGER.debug("finished removeBlob for " + bucketPath);
     }
 
     @Override
     public void removeBlobFolder(BucketDirectory bucketDirectory) {
-        LOGGER.info("start removeBlobFolder for " + bucketDirectory);
+        LOGGER.debug("start removeBlobFolder for " + bucketDirectory);
         if (bucketDirectory.getObjectHandle().getName() == null) {
             throw new StorageConnectionException("not a valid bucket directory " + bucketDirectory);
         }
@@ -170,7 +170,7 @@ public class MongoDBExtendedStoreConnection implements ExtendedStoreConnection {
         String pattern = "^" + directoryname + ".*";
         GridFSFindIterable list = bucket.find(regex(FILENAME_TAG, pattern, "i"));
         list.forEach((Consumer<GridFSFile>) file -> bucket.delete(file.getObjectId()));
-        LOGGER.info("finished removeBlobFolder for " + bucketDirectory);
+        LOGGER.debug("finished removeBlobFolder for " + bucketDirectory);
     }
 
     @Override
@@ -185,7 +185,7 @@ public class MongoDBExtendedStoreConnection implements ExtendedStoreConnection {
 
     @Override
     public void createContainer(BucketDirectory bucketDirectory) {
-        LOGGER.info("createContainer:" + bucketDirectory);
+        LOGGER.debug("createContainer:" + bucketDirectory);
         GridFSBucket bucket = GridFSBuckets.create(database, bucketDirectory.getObjectHandle().getContainer());
         InputStream is = new ByteArrayInputStream(new Date().toString().getBytes());
         try {
@@ -218,7 +218,7 @@ public class MongoDBExtendedStoreConnection implements ExtendedStoreConnection {
 
     @Override
     public List<StorageMetadata> list(BucketDirectory bucketDirectory, ListRecursiveFlag listRecursiveFlag) {
-        LOGGER.info("start list for " + bucketDirectory);
+        LOGGER.debug("start list for " + bucketDirectory);
         GridFSBucket bucket = getGridFSBucket(bucketDirectory);
         List<StorageMetadata> list = new ArrayList<>();
         if (!containerExists(bucket)) {
@@ -273,7 +273,7 @@ public class MongoDBExtendedStoreConnection implements ExtendedStoreConnection {
             list.add(storageMetadata);
         });
 
-        LOGGER.info("list(" + bucketDirectory + ")");
+        LOGGER.debug("list(" + bucketDirectory + ")");
         list.forEach(c -> LOGGER.debug(" > " + c.getName() + " " + c.getType()));
         return list;
     }
@@ -306,10 +306,10 @@ public class MongoDBExtendedStoreConnection implements ExtendedStoreConnection {
     private void deleteAllExcept(GridFSBucket bucket, String filename, ObjectId objectID) {
         List<ObjectId> idsToDelete = new ArrayList<>();
         bucket.find(Filters.eq(FILENAME_TAG, filename)).forEach((Consumer<GridFSFile>) file -> idsToDelete.add(file.getObjectId()));
-        LOGGER.info("****  number of files to delete:" + idsToDelete.size());
+        LOGGER.debug("****  number of files to delete:" + idsToDelete.size());
         idsToDelete.forEach(id -> {
             if (!id.equals(objectID)) {
-                LOGGER.info("****  delete:" + id);
+                LOGGER.debug("****  delete:" + id);
                 bucket.delete(id);
             }
         });

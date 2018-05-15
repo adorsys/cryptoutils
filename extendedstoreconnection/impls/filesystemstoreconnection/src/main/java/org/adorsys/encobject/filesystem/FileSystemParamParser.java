@@ -14,7 +14,7 @@ public class FileSystemParamParser {
     private String filesystembase = "target/filesystemstorage";
 
     public FileSystemParamParser(String params) {
-        LOGGER.info("parse:" + params);
+        LOGGER.debug("parse:" + params);
         if (params.length() > 0) {
             filesystembase = params;
         }

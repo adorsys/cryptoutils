@@ -348,11 +348,11 @@ public class ExtendedStoreConnectionTest {
         s.putBlob(filea, origPayload);
         Payload payload = s.getBlob(filea);
         Assert.assertEquals("1", new String(payload.getData()));
-        LOGGER.info("ok, inhalt nach dem ersten Schreiben ok");
+        LOGGER.debug("ok, inhalt nach dem ersten Schreiben ok");
         Payload newPayload = new SimplePayloadImpl(storageMetadata, "2".getBytes());
         s.putBlob(filea, newPayload);
         Assert.assertEquals("2", new String(newPayload.getData()));
-        LOGGER.info("ok, inhalt nach dem zweiten Schreiben auch ok");
+        LOGGER.debug("ok, inhalt nach dem zweiten Schreiben auch ok");
     }
 
     @Test

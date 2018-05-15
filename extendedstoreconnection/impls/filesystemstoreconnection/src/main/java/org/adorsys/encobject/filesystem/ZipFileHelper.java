@@ -82,7 +82,7 @@ public class ZipFileHelper {
 
             File origFile = BucketPathFileHelper.getAsFile(baseDir.append(bucketPath.add(ZIP_SUFFIX)));
             if (origFile.exists()) {
-                LOGGER.info("ACHTUNG, file existiert bereits, wird nun neu verlinkt " + bucketPath);
+                LOGGER.debug("ACHTUNG, file existiert bereits, wird nun neu verlinkt " + bucketPath);
                 FileUtils.forceDelete(origFile);
             }
             FileUtils.moveFile(tempFile, origFile);
@@ -134,7 +134,7 @@ public class ZipFileHelper {
 
             File origFile = BucketPathFileHelper.getAsFile(baseDir.append(bucketPath.add(ZIP_SUFFIX)));
             if (origFile.exists()) {
-                LOGGER.info("ACHTUNG, file existiert bereits, wird nun neu verlinkt " + bucketPath);
+                LOGGER.debug("ACHTUNG, file existiert bereits, wird nun neu verlinkt " + bucketPath);
                 FileUtils.forceDelete(origFile);
             }
             FileUtils.moveFile(tempFile, origFile);

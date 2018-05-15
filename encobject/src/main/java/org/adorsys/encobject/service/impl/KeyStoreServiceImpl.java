@@ -38,7 +38,7 @@ public class KeyStoreServiceImpl implements KeyStoreService {
                                BucketPath keyStorePath,
                                KeyStoreCreationConfig config) {
         try {
-            LOGGER.info("start create keystore " + keyStorePath);
+            LOGGER.debug("start create keystore " + keyStorePath);
             if (extendedStoreConnection.blobExists(keyStorePath)) {
                 throw new KeyStoreExistsException("creation of keytore aborted. a keystore already exists in " + keyStorePath);
             }
@@ -49,10 +49,10 @@ public class KeyStoreServiceImpl implements KeyStoreService {
             }
             // TODO, hier also statt der StoreID nun das
             String serverKeyPairAliasPrefix = HexUtil.convertBytesToHexString(keyStorePath.getObjectHandle().getName().getBytes());
-            LOGGER.info("keystoreid = " + serverKeyPairAliasPrefix);
+            LOGGER.debug("keystoreid = " + serverKeyPairAliasPrefix);
             {
                 String realKeyStoreId = new String(HexUtil.convertHexStringToBytes(serverKeyPairAliasPrefix));
-                LOGGER.info("meaning of keystoreid = " + realKeyStoreId);
+                LOGGER.debug("meaning of keystoreid = " + realKeyStoreId);
             }
             KeyStoreGenerator keyStoreGenerator = new KeyStoreGenerator(
                     config,
@@ -62,7 +62,7 @@ public class KeyStoreServiceImpl implements KeyStoreService {
             KeyStore userKeyStore = keyStoreGenerator.generate();
 
             keystorePersistence.saveKeyStore(userKeyStore, keyStoreAuth.getReadStoreHandler(), keyStorePath.getObjectHandle());
-            LOGGER.info("finished create keystore " + keyStorePath);
+            LOGGER.debug("finished create keystore " + keyStorePath);
         } catch (Exception e) {
             throw BaseExceptionHandler.handle(e);
         }
@@ -70,9 +70,9 @@ public class KeyStoreServiceImpl implements KeyStoreService {
 
     @Override
     public KeyStore loadKeystore(BucketPath keyStorePath, CallbackHandler userKeystoreHandler) {
-        LOGGER.info("start load keystore " + keyStorePath);
+        LOGGER.debug("start load keystore " + keyStorePath);
         KeyStore keyStore = keystorePersistence.loadKeystore(keyStorePath.getObjectHandle(), userKeystoreHandler);
-        LOGGER.info("finished load keystore " + keyStorePath);
+        LOGGER.debug("finished load keystore " + keyStorePath);
         return keyStore;
     }
 }

@@ -5,7 +5,7 @@
     <parent>
         <groupId>de.adorsys.cryptoutils</groupId>
         <artifactId>storeconnection-impls</artifactId>
-        <version>0.18.5</version>
+        <version>0.18.6</version>
     </parent>
 
     <modelVersion>4.0.0</modelVersion>
@@ -31,16 +31,11 @@
             <artifactId>commons-io</artifactId>
         </dependency>
 
+        <!-- logging -->
         <dependency>
-            <groupId>org.apache.logging.log4j</groupId>
-            <artifactId>log4j-slf4j-impl</artifactId>
-            <version>2.7</version>
-        </dependency>
-
-        <dependency>
-            <groupId>org.apache.logging.log4j</groupId>
-            <artifactId>log4j-core</artifactId>
-            <version>2.7</version>
+            <groupId>org.slf4j</groupId>
+            <artifactId>slf4j-api</artifactId>
+            <version>1.7.25</version>
         </dependency>
 
         <dependency>

@@ -110,8 +110,6 @@
 				<version>${project.version}</version>
 			</dependency>
 
-
-
 			<dependency>
 				<groupId>io.swagger</groupId>
 				<artifactId>swagger-annotations</artifactId>
@@ -190,6 +188,16 @@
 
 		</dependencies>
 	</dependencyManagement>
+
+    <dependencies>
+        <!-- test -->
+        <dependency>
+            <groupId>org.slf4j</groupId>
+            <artifactId>slf4j-simple</artifactId>
+            <version>1.7.25</version>
+            <scope>test</scope>
+        </dependency>
+    </dependencies>
 
 	<build>
 		<finalName>cryptoutils</finalName>

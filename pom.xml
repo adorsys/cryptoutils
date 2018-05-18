@@ -39,6 +39,7 @@
 
 		<envutils.version>0.2</envutils.version>
 		<version.swagger>1.5.5</version.swagger>
+		<slf4j-simple.version>1.7.25</slf4j-simple.version>
 	</properties>
 
 	<modules>
@@ -194,7 +195,7 @@
         <dependency>
             <groupId>org.slf4j</groupId>
             <artifactId>slf4j-simple</artifactId>
-            <version>1.7.25</version>
+            <version>${slf4j-simple.version}</version>
             <scope>test</scope>
         </dependency>
     </dependencies>

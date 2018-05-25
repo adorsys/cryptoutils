@@ -7,6 +7,7 @@ import io.minio.messages.DeleteError;
 import io.minio.messages.Item;
 import org.adorsys.cryptoutils.exceptions.BaseException;
 import org.adorsys.cryptoutils.exceptions.BaseExceptionHandler;
+import org.adorsys.cryptoutils.utils.Frame;
 import org.adorsys.encobject.complextypes.BucketDirectory;
 import org.adorsys.encobject.complextypes.BucketPath;
 import org.adorsys.encobject.complextypes.BucketPathUtil;
@@ -45,33 +46,47 @@ import java.util.Set;
 public class MinioExtendedStoreConnection implements ExtendedStoreConnection {
     private final static Logger LOGGER = LoggerFactory.getLogger(MinioExtendedStoreConnection.class);
     private final static String CONTENT_TYPE = "";
-    private final static String ROOT_BUCKET = "org.adorsys.cryptoutils";
     private final static String METADATA_EXT = ".metadata.extension.";
-    private final static String CONTAINER_BUCKET = "org.adorsys.cryptoutils.containers";
     private final static String MINIO_TMP_FILE_PREFIX = "MINIO_TMP_FILE_";
     private final static String MINIO_TMP_FILE_SUFFIX = "";
-    private final static BucketDirectory rootBucket = new BucketDirectory(ROOT_BUCKET);
-    private final static BucketDirectory containerBucket = new BucketDirectory(CONTAINER_BUCKET);
+    private final BucketDirectory rootBucket;
+    private final BucketDirectory containerBucket;
     public static final String CHARSET_NAME = "UTF-8";
+    public static final String DEFAULT_ROOT_BUCKET_NAME = "org.adorsys.cryptoutils";
 
 
     private final MinioClient minioClient;
     private final StorageMetadataFlattenerGSON storageMetadataFlattenerGSON = new StorageMetadataFlattenerGSON();
 
     public MinioExtendedStoreConnection(URL url, MinioAccessKey minioAccessKey, MinioSecretKey minioSecretKey) {
+        this(url, minioAccessKey, minioSecretKey, DEFAULT_ROOT_BUCKET_NAME);
+    }
+
+    public MinioExtendedStoreConnection(URL url, MinioAccessKey minioAccessKey, MinioSecretKey minioSecretKey, String rootBucketName) {
+        Frame frame = new Frame();
+        frame.add("USE MINIO SYSTEM");
+        frame.add("(minio has be up and running )");
+        frame.add("url: " + url.toString());
+        frame.add("accessKey: " + minioAccessKey.getValue());
+        frame.add("secretKey: " + minioSecretKey.getValue());
+        frame.add("root: " + rootBucketName);
+        LOGGER.info(frame.toString());
+
         try {
+            rootBucket = new BucketDirectory(rootBucketName);
+            containerBucket = new BucketDirectory(rootBucketName + ".containers");
             this.minioClient = new MinioClient(url, minioAccessKey.getValue(), minioSecretKey.getValue());
             if (!minioClient.bucketExists(rootBucket.getObjectHandle().getContainer())) {
                 LOGGER.debug("real bucket " + rootBucket + " wird angelegt ");
                 minioClient.makeBucket(rootBucket.getObjectHandle().getContainer());
             } else {
-                LOGGER.debug("real bucket " + rootBucket + " wird existiert bereits ");
+                LOGGER.debug("real bucket " + rootBucket + " existiert bereits ");
             }
             if (!minioClient.bucketExists(containerBucket.getObjectHandle().getContainer())) {
                 LOGGER.debug("container bucket " + containerBucket + " wird angelegt ");
                 minioClient.makeBucket(containerBucket.getObjectHandle().getContainer());
             } else {
-                LOGGER.debug("container bucket " + containerBucket + " wird existiert bereits ");
+                LOGGER.debug("container bucket " + containerBucket + " existiert bereits ");
             }
         } catch (Exception e) {
             throw BaseExceptionHandler.handle(e);

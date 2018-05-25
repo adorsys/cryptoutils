@@ -16,6 +16,7 @@ import com.mongodb.gridfs.GridFS;
 import com.mongodb.gridfs.GridFSDBFile;
 import org.adorsys.cryptoutils.exceptions.BaseException;
 import org.adorsys.cryptoutils.exceptions.BaseExceptionHandler;
+import org.adorsys.cryptoutils.utils.Frame;
 import org.adorsys.encobject.complextypes.BucketDirectory;
 import org.adorsys.encobject.complextypes.BucketPath;
 import org.adorsys.encobject.complextypes.BucketPathUtil;
@@ -63,6 +64,14 @@ public class MongoDBExtendedStoreConnection implements ExtendedStoreConnection {
     protected StorageMetadataFlattenerGSON gsonHelper = new StorageMetadataFlattenerGSON();
 
     public MongoDBExtendedStoreConnection(String host, Integer port, String databasename) {
+        Frame frame = new Frame();
+        frame.add("USE MONGO DB");
+        frame.add("mongo db has be up and running )");
+        frame.add("host: " + host);
+        frame.add("port: " + port);
+        frame.add("database: " + databasename);
+        LOGGER.info(frame.toString());
+
         MongoClient mongoClient = new MongoClient(host, port);
         database = mongoClient.getDatabase(databasename);
         databaseDeprecated = mongoClient.getDB(databasename);

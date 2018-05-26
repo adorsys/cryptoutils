@@ -14,7 +14,7 @@ import java.util.List;
 /**
  * Created by peter on 27.03.18 at 20:20.
  */
-class ReadArguments {
+public class ReadArguments {
     private final static Logger LOGGER = LoggerFactory.getLogger(ReadArguments.class);
     private static final String SYSTEM_PROPERTY_PREFIX = "-D";
     public static final String MONGO = "SC-MONGO";
@@ -26,6 +26,8 @@ class ReadArguments {
     public static final String FILESYSTEM_ARG = SYSTEM_PROPERTY_PREFIX + FILESYSTEM + "=";
 
     public ArgsAndConfig readArguments(String[] args) {
+        Arrays.stream(args).forEach(arg -> LOGGER.debug("readArguments arg:" + arg));
+
         List<String> remainingArgs = new ArrayList<>();
         StoreConnectionFactoryConfig config = new StoreConnectionFactoryConfig();
 
@@ -50,6 +52,8 @@ class ReadArguments {
     }
 
     public StoreConnectionFactoryConfig readEnvironment() {
+        LOGGER.debug("readEnvironment");
+
         try {
             StoreConnectionFactoryConfig config = new StoreConnectionFactoryConfig();
             if (System.getProperty(MONGO) != null) {

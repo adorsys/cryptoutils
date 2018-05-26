@@ -2,6 +2,7 @@ package org.adorsys.encobject.filesystem;
 
 import org.adorsys.cryptoutils.exceptions.BaseException;
 import org.adorsys.cryptoutils.exceptions.BaseExceptionHandler;
+import org.adorsys.cryptoutils.utils.Frame;
 import org.adorsys.encobject.complextypes.BucketDirectory;
 import org.adorsys.encobject.complextypes.BucketPath;
 import org.adorsys.encobject.complextypes.BucketPathUtil;
@@ -45,6 +46,11 @@ public class FileSystemExtendedStorageConnection implements ExtendedStoreConnect
     }
 
     public FileSystemExtendedStorageConnection(String basedir) {
+        Frame frame = new Frame();
+        frame.add("USE FILE SYSTEM");
+        frame.add("basedir: " + basedir);
+        LOGGER.info(frame.toString());
+
         this.baseDir = new BucketDirectory(basedir);
         this.zipFileHelper = new ZipFileHelper(this.baseDir);
     }

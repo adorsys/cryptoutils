@@ -3,7 +3,7 @@
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>de.adorsys.cryptoutils</groupId>
 	<artifactId>cryptoutils</artifactId>
-	<version>0.18.6</version>
+	<version>0.18.7</version>
 
 	<name>Cryptographic helpers for Secure Banking</name>
     <description>Utility Components for the development of secure banking modules. Components developed under this tree are released as jar.</description>
@@ -39,6 +39,7 @@
 
 		<envutils.version>0.2</envutils.version>
 		<version.swagger>1.5.5</version.swagger>
+		<slf4j-simple.version>1.7.25</slf4j-simple.version>
 	</properties>
 
 	<modules>
@@ -109,8 +110,6 @@
 				<artifactId>basetypes</artifactId>
 				<version>${project.version}</version>
 			</dependency>
-
-
 
 			<dependency>
 				<groupId>io.swagger</groupId>
@@ -190,6 +189,16 @@
 
 		</dependencies>
 	</dependencyManagement>
+
+    <dependencies>
+        <!-- test -->
+        <dependency>
+            <groupId>org.slf4j</groupId>
+            <artifactId>slf4j-simple</artifactId>
+            <version>${slf4j-simple.version}</version>
+            <scope>test</scope>
+        </dependency>
+    </dependencies>
 
 	<build>
 		<finalName>cryptoutils</finalName>

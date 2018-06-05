@@ -47,16 +47,6 @@ public class AmazonS3ClientTest {
 
     // @Test
     public void a() {
-        for (int i = 0; i < 1; i++) {
-            try {
-                LOGGER.info("try " + i);
-                b();
-            } catch (Exception e) {
-            }
-        }
-    }
-
-    public void b() {
         try {
             String AFFE = "affe";
             AWSCredentialsProvider credentialsProvider = new AWSCredentialsProvider() {
@@ -76,7 +66,7 @@ public class AmazonS3ClientTest {
             AwsClientBuilder.EndpointConfiguration endpoint = new AwsClientBuilder.EndpointConfiguration(urlString, "DE");
 
             ClientConfiguration clientConfig = new ClientConfiguration();
-            clientConfig.setSocketTimeout(500);
+            clientConfig.setSocketTimeout(1500);
             clientConfig.setProtocol(Protocol.HTTP);
             clientConfig.disableSocketProxy();
             AmazonS3 conn = AmazonS3ClientBuilder.standard()

@@ -16,6 +16,7 @@
         <module>mongodbstoreconnection</module>
         <module>miniostoreconnection</module>
         <module>storeconnectionfactory</module>
+        <module>amazons3</module>
     </modules>
 
     <packaging>pom</packaging>

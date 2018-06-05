@@ -40,6 +40,8 @@
 		<envutils.version>0.2</envutils.version>
 		<version.swagger>1.5.5</version.swagger>
 		<slf4j-simple.version>1.7.25</slf4j-simple.version>
+		<amazons3.version>1.11.339</amazons3.version>
+		<minio.version>3.0.12</minio.version>
 	</properties>
 
 	<modules>

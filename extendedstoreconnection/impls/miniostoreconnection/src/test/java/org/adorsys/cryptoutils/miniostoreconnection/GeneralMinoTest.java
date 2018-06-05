@@ -7,6 +7,7 @@ import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.io.ByteArrayInputStream;
 import java.net.URL;
 
 /**
@@ -14,9 +15,19 @@ import java.net.URL;
  */
 public class GeneralMinoTest {
     private final static Logger LOGGER = LoggerFactory.getLogger(GeneralMinoTest.class);
-    private MinioAccessKey accessKey = new MinioAccessKey("9J8I2EAWUNRVRLXIVV5B");
-    private MinioSecretKey secretKey = new MinioSecretKey("wJKOJNWiQVBkzIipinJlG8k6iCFlSlES1c9mo2jI");
-    private URL url = getUrl("http://localhost:9000");
+
+    /*
+    private MinioAccessKey accessKey = new MinioAccessKey("simpleAccessKey");
+    private MinioSecretKey secretKey = new MinioSecretKey("simpleSecretKey");
+    private URL url = getUrl("http://electronicrs818:9001");
+    private String bucketName = "org.adorsys.cryptoutils";
+    */
+
+    private MinioAccessKey accessKey = new MinioAccessKey("adorsys");
+    private MinioSecretKey secretKey = new MinioSecretKey("faizooSe0eiDodahx7ath7athah4leeS");
+    private URL url = getUrl("https://ceph-demo.cloud.adorsys.de");
+    private String bucketName = "org.adorsys.cryptoutils";
+
 
     private static URL getUrl(String url) {
         try {
@@ -32,11 +43,26 @@ public class GeneralMinoTest {
             MinioClient minioClient = new MinioClient(url, accessKey.getValue(), secretKey.getValue());
 
 
-            BucketDirectory rootBucket = new BucketDirectory("org.adorsys.cryptoutils");
-            String CONTAINER_FILE = ".container.marker.file";
+            BucketDirectory rootBucket = new BucketDirectory(bucketName);
+            if (!minioClient.bucketExists(bucketName)) {
+                LOGGER.debug("erzeuge Bucket " + bucketName);
+                minioClient.makeBucket(bucketName);
+            }
 
-            LOGGER.debug("list now " + rootBucket);
-            minioClient.listObjects(rootBucket.getObjectHandle().getContainer(), ".*/" + CONTAINER_FILE, true).forEach(
+
+
+            String FIlE_NAME = "first.txt";
+            LOGGER.info("create file " + FIlE_NAME);
+            byte[] bytes = "Du Affe".getBytes();
+            minioClient.putObject(
+                    rootBucket.appendName(FIlE_NAME).getObjectHandle().getContainer(),
+                    rootBucket.appendName(FIlE_NAME).getObjectHandle().getName(),
+                    new ByteArrayInputStream(bytes),
+                    bytes.length,
+                    "");
+
+            LOGGER.debug("list now " + bucketName);
+            minioClient.listObjects(bucketName, "", true).forEach(
                     el -> {
                         try {
                             LOGGER.debug("found " + el.get().objectName());
@@ -45,6 +71,7 @@ public class GeneralMinoTest {
                             throw BaseExceptionHandler.handle(e);
                         }
                     });
+
         } catch (Exception e) {
             throw BaseExceptionHandler.handle(e);
         }

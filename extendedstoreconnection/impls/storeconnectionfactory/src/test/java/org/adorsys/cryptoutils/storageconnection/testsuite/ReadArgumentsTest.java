@@ -3,6 +3,7 @@ package org.adorsys.cryptoutils.storageconnection.testsuite;
 import org.adorsys.cryptoutils.exceptions.BaseException;
 import org.adorsys.cryptoutils.storeconnectionfactory.ExtendedStoreConnectionFactory;
 import org.adorsys.cryptoutils.storeconnectionfactory.ReadArguments;
+import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.slf4j.Logger;
@@ -13,13 +14,35 @@ import org.slf4j.LoggerFactory;
  */
 public class ReadArgumentsTest {
     private final static Logger LOGGER = LoggerFactory.getLogger(ReadArgumentsTest.class);
+    String minio;
+    String mongo;
+    String filesys;
 
     @Before
     public void before() {
+        minio = System.getProperty("SC-MINIO");
+        mongo = System.getProperty("SC-MONGO");
+        filesys = System.getProperty("SC-FILESYSTEM");
+        System.clearProperty("SC-MINIO");
+        System.clearProperty("SC-MONGO");
+        System.clearProperty("SC-FILESYSTEM");
+    }
+
+    @After
+    public void after() {
         LOGGER.debug("----------------");
         System.clearProperty("SC-MINIO");
         System.clearProperty("SC-MONGO");
         System.clearProperty("SC-FILESYSTEM");
+        if (minio != null) {
+            System.setProperty("SC-MINIO", minio);
+        }
+        if (mongo != null) {
+            System.setProperty("SC-MONGO", mongo);
+        }
+        if (filesys != null) {
+            System.setProperty("SC-FILESYSTEM", filesys);
+        }
     }
 
     @Test

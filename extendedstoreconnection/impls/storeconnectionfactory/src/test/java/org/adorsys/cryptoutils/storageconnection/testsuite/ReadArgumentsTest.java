@@ -24,25 +24,25 @@ public class ReadArgumentsTest {
 
     @Test
     public void testEnvMinio1() {
-        System.setProperty("SC-MINIO", "http://localhost|accesskey|secretkey");
+        System.setProperty("SC-MINIO", "http://localhost,accesskey,secretkey");
         new ReadArguments().readEnvironment();
     }
 
     @Test(expected = BaseException.class)
     public void testEnvMinioWrong() {
-        System.setProperty("SC-MINIO", "http://localhost|accesskey,secretkey");
+        System.setProperty("SC-MINIO", "http://localhost accesskey,secretkey");
         new ReadArguments().readEnvironment();
     }
 
     @Test
     public void testEnvMongo1() {
-        System.setProperty("SC-MONGO", "localhost|123|mongdb");
+        System.setProperty("SC-MONGO", "localhost,123,mongdb");
         new ReadArguments().readEnvironment();
     }
 
     @Test(expected = BaseException.class)
     public void testEnvMongoWrong() {
-        System.setProperty("SC-MONGO", "localhost|123,mongdb");
+        System.setProperty("SC-MONGO", "localhost,123|mongdb");
         new ReadArguments().readEnvironment();
     }
 
@@ -67,14 +67,14 @@ public class ReadArgumentsTest {
     @Test
     public void testArgMinio1() {
         String[] args = new String[1];
-        args[0] = "-DSC-MINIO=http://localhost|accesskey|secretkey";
+        args[0] = "-DSC-MINIO=http://localhost,accesskey,secretkey";
         new ReadArguments().readArguments(args);
     }
 
     @Test
     public void testArgMongo1() {
         String[] args = new String[1];
-        args[0] = "-DSC-MONGO=localhost|123|mongdb";
+        args[0] = "-DSC-MONGO=localhost,123,mongdb";
         new ReadArguments().readArguments(args);
     }
 

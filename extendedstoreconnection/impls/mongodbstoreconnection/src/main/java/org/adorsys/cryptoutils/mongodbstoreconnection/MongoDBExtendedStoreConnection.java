@@ -84,8 +84,13 @@ public class MongoDBExtendedStoreConnection implements ExtendedStoreConnection {
 
     @Override
     public Payload getBlob(BucketPath bucketPath) {
+        return getBlob(bucketPath, null);
+    }
+
+    @Override
+    public Payload getBlob(BucketPath bucketPath, StorageMetadata storageMetadata) {
         try {
-            PayloadStream blobStream = getBlobStream(bucketPath);
+            PayloadStream blobStream = getBlobStream(bucketPath, storageMetadata);
             return new SimplePayloadImpl(blobStream.getStorageMetadata(), IOUtils.toByteArray(blobStream.openStream()));
         } catch (Exception e) {
             throw BaseExceptionHandler.handle(e);
@@ -115,14 +120,22 @@ public class MongoDBExtendedStoreConnection implements ExtendedStoreConnection {
 
     @Override
     public PayloadStream getBlobStream(BucketPath bucketPath) {
+        return getBlobStream(bucketPath, null);
+    }
+
+    @Override
+    public PayloadStream getBlobStream(BucketPath bucketPath, StorageMetadata storageMetadata) {
         LOGGER.debug("start getBlobStream for " + bucketPath);
+        if (storageMetadata == null) {
+            storageMetadata = getStorageMetadata(bucketPath);
+        }
         GridFSBucket bucket = getGridFSBucket(bucketPath);
         checkBucketExists(bucket);
         String filename = bucketPath.getObjectHandle().getName();
 
         GridFSDownloadOptions options = new GridFSDownloadOptions();
         GridFSDownloadStream fileStream = bucket.openDownloadStream(filename, options);
-        PayloadStream payloadStream = new SimplePayloadStreamImpl(getStorageMetadata(bucketPath), fileStream);
+        PayloadStream payloadStream = new SimplePayloadStreamImpl(storageMetadata, fileStream);
         LOGGER.debug("finished getBlobStream for " + bucketPath);
         return payloadStream;
     }
@@ -180,16 +193,6 @@ public class MongoDBExtendedStoreConnection implements ExtendedStoreConnection {
         GridFSFindIterable list = bucket.find(regex(FILENAME_TAG, pattern, "i"));
         list.forEach((Consumer<GridFSFile>) file -> bucket.delete(file.getObjectId()));
         LOGGER.debug("finished removeBlobFolder for " + bucketDirectory);
-    }
-
-    @Override
-    public void removeBlobs(Iterable<BucketPath> bucketPaths) {
-        bucketPaths.forEach(bucketPath -> removeBlob(bucketPath));
-    }
-
-    @Override
-    public long countBlobs(BucketDirectory bucketDirectory, ListRecursiveFlag recursive) {
-        return list(bucketDirectory, recursive).size();
     }
 
     @Override

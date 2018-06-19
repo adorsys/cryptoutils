@@ -47,7 +47,7 @@ public class ConnectToMongoTest {
     private final static Logger LOGGER = LoggerFactory.getLogger(ConnectToMongoTest.class);
     public static final String DATABASE_NAME = "testgrid";
 
-    // @Test
+    @Test
     public void createSimpleCollection() {
         LOGGER.debug("test");
 

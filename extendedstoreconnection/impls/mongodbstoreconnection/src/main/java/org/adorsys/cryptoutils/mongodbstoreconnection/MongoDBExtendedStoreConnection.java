@@ -147,6 +147,8 @@ public class MongoDBExtendedStoreConnection implements ExtendedStoreConnection {
 
     @Override
     public StorageMetadata getStorageMetadata(BucketPath bucketPath) {
+        LOGGER.debug("readmetadata " + bucketPath);
+
         GridFSBucket bucket = getGridFSBucket(bucketPath);
         checkBucketExists(bucket);
         GridFS gridFS = new GridFS(databaseDeprecated, bucketPath.getObjectHandle().getContainer());

@@ -199,6 +199,7 @@ public class ZipFileHelper {
     }
 
     public StorageMetadata readZipMetadataOnly(BucketPath bucketPath) {
+        LOGGER.debug("readmetadata " + bucketPath);
         try {
             File file = BucketPathFileHelper.getAsFile(baseDir.append(bucketPath.add(ZIP_SUFFIX)));
             if (!file.exists()) {

@@ -5,6 +5,7 @@ import org.adorsys.cryptoutils.exceptions.BaseExceptionHandler;
 import org.adorsys.encobject.complextypes.BucketPath;
 import org.adorsys.encobject.domain.Payload;
 import org.adorsys.encobject.domain.PayloadStream;
+import org.adorsys.encobject.domain.StorageMetadata;
 import org.adorsys.encobject.service.api.EncryptedPersistenceService;
 import org.adorsys.encobject.service.api.EncryptionStreamService;
 import org.adorsys.encobject.service.api.ExtendedStoreConnection;
@@ -46,8 +47,13 @@ public class EncryptedPersistenceServiceImpl implements EncryptedPersistenceServ
 
     @Override
     public Payload loadAndDecrypt(BucketPath bucketPath, KeySource keySource) {
+        return loadAndDecrypt(bucketPath, keySource, null);
+    }
+
+    @Override
+    public Payload loadAndDecrypt(BucketPath bucketPath, KeySource keySource, StorageMetadata storageMetadata) {
         try {
-            Payload payload = extendedStoreConnection.getBlob(bucketPath);
+            Payload payload = extendedStoreConnection.getBlob(bucketPath, storageMetadata);
             String encryptionType = payload.getStorageMetadata().getUserMetadata().get(ENCRYPTION_SERVICE);
             payload.getStorageMetadata().getUserMetadata().remove(ENCRYPTION_SERVICE);
             if (!encryptionType.equals(encryptionStreamService.getClass().toString())) {
@@ -78,7 +84,12 @@ public class EncryptedPersistenceServiceImpl implements EncryptedPersistenceServ
 
     @Override
     public PayloadStream loadAndDecryptStream(BucketPath bucketPath, KeySource keySource) {
-        PayloadStream payloadStream = extendedStoreConnection.getBlobStream(bucketPath);
+        return loadAndDecryptStream(bucketPath, keySource, null);
+    }
+
+    @Override
+    public PayloadStream loadAndDecryptStream(BucketPath bucketPath, KeySource keySource, StorageMetadata storageMetadata) {
+        PayloadStream payloadStream = extendedStoreConnection.getBlobStream(bucketPath, storageMetadata);
         String encryptionType = payloadStream.getStorageMetadata().getUserMetadata().get(ENCRYPTION_SERVICE);
         payloadStream.getStorageMetadata().getUserMetadata().remove(ENCRYPTION_SERVICE);
         if (!encryptionType.equals(encryptionStreamService.getClass().toString())) {

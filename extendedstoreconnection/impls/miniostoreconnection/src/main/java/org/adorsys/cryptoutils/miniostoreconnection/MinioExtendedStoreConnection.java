@@ -152,6 +152,7 @@ public class MinioExtendedStoreConnection implements ExtendedStoreConnection {
 
     @Override
     public StorageMetadata getStorageMetadata(BucketPath bucketPath) {
+        LOGGER.debug("readmetadata " + bucketPath);
         try {
             if (!blobExists(bucketPath)) {
                 throw new ResourceNotFoundException(bucketPath.toString());

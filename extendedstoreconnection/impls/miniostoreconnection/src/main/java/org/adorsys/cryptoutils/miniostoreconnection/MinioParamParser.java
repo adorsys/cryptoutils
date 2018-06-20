@@ -1,6 +1,7 @@
 package org.adorsys.cryptoutils.miniostoreconnection;
 
 import org.adorsys.cryptoutils.exceptions.BaseExceptionHandler;
+import org.adorsys.encobject.exceptions.ParamParserException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -16,11 +17,12 @@ public class MinioParamParser {
     private MinioAccessKey minioAccessKey;
     private MinioSecretKey minioSecretKey;
     private String rootBucketName;
+    private final static String DELIMITER = ",";
 
     public MinioParamParser(String params) {
         LOGGER.debug("parse:" + params);
         try {
-            StringTokenizer st = new StringTokenizer(params, "|");
+            StringTokenizer st = new StringTokenizer(params, DELIMITER);
             String urlString = st.nextToken();
             String accessKey = st.nextToken();
             String secretKey = st.nextToken();
@@ -33,7 +35,7 @@ public class MinioParamParser {
                 rootBucketName = MinioExtendedStoreConnection.DEFAULT_ROOT_BUCKET_NAME;
             }
         } catch (Exception e) {
-            throw BaseExceptionHandler.handle(e);
+            throw new ParamParserException(params, DELIMITER);
         }
     }
 

@@ -7,6 +7,7 @@ import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.io.ByteArrayInputStream;
 import java.net.URL;
 
 /**
@@ -14,9 +15,9 @@ import java.net.URL;
  */
 public class GeneralMinoTest {
     private final static Logger LOGGER = LoggerFactory.getLogger(GeneralMinoTest.class);
-    private MinioAccessKey accessKey = new MinioAccessKey("9J8I2EAWUNRVRLXIVV5B");
-    private MinioSecretKey secretKey = new MinioSecretKey("wJKOJNWiQVBkzIipinJlG8k6iCFlSlES1c9mo2jI");
-    private URL url = getUrl("http://localhost:9000");
+    private MinioAccessKey accessKey = new MinioAccessKey("simpleAccessKey");
+    private MinioSecretKey secretKey = new MinioSecretKey("simpleSecretKey");
+    private URL url = getUrl("http://ers818:9001");
 
     private static URL getUrl(String url) {
         try {
@@ -35,6 +36,20 @@ public class GeneralMinoTest {
             BucketDirectory rootBucket = new BucketDirectory("org.adorsys.cryptoutils");
             String CONTAINER_FILE = ".container.marker.file";
 
+            if (!minioClient.bucketExists(rootBucket.getObjectHandle().getContainer())) {
+                minioClient.makeBucket(rootBucket.getObjectHandle().getContainer());
+            }
+            String content = "Du Affe";
+            String contentType = "application/txt";
+            String base = "";
+            for (int i = 0; i<30; i++) {
+                base = base + "/1234567890" + "." + i;
+                String filename = base + "/file.txt";
+                LOGGER.info("bucketl ength   = " + rootBucket.getObjectHandle().getContainer().length());
+                LOGGER.info("filename length = " + filename.length());
+                LOGGER.info("totoal length   = " + (rootBucket.getObjectHandle().getContainer().length() + filename.length()));
+                minioClient.putObject(rootBucket.getObjectHandle().getContainer(), filename, new ByteArrayInputStream(content.getBytes()), contentType);
+            }
             LOGGER.debug("list now " + rootBucket);
             minioClient.listObjects(rootBucket.getObjectHandle().getContainer(), ".*/" + CONTAINER_FILE, true).forEach(
                     el -> {

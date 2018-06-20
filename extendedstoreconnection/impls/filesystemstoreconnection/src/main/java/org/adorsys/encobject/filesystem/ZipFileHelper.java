@@ -151,9 +151,11 @@ public class ZipFileHelper {
     }
 
 
-    public Payload readZip(BucketPath bucketPath) {
+    public Payload readZip(BucketPath bucketPath, StorageMetadata storageMetadata) {
         try {
-            StorageMetadata storageMetadata = readZipMetadataOnly(bucketPath);
+            if (storageMetadata == null) {
+                storageMetadata = readZipMetadataOnly(bucketPath);
+            }
 
             File file = BucketPathFileHelper.getAsFile(baseDir.append(bucketPath.add(ZIP_SUFFIX)));
             ZipInputStream zis = new ZipInputStream(new BufferedInputStream(new FileInputStream(file)));
@@ -175,9 +177,11 @@ public class ZipFileHelper {
         }
     }
 
-    public PayloadStream readZipStream(BucketPath bucketPath) {
+    public PayloadStream readZipStream(BucketPath bucketPath, StorageMetadata storageMetadata) {
         try {
-            StorageMetadata storageMetadata = readZipMetadataOnly(bucketPath);
+            if (storageMetadata == null) {
+                storageMetadata = readZipMetadataOnly(bucketPath);
+            }
 
             File file = BucketPathFileHelper.getAsFile(baseDir.append(bucketPath.add(ZIP_SUFFIX)));
             ZipInputStream zis = new ZipInputStream(new BufferedInputStream(new FileInputStream(file)));
@@ -195,6 +199,7 @@ public class ZipFileHelper {
     }
 
     public StorageMetadata readZipMetadataOnly(BucketPath bucketPath) {
+        LOGGER.debug("readmetadata " + bucketPath);
         try {
             File file = BucketPathFileHelper.getAsFile(baseDir.append(bucketPath.add(ZIP_SUFFIX)));
             if (!file.exists()) {

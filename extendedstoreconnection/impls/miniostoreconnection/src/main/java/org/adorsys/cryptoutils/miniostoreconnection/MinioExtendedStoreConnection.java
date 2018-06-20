@@ -109,6 +109,16 @@ public class MinioExtendedStoreConnection implements ExtendedStoreConnection {
     }
 
     @Override
+    public Payload getBlob(BucketPath bucketPath, StorageMetadata storageMetadata) {
+        try {
+            PayloadStream payloadStream = getBlobStream(bucketPath, storageMetadata);
+            return new SimplePayloadImpl(payloadStream.getStorageMetadata(), IOUtils.toByteArray(payloadStream.openStream()));
+        } catch (Exception e) {
+            throw BaseExceptionHandler.handle(e);
+        }
+    }
+
+    @Override
     public void putBlobStream(BucketPath bucketPath, PayloadStream payloadStream) {
         putBlobStreamWithTempFile(bucketPath, payloadStream);
         storeMetadata(bucketPath, payloadStream.getStorageMetadata());
@@ -116,8 +126,15 @@ public class MinioExtendedStoreConnection implements ExtendedStoreConnection {
 
     @Override
     public PayloadStream getBlobStream(BucketPath bucketPath) {
+        return getBlobStream(bucketPath, null);
+    }
+
+    @Override
+    public PayloadStream getBlobStream(BucketPath bucketPath, StorageMetadata storageMetadata) {
         try {
-            StorageMetadata storageMetadata = getStorageMetadata(bucketPath);
+            if (storageMetadata == null) {
+                storageMetadata = getStorageMetadata(bucketPath);
+            }
             InputStream stream = minioClient.getObject(
                     rootBucket.append(bucketPath).getObjectHandle().getContainer(),
                     rootBucket.append(bucketPath).getObjectHandle().getName());
@@ -135,6 +152,7 @@ public class MinioExtendedStoreConnection implements ExtendedStoreConnection {
 
     @Override
     public StorageMetadata getStorageMetadata(BucketPath bucketPath) {
+        LOGGER.debug("readmetadata " + bucketPath);
         try {
             if (!blobExists(bucketPath)) {
                 throw new ResourceNotFoundException(bucketPath.toString());
@@ -200,16 +218,6 @@ public class MinioExtendedStoreConnection implements ExtendedStoreConnection {
                 removeBlob(new BucketPath(metadata.getName()));
             }
         });
-    }
-
-    @Override
-    public void removeBlobs(Iterable<BucketPath> iterable) {
-        iterable.forEach(bucketPath -> removeBlob(bucketPath));
-    }
-
-    @Override
-    public long countBlobs(BucketDirectory bucketDirectory, ListRecursiveFlag listRecursiveFlag) {
-        return list(bucketDirectory, listRecursiveFlag).size();
     }
 
     @Override

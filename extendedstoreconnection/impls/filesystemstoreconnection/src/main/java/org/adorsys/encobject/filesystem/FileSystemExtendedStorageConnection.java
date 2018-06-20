@@ -160,7 +160,13 @@ public class FileSystemExtendedStorageConnection implements ExtendedStoreConnect
     @Override
     public Payload getBlob(BucketPath bucketPath) {
         checkContainerExists(bucketPath);
-        return zipFileHelper.readZip(bucketPath);
+        return zipFileHelper.readZip(bucketPath, null);
+    }
+
+    @Override
+    public Payload getBlob(BucketPath bucketPath, StorageMetadata storageMetadata) {
+        checkContainerExists(bucketPath);
+        return zipFileHelper.readZip(bucketPath, storageMetadata);
     }
 
     @Override
@@ -173,7 +179,13 @@ public class FileSystemExtendedStorageConnection implements ExtendedStoreConnect
     @Override
     public PayloadStream getBlobStream(BucketPath bucketPath) {
         checkContainerExists(bucketPath);
-        return zipFileHelper.readZipStream(bucketPath);
+        return zipFileHelper.readZipStream(bucketPath, null);
+    }
+
+    @Override
+    public PayloadStream getBlobStream(BucketPath bucketPath, StorageMetadata storageMetadata) {
+        checkContainerExists(bucketPath);
+        return zipFileHelper.readZipStream(bucketPath, storageMetadata);
     }
 
     @Override
@@ -213,18 +225,6 @@ public class FileSystemExtendedStorageConnection implements ExtendedStoreConnect
             throw new DeleteFileException("can not delete " + directory, e);
         }
 
-    }
-
-    @Override
-    public void removeBlobs(Iterable<BucketPath> bucketPaths) {
-        for (BucketPath bp : bucketPaths) {
-            removeBlob(bp);
-        }
-    }
-
-    @Override
-    public long countBlobs(BucketDirectory bucketDirectory, ListRecursiveFlag recursive) {
-        return countBlobs(listContent(bucketDirectory, recursive), 0);
     }
 
     /* ===========================================================================================================

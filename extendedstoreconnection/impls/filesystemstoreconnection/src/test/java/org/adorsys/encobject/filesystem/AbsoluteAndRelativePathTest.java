@@ -45,6 +45,9 @@ public class AbsoluteAndRelativePathTest {
             String tmpdir = System.getProperty("java.io.tmpdir");
             LOGGER.debug("tempdir " + tmpdir);
             Assert.assertTrue(tmpdir.startsWith(BucketPath.BUCKET_SEPARATOR));
+            if (!tmpdir.endsWith(BucketPath.BUCKET_SEPARATOR)) {
+                tmpdir = tmpdir + BucketPath.BUCKET_SEPARATOR;
+            }
             Assert.assertTrue(tmpdir.endsWith(BucketPath.BUCKET_SEPARATOR));
             String absoluteDir = tmpdir + "target" + BucketPath.BUCKET_SEPARATOR + UUID.randomUUID().toString();
             LOGGER.debug("my absolute path " + absoluteDir);

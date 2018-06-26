@@ -56,7 +56,7 @@ public class ExtendedStoreConnectionTest {
     @Test
     public void createManyBuckets() {
         ExtendedStoreConnection c = ExtendedStoreConnectionFactory.get();
-        for (int i = 0; i<200; i++) {
+        for (int i = 0; i < 200; i++) {
             BucketDirectory bd = new BucketDirectory("bucket" + i);
             containers.add(bd);
             c.createContainer(bd);
@@ -106,23 +106,40 @@ public class ExtendedStoreConnectionTest {
      */
     @Test
     public void testList3() {
+        int REPEATS=10;
+        int i = 0;
+
+        while (i > 0) {
+            LOGGER.info("wait for visualVM profiler " + i);
+            try {
+                Thread.currentThread().sleep(1000);
+            } catch (Exception e) {
+            }
+            i--;
+        }
         BucketDirectory bd = new BucketDirectory("affe3");
         s.createContainer(bd);
         containers.add(bd);
-        BucketPath file = bd.appendName("file1");
+        for (int j=0; j<REPEATS; j++) {
+            BucketPath file = bd.appendName("file1");
+            if (s.blobExists(file)) {
+                s.removeBlob(file);
+            }
 
-        byte[] filecontent = "Inhalt".getBytes();
-        s.putBlob(file, filecontent);
+            byte[] filecontent = "Inhalt".getBytes();
+            s.putBlob(file, filecontent);
 
-        List<StorageMetadata> content = s.list(bd, ListRecursiveFlag.FALSE);
-        List<BucketPath> files = getFilesOnly(content);
-        Assert.assertEquals(1, files.size());
-        List<BucketDirectory> dirs = getDirectoresOnly(content);
-        Assert.assertEquals(1, dirs.size());
+            List<StorageMetadata> content = s.list(bd, ListRecursiveFlag.FALSE);
+            List<BucketPath> files = getFilesOnly(content);
+            Assert.assertEquals(1, files.size());
+            List<BucketDirectory> dirs = getDirectoresOnly(content);
+            Assert.assertEquals(1, dirs.size());
+            Assert.assertTrue(s.blobExists(file));
 
-        Payload loadedPayload = s.getBlob(file);
-        byte[] loadedFileContent = loadedPayload.getData();
-        Assert.assertTrue(Arrays.equals(filecontent, loadedFileContent));
+            Payload loadedPayload = s.getBlob(file);
+            byte[] loadedFileContent = loadedPayload.getData();
+            Assert.assertTrue(Arrays.equals(filecontent, loadedFileContent));
+        }
     }
 
     /**
@@ -360,7 +377,7 @@ public class ExtendedStoreConnectionTest {
         cleanDB();
 
         List<BucketDirectory> mybuckets = new ArrayList<>();
-        for (int i = 0; i<10; i++) {
+        for (int i = 0; i < 10; i++) {
             BucketDirectory bd = new BucketDirectory("bucket" + i);
             mybuckets.add(bd);
             containers.add(bd);
@@ -382,6 +399,7 @@ public class ExtendedStoreConnectionTest {
         Assert.assertTrue(mybuckets.containsAll(foundBuckets));
 
     }
+
     @Test
     public void testFileExists() {
         BucketDirectory bd = new BucketDirectory("bucketfileexiststest");

@@ -37,13 +37,15 @@ public class ZipFileHelper {
     protected static final String ZIP_CONTENT_BINARY = "Content.binary";
     protected static final String ZIP_SUFFIX = ".zip";
     public static final String CHARSET_NAME = "UTF-8";
+    private boolean absolutePath = false;
 
 
     protected BucketDirectory baseDir;
     protected StorageMetadataFlattenerGSON gsonHelper = new StorageMetadataFlattenerGSON();
 
-    public ZipFileHelper(BucketDirectory bucketDirectory) {
+    public ZipFileHelper(BucketDirectory bucketDirectory, boolean absolutePath) {
         this.baseDir = bucketDirectory;
+        this.absolutePath = absolutePath;
     }
 
     /**
@@ -58,7 +60,7 @@ public class ZipFileHelper {
             byte[] content = payload.getData();
 
             createDirectoryIfNecessary(bucketPath);
-            File tempFile = BucketPathFileHelper.getAsFile(baseDir.append(bucketPath.add(ZIP_SUFFIX).add("." + UUID.randomUUID().toString())));
+            File tempFile = BucketPathFileHelper.getAsFile(baseDir.append(bucketPath.add(ZIP_SUFFIX).add("." + UUID.randomUUID().toString())), absolutePath);
             if (tempFile.exists()) {
                 throw new StorageConnectionException("Temporary File exists. This must not happen." + tempFile);
             }
@@ -80,7 +82,7 @@ public class ZipFileHelper {
             zos.close();
             zos = null;
 
-            File origFile = BucketPathFileHelper.getAsFile(baseDir.append(bucketPath.add(ZIP_SUFFIX)));
+            File origFile = BucketPathFileHelper.getAsFile(baseDir.append(bucketPath.add(ZIP_SUFFIX)), absolutePath);
             if (origFile.exists()) {
                 LOGGER.debug("ACHTUNG, file existiert bereits, wird nun neu verlinkt " + bucketPath);
                 FileUtils.forceDelete(origFile);
@@ -111,7 +113,7 @@ public class ZipFileHelper {
             LOGGER.debug("WRITE metadata string " + jsonString + "with " + CHARSET_NAME);
 
             createDirectoryIfNecessary(bucketPath);
-            File tempFile = BucketPathFileHelper.getAsFile(baseDir.append(bucketPath.add(ZIP_SUFFIX).add("." + UUID.randomUUID().toString())));
+            File tempFile = BucketPathFileHelper.getAsFile(baseDir.append(bucketPath.add(ZIP_SUFFIX).add("." + UUID.randomUUID().toString())), absolutePath);
             if (tempFile.exists()) {
                 throw new StorageConnectionException("Temporary File exists. This must not happen." + tempFile);
             }
@@ -132,7 +134,7 @@ public class ZipFileHelper {
             IOUtils.closeQuietly(zos);
             zos = null;
 
-            File origFile = BucketPathFileHelper.getAsFile(baseDir.append(bucketPath.add(ZIP_SUFFIX)));
+            File origFile = BucketPathFileHelper.getAsFile(baseDir.append(bucketPath.add(ZIP_SUFFIX)), absolutePath);
             if (origFile.exists()) {
                 LOGGER.debug("ACHTUNG, file existiert bereits, wird nun neu verlinkt " + bucketPath);
                 FileUtils.forceDelete(origFile);
@@ -157,7 +159,7 @@ public class ZipFileHelper {
                 storageMetadata = readZipMetadataOnly(bucketPath);
             }
 
-            File file = BucketPathFileHelper.getAsFile(baseDir.append(bucketPath.add(ZIP_SUFFIX)));
+            File file = BucketPathFileHelper.getAsFile(baseDir.append(bucketPath.add(ZIP_SUFFIX)), absolutePath);
             ZipInputStream zis = new ZipInputStream(new BufferedInputStream(new FileInputStream(file)));
             ZipEntry entry;
             byte[] data = null;
@@ -183,7 +185,7 @@ public class ZipFileHelper {
                 storageMetadata = readZipMetadataOnly(bucketPath);
             }
 
-            File file = BucketPathFileHelper.getAsFile(baseDir.append(bucketPath.add(ZIP_SUFFIX)));
+            File file = BucketPathFileHelper.getAsFile(baseDir.append(bucketPath.add(ZIP_SUFFIX)), absolutePath);
             ZipInputStream zis = new ZipInputStream(new BufferedInputStream(new FileInputStream(file)));
             ZipEntry entry;
             while ((entry = zis.getNextEntry()) != null) {
@@ -201,7 +203,7 @@ public class ZipFileHelper {
     public StorageMetadata readZipMetadataOnly(BucketPath bucketPath) {
         LOGGER.debug("readmetadata " + bucketPath);
         try {
-            File file = BucketPathFileHelper.getAsFile(baseDir.append(bucketPath.add(ZIP_SUFFIX)));
+            File file = BucketPathFileHelper.getAsFile(baseDir.append(bucketPath.add(ZIP_SUFFIX)), absolutePath);
             if (!file.exists()) {
                 throw new FileSystemException("File does not exist" + bucketPath);
             }
@@ -228,7 +230,7 @@ public class ZipFileHelper {
     }
 
     private void createDirectoryIfNecessary(BucketPath bucketPath) {
-        File dir = BucketPathFileHelper.getAsFile(baseDir.append(bucketPath).getBucketDirectory());
+        File dir = BucketPathFileHelper.getAsFile(baseDir.append(bucketPath).getBucketDirectory(), absolutePath);
         if (dir.exists()) {
             return;
         }

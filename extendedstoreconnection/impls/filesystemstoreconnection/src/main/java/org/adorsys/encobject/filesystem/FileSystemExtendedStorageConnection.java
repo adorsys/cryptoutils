@@ -40,19 +40,33 @@ public class FileSystemExtendedStorageConnection implements ExtendedStoreConnect
     private final static Logger LOGGER = LoggerFactory.getLogger(FileSystemExtendedStorageConnection.class);
     protected final BucketDirectory baseDir;
     private ZipFileHelper zipFileHelper;
+    private boolean absolutePath = false;
 
     public FileSystemExtendedStorageConnection() {
         this(new FileSystemParamParser("").getFilesystembase());
     }
 
     public FileSystemExtendedStorageConnection(String basedir) {
-        Frame frame = new Frame();
-        frame.add("USE FILE SYSTEM");
-        frame.add("basedir: " + basedir);
-        LOGGER.info(frame.toString());
+        try {
+            this.baseDir = new BucketDirectory(basedir);
+            this.absolutePath = (basedir.startsWith(BucketPath.BUCKET_SEPARATOR));
+            Frame frame = new Frame();
+            frame.add("USE FILE SYSTEM");
+            if (!absolutePath) {
+                String currentDir = new File(".").getCanonicalPath();
+                String absoluteDirectory = basedir;
+                absoluteDirectory = currentDir + absoluteDirectory;
+                frame.add("basedir     : " + basedir);
+                frame.add("absolutedir : " + absoluteDirectory);
+            } else {
+                frame.add("absolutedir : " + basedir);
+            }
+            LOGGER.info(frame.toString());
 
-        this.baseDir = new BucketDirectory(basedir);
-        this.zipFileHelper = new ZipFileHelper(this.baseDir);
+            this.zipFileHelper = new ZipFileHelper(this.baseDir, absolutePath);
+        } catch (Exception e) {
+            throw BaseExceptionHandler.handle(e);
+        }
     }
 
 
@@ -60,7 +74,7 @@ public class FileSystemExtendedStorageConnection implements ExtendedStoreConnect
     public void createContainer(BucketDirectory bucketDirectory) {
         String containerOnly = bucketDirectory.getObjectHandle().getContainer();
 
-        File file = BucketPathFileHelper.getAsFile(baseDir.appendDirectory(containerOnly));
+        File file = BucketPathFileHelper.getAsFile(baseDir.appendDirectory(containerOnly), absolutePath);
         if (file.isDirectory()) {
             LOGGER.debug("directory already exists:" + file);
             return;
@@ -74,7 +88,7 @@ public class FileSystemExtendedStorageConnection implements ExtendedStoreConnect
 
     @Override
     public boolean containerExists(BucketDirectory bucketDirectory) {
-        File file = BucketPathFileHelper.getAsFile(baseDir.appendDirectory(bucketDirectory.getObjectHandle().getContainer()));
+        File file = BucketPathFileHelper.getAsFile(baseDir.appendDirectory(bucketDirectory.getObjectHandle().getContainer()), absolutePath);
         if (file.isDirectory()) {
             LOGGER.debug("directory exists:" + file);
             return true;
@@ -89,7 +103,7 @@ public class FileSystemExtendedStorageConnection implements ExtendedStoreConnect
 
     @Override
     public void deleteContainer(BucketDirectory container) {
-        File file = BucketPathFileHelper.getAsFile(baseDir.appendDirectory(container.getObjectHandle().getContainer()));
+        File file = BucketPathFileHelper.getAsFile(baseDir.appendDirectory(container.getObjectHandle().getContainer()), absolutePath);
         if (!containerExists(container)) {
             LOGGER.debug("directory does not exist. so nothing to delete:" + file);
             return;
@@ -109,7 +123,7 @@ public class FileSystemExtendedStorageConnection implements ExtendedStoreConnect
 
     @Override
     public boolean blobExists(BucketPath bucketPath) {
-        File file = BucketPathFileHelper.getAsFile(baseDir.append(bucketPath.add(ZipFileHelper.ZIP_SUFFIX)));
+        File file = BucketPathFileHelper.getAsFile(baseDir.append(bucketPath.add(ZipFileHelper.ZIP_SUFFIX)), absolutePath);
         if (file.isDirectory()) {
             throw new FileIsFolderException("file " + file);
         }
@@ -124,7 +138,7 @@ public class FileSystemExtendedStorageConnection implements ExtendedStoreConnect
     @Override
     public List<StorageMetadata> list(BucketDirectory bucketDirectory, ListRecursiveFlag listRecursiveFlag) {
         List<StorageMetadata> result = new ArrayList<>();
-        File file = BucketPathFileHelper.getAsFile(baseDir.append(bucketDirectory));
+        File file = BucketPathFileHelper.getAsFile(baseDir.append(bucketDirectory), absolutePath);
         if (!file.exists()) {
             return result;
         }
@@ -140,7 +154,7 @@ public class FileSystemExtendedStorageConnection implements ExtendedStoreConnect
     public List<BucketDirectory> listAllBuckets() {
         try {
             List<BucketDirectory> list = new ArrayList<>();
-            String[] dirs = BucketPathFileHelper.getAsFile(baseDir).list(new DirectoryFilenameFilter());
+            String[] dirs = BucketPathFileHelper.getAsFile(baseDir, absolutePath).list(new DirectoryFilenameFilter());
             if (dirs == null) {
                 return list;
             }
@@ -197,7 +211,7 @@ public class FileSystemExtendedStorageConnection implements ExtendedStoreConnect
     @Override
     public void removeBlob(BucketPath bucketPath) {
         checkContainerExists(bucketPath);
-        File file = BucketPathFileHelper.getAsFile(baseDir.append(bucketPath).add(ZipFileHelper.ZIP_SUFFIX));
+        File file = BucketPathFileHelper.getAsFile(baseDir.append(bucketPath).add(ZipFileHelper.ZIP_SUFFIX), absolutePath);
         if (!file.exists()) {
             return;
         }
@@ -214,7 +228,7 @@ public class FileSystemExtendedStorageConnection implements ExtendedStoreConnect
         if (bucketDirectory.getObjectHandle().getName() == null) {
             throw new StorageConnectionException("not a valid bucket directory " + bucketDirectory);
         }
-        File directory = BucketPathFileHelper.getAsFile(baseDir.append(bucketDirectory));
+        File directory = BucketPathFileHelper.getAsFile(baseDir.append(bucketDirectory), absolutePath);
         LOGGER.debug("remove directory " + directory.getAbsolutePath());
         if (!directory.exists()) {
             return;
@@ -263,7 +277,7 @@ public class FileSystemExtendedStorageConnection implements ExtendedStoreConnect
 
 
     private void files2content(DirectoryContent content, BucketDirectory bucketDirectory, Collection<File> files) {
-        String knownPrefix = BucketPathFileHelper.getAsFile(baseDir.append(bucketDirectory)).getAbsolutePath();
+        String knownPrefix = BucketPathFileHelper.getAsFile(baseDir.append(bucketDirectory), absolutePath).getAbsolutePath();
 
         for (File f : files) {
             String name = f.getName();
@@ -278,7 +292,7 @@ public class FileSystemExtendedStorageConnection implements ExtendedStoreConnect
 
 
     private void dirs2content(DirectoryContent content, BucketDirectory bucketDirectory, String[] dirs) {
-        String knownPrefix = BucketPathFileHelper.getAsFile(baseDir.append(bucketDirectory)).getAbsolutePath();
+        String knownPrefix = BucketPathFileHelper.getAsFile(baseDir.append(bucketDirectory), absolutePath).getAbsolutePath();
 
         for (String dir : dirs) {
             content.getSubidrs().add(new DirectoryContent(bucketDirectory.appendDirectory(dir)));
@@ -306,7 +320,7 @@ public class FileSystemExtendedStorageConnection implements ExtendedStoreConnect
     }
 
     private DirectoryContent listContent(BucketDirectory bucketDirectory, ListRecursiveFlag listRecursiveFlag) {
-        File file = BucketPathFileHelper.getAsFile(baseDir.append(bucketDirectory));
+        File file = BucketPathFileHelper.getAsFile(baseDir.append(bucketDirectory), absolutePath);
         try {
             DirectoryContent content = new DirectoryContent(bucketDirectory);
             if (file.isFile()) {

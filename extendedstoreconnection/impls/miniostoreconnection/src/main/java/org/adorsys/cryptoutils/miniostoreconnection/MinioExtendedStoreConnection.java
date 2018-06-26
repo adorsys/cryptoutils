@@ -175,20 +175,15 @@ public class MinioExtendedStoreConnection implements ExtendedStoreConnection {
     public boolean blobExists(BucketPath bucketPath) {
         LOGGER.debug("blobExists:" + bucketPath);
         String container = rootBucket.append(bucketPath).getObjectHandle().getContainer();
-        String prefix = rootBucket.append(bucketPath).getObjectHandle().getName();
-        ArrayList<String> list = new ArrayList<>();
-        minioClient.listObjects(container, prefix, false).forEach(item -> {
-                    try {
-                        list.add(item.get().objectName());
-                    } catch (Exception e) {
-                        throw BaseExceptionHandler.handle(e);
-                    }
-                }
-        );
-        list.forEach(el -> LOGGER.debug("FOUND :" + el));
-        boolean value = !list.isEmpty();
-        LOGGER.debug("blobExists:" + bucketPath + " -> " + value);
-        return value;
+        String name = rootBucket.append(bucketPath).getObjectHandle().getName();
+        try {
+            minioClient.statObject(container, name);
+            return true;
+        } catch (Exception e) {
+            // Exceptions for controll flow is not allowed. actually.
+            // but the list method is too slow
+        }
+        return false;
     }
 
     @Override

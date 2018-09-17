@@ -32,14 +32,13 @@
 
 
     <properties>
-		<maven.compiler.source>1.8</maven.compiler.source>
-		<maven.compiler.target>1.8</maven.compiler.target>
 		<failOnMissingWebXml>false</failOnMissingWebXml>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 
 		<envutils.version>0.2</envutils.version>
 		<version.swagger>1.5.5</version.swagger>
 		<slf4j-simple.version>1.7.25</slf4j-simple.version>
+	    <amazon.aws.version>1.11.409</amazon.aws.version>
 	</properties>
 
 	<modules>
@@ -116,7 +115,7 @@
 				<artifactId>swagger-annotations</artifactId>
 				<version>${version.swagger}</version>
 			</dependency>
-			
+
 			<dependency>
 				<groupId>com.nimbusds</groupId>
 				<artifactId>nimbus-jose-jwt</artifactId>
@@ -134,7 +133,7 @@
 				<artifactId>commons-io</artifactId>
 				<version>2.5</version>
 			</dependency>
-			
+
 			<!-- https://mvnrepository.com/artifact/org.bouncycastle/bcpkix-jdk15on -->
 			<dependency>
 			    <groupId>org.bouncycastle</groupId>

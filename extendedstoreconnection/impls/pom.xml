@@ -12,6 +12,7 @@
     <artifactId>storeconnection-impls</artifactId>
 
     <modules>
+        <module>cephstoreconnection</module>
         <module>filesystemstoreconnection</module>
         <module>mongodbstoreconnection</module>
         <module>miniostoreconnection</module>

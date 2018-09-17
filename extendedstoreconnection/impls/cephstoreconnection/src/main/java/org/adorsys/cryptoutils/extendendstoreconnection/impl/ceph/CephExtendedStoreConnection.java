@@ -134,9 +134,9 @@ public class CephExtendedStoreConnection implements ExtendedStoreConnection {
 
     @Override
     public StorageMetadata getStorageMetadata(BucketPath bucketPath) {
-        GetObjectMetadataRequest getObjectMetadataRequest = new GetObjectMetadataRequest();
-        getObjectMetadataRequest.setBucketName(bucketPath.getObjectHandle().getContainer());
-        getObjectMetadataRequest.setKey(bucketPath.getObjectHandle().getName());
+        GetObjectMetadataRequest getObjectMetadataRequest = new GetObjectMetadataRequest(
+                bucketPath.getObjectHandle().getContainer(),
+                bucketPath.getObjectHandle().getName());
         ObjectMetadata objectMetadata = connection.getObjectMetadata(getObjectMetadataRequest);
         StorageMetadata storageMetadata = new SimpleStorageMetadataImpl();
         objectMetadata.getUserMetadata().keySet().forEach(key -> storageMetadata.getUserMetadata().put(key, objectMetadata.getUserMetadata().get(key)));

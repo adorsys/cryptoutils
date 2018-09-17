@@ -26,9 +26,12 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.ByteArrayInputStream;
+import java.io.File;
+import java.io.FileInputStream;
 import java.io.InputStream;
 import java.net.URL;
 import java.nio.charset.Charset;
+import java.nio.file.StandardCopyOption;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -39,6 +42,9 @@ import java.util.Map;
 public class CephExtendedStoreConnection implements ExtendedStoreConnection {
     private final static Logger LOGGER = LoggerFactory.getLogger(CephExtendedStoreConnection.class);
     private AmazonS3 connection = null;
+    private final static String CEPH_TMP_FILE_PREFIX = "CEPH_TMP_FILE_";
+    private final static String CEPH_TMP_FILE_SUFFIX = "";
+
 
     public CephExtendedStoreConnection(URL url, AmazonS3AccessKey accessKey, AmazonS3SecretKey secretKey) {
 
@@ -74,7 +80,7 @@ public class CephExtendedStoreConnection implements ExtendedStoreConnection {
     public void putBlob(BucketPath bucketPath, Payload payload) {
         InputStream inputStream = new ByteArrayInputStream(payload.getData());
         PayloadStream payloadStream = new SimplePayloadStreamImpl(payload.getStorageMetadata(), inputStream);
-        putBlobStream(bucketPath, payloadStream);
+        putBlobStreamWithMemory(bucketPath, payloadStream, payload.getData().length);
     }
 
     @Override
@@ -97,15 +103,7 @@ public class CephExtendedStoreConnection implements ExtendedStoreConnection {
 
     @Override
     public void putBlobStream(BucketPath bucketPath, PayloadStream payloadStream) {
-        LOGGER.debug("write stream for " + bucketPath);
-        ObjectMetadata objectMetadata = new ObjectMetadata();
-        Map<String, String> userMetaData = new HashMap<>();
-        payloadStream.getStorageMetadata().getUserMetadata().keySet().forEach(key -> userMetaData.put(key, payloadStream.getStorageMetadata().getUserMetadata().get(key)));
-        objectMetadata.setUserMetadata(userMetaData);
-        PutObjectRequest putObjectRequest = new PutObjectRequest(bucketPath.getObjectHandle().getContainer(), bucketPath.getObjectHandle().getName(), payloadStream.openStream(), objectMetadata);
-        PutObjectResult putObjectResult = connection.putObject(putObjectRequest);
-        LOGGER.debug("write of stream for :" + bucketPath + " -> " + putObjectResult.toString());
-
+        putBlobStreamWithTempFile(bucketPath, payloadStream);
     }
 
     @Override
@@ -145,12 +143,21 @@ public class CephExtendedStoreConnection implements ExtendedStoreConnection {
 
     @Override
     public boolean blobExists(BucketPath bucketPath) {
-        return false;
+        // actually using exceptions is not nice, but it seems to be much faster than any list command
+        try {
+            connection.getObjectMetadata(bucketPath.getObjectHandle().getContainer(), bucketPath.getObjectHandle().getName());
+            LOGGER.debug("blob exists " + bucketPath + " TRUE");
+            return true;
+        } catch (Exception e) {
+            LOGGER.debug("blob exists " + bucketPath + " FALSE");
+            return false;
+        }
     }
 
     @Override
     public void removeBlob(BucketPath bucketPath) {
-
+            LOGGER.debug("removeBlob " + bucketPath);
+            connection.deleteObject(bucketPath.getObjectHandle().getContainer(), bucketPath.getObjectHandle().getName());
     }
 
     @Override
@@ -175,6 +182,8 @@ public class CephExtendedStoreConnection implements ExtendedStoreConnection {
 
     @Override
     public List<StorageMetadata> list(BucketDirectory bucketDirectory, ListRecursiveFlag listRecursiveFlag) {
+
+
         return null;
     }
 
@@ -182,4 +191,52 @@ public class CephExtendedStoreConnection implements ExtendedStoreConnection {
     public List<BucketDirectory> listAllBuckets() {
         return null;
     }
+
+    // ==========================================================================
+
+    private void putBlobStreamWithMemory(BucketPath bucketPath, PayloadStream payloadStream, int size) {
+        try {
+            byte[] bytes = IOUtils.toByteArray(payloadStream.openStream());
+            LOGGER.debug("write stream for " + bucketPath + " with known length " + size);
+            ObjectMetadata objectMetadata = new ObjectMetadata();
+            objectMetadata.setContentLength(size);
+            Map<String, String> userMetaData = new HashMap<>();
+            payloadStream.getStorageMetadata().getUserMetadata().keySet().forEach(key -> userMetaData.put(key, payloadStream.getStorageMetadata().getUserMetadata().get(key)));
+            objectMetadata.setUserMetadata(userMetaData);
+            PutObjectRequest putObjectRequest = new PutObjectRequest(bucketPath.getObjectHandle().getContainer(), bucketPath.getObjectHandle().getName(), payloadStream.openStream(), objectMetadata);
+            PutObjectResult putObjectResult = connection.putObject(putObjectRequest);
+            LOGGER.debug("write of stream for :" + bucketPath + " -> " + putObjectResult.toString());
+        } catch (Exception e) {
+            throw BaseExceptionHandler.handle(e);
+        }
+    }
+
+    private void putBlobStreamWithTempFile(BucketPath bucketPath, PayloadStream payloadStream) {
+        try {
+            LOGGER.debug("store " + bucketPath + " to tmpfile with unknown size");
+            InputStream is = payloadStream.openStream();
+            File targetFile = File.createTempFile(CEPH_TMP_FILE_PREFIX, CEPH_TMP_FILE_SUFFIX);
+            java.nio.file.Files.copy(
+                    is,
+                    targetFile.toPath(),
+                    StandardCopyOption.REPLACE_EXISTING);
+            IOUtils.closeQuietly(is);
+            LOGGER.debug(bucketPath + " with tmpfile " + targetFile.getAbsolutePath() + " written with " + targetFile.length() + " bytes -> will now be copied to minio");
+            FileInputStream fis = new FileInputStream(targetFile);
+
+            ObjectMetadata objectMetadata = new ObjectMetadata();
+            objectMetadata.setContentLength(targetFile.length());
+            Map<String, String> userMetaData = new HashMap<>();
+            payloadStream.getStorageMetadata().getUserMetadata().keySet().forEach(key -> userMetaData.put(key, payloadStream.getStorageMetadata().getUserMetadata().get(key)));
+            objectMetadata.setUserMetadata(userMetaData);
+            PutObjectRequest putObjectRequest = new PutObjectRequest(bucketPath.getObjectHandle().getContainer(), bucketPath.getObjectHandle().getName(), payloadStream.openStream(), objectMetadata);
+            PutObjectResult putObjectResult = connection.putObject(putObjectRequest);
+            IOUtils.closeQuietly(fis);
+            LOGGER.debug("stored " + bucketPath + " to minio with size " + targetFile.length());
+            targetFile.delete();
+        } catch (Exception e) {
+            throw BaseExceptionHandler.handle(e);
+        }
+    }
+
 }

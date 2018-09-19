@@ -25,6 +25,10 @@
             <groupId>de.adorsys.cryptoutils</groupId>
             <artifactId>miniostoreconnection</artifactId>
         </dependency>
+        <dependency>
+            <groupId>de.adorsys.cryptoutils</groupId>
+            <artifactId>cephstoreconnection</artifactId>
+        </dependency>
 
         <dependency>
             <groupId>commons-io</groupId>
@@ -42,6 +46,11 @@
             <groupId>junit</groupId>
             <artifactId>junit</artifactId>
             <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>de.adorsys.cryptoutils</groupId>
+            <artifactId>cephstoreconnection</artifactId>
+            <version>0.18.10-SNAPSHOT</version>
         </dependency>
 
     </dependencies>

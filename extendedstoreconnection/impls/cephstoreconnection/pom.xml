@@ -78,6 +78,12 @@
             <artifactId>aws-java-sdk-s3</artifactId>
             <version>${amazon.aws.version}</version>
         </dependency>
+        <dependency>
+            <groupId>org.apache.commons</groupId>
+            <artifactId>commons-lang3</artifactId>
+            <version>${apache.commons.lang3.version}</version>
+        </dependency>
+
 
 
         <dependency>

@@ -46,6 +46,7 @@
         <version.swagger>1.5.5</version.swagger>
         <slf4j-simple.version>1.7.25</slf4j-simple.version>
         <amazon.aws.version>1.11.409</amazon.aws.version>
+        <apache.commons.lang3.version>3.8</apache.commons.lang3.version>
     </properties>
 
     <modules>

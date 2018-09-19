@@ -13,15 +13,18 @@ import org.adorsys.cryptoutils.exceptions.BaseException;
 import org.adorsys.cryptoutils.exceptions.BaseExceptionHandler;
 import org.adorsys.encobject.complextypes.BucketDirectory;
 import org.adorsys.encobject.complextypes.BucketPath;
+import org.adorsys.encobject.complextypes.BucketPathUtil;
 import org.adorsys.encobject.domain.Payload;
 import org.adorsys.encobject.domain.PayloadStream;
 import org.adorsys.encobject.domain.StorageMetadata;
+import org.adorsys.encobject.domain.StorageType;
 import org.adorsys.encobject.service.api.ExtendedStoreConnection;
 import org.adorsys.encobject.service.impl.SimplePayloadImpl;
 import org.adorsys.encobject.service.impl.SimplePayloadStreamImpl;
 import org.adorsys.encobject.service.impl.SimpleStorageMetadataImpl;
 import org.adorsys.encobject.types.ListRecursiveFlag;
 import org.apache.commons.io.IOUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -32,9 +35,7 @@ import java.io.InputStream;
 import java.net.URL;
 import java.nio.charset.Charset;
 import java.nio.file.StandardCopyOption;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 /**
  * Created by peter on 17.09.18.
@@ -136,7 +137,9 @@ public class CephExtendedStoreConnection implements ExtendedStoreConnection {
                 bucketPath.getObjectHandle().getContainer(),
                 bucketPath.getObjectHandle().getName());
         ObjectMetadata objectMetadata = connection.getObjectMetadata(getObjectMetadataRequest);
-        StorageMetadata storageMetadata = new SimpleStorageMetadataImpl();
+        SimpleStorageMetadataImpl storageMetadata = new SimpleStorageMetadataImpl();
+        storageMetadata.setType(StorageType.BLOB);
+        storageMetadata.setName(BucketPathUtil.getAsString(bucketPath));
         objectMetadata.getUserMetadata().keySet().forEach(key -> storageMetadata.getUserMetadata().put(key, objectMetadata.getUserMetadata().get(key)));
         return storageMetadata;
     }
@@ -162,41 +165,135 @@ public class CephExtendedStoreConnection implements ExtendedStoreConnection {
 
     @Override
     public void removeBlobFolder(BucketDirectory bucketDirectory) {
+        LOGGER.debug("remove blob folder " + bucketDirectory);
+        List<StorageMetadata> storageMetadatas = list(bucketDirectory, ListRecursiveFlag.TRUE);
+        storageMetadatas.forEach(metadata -> {
+            BucketPath fullName = new BucketPath(metadata.getName());
+            connection.deleteObject(fullName.getObjectHandle().getContainer(),
+                    fullName.getObjectHandle().getName());
+        });
+
 
     }
 
     @Override
     public void createContainer(BucketDirectory bucketDirectory) {
-
+        LOGGER.debug("create bucket " + bucketDirectory);
+        connection.createBucket(bucketDirectory.getObjectHandle().getContainer());
     }
 
     @Override
     public boolean containerExists(BucketDirectory bucketDirectory) {
-        return false;
+        LOGGER.debug("container exsits " + bucketDirectory);
+        return connection.doesBucketExistV2(bucketDirectory.getObjectHandle().getContainer());
     }
 
     @Override
     public void deleteContainer(BucketDirectory bucketDirectory) {
-
+        LOGGER.debug("delete bucket " + bucketDirectory);
+        List<StorageMetadata> list = list(bucketDirectory, ListRecursiveFlag.TRUE);
+        for (StorageMetadata storageMetadata : list) {
+            if (storageMetadata.getType().equals(StorageType.BLOB)) {
+                removeBlob(new BucketPath(storageMetadata.getName()));
+            }
+        }
+        connection.deleteBucket(bucketDirectory.getObjectHandle().getContainer());
     }
 
     @Override
     public List<StorageMetadata> list(BucketDirectory bucketDirectory, ListRecursiveFlag listRecursiveFlag) {
+        LOGGER.debug("list " + bucketDirectory);
+        List<StorageMetadata> returnList = new ArrayList<>();
+        if (!containerExists(bucketDirectory)) {
+            LOGGER.debug("return empty list for " + bucketDirectory);
+            return returnList;
+        }
 
+        String container = bucketDirectory.getObjectHandle().getContainer();
+        String prefix = bucketDirectory.getObjectHandle().getName();
+        if (prefix == null) {
+            prefix = BucketPath.BUCKET_SEPARATOR;
+        }
 
-        return null;
+        LOGGER.debug("search in " + container + " with prefix " + prefix + " " + listRecursiveFlag);
+        String searchKey = prefix.substring(1); // remove first slash
+        ObjectListing ol = connection.listObjects(container, searchKey);
+        final List<String> keys = new ArrayList<>();
+        ol.getObjectSummaries().forEach(el -> keys.add(BucketPath.BUCKET_SEPARATOR + el.getKey()));
+        returnList = filter(container, prefix, keys, listRecursiveFlag);
+        returnList.forEach(el -> LOGGER.debug("return for " + bucketDirectory + " :" + el.getName() + " type " + el.getType()));
+        return returnList;
     }
 
     @Override
     public List<BucketDirectory> listAllBuckets() {
-        return null;
+        LOGGER.debug("list all buckets");
+        List<BucketDirectory> buckets = new ArrayList<>();
+        connection.listBuckets().forEach(bucket -> buckets.add(new BucketDirectory(bucket.getName())));
+        return buckets;
     }
 
     // ==========================================================================
 
+    List<StorageMetadata> filter(String container, String prefix, final List<String> keys, ListRecursiveFlag recursive) {
+        List<StorageMetadata> result = new ArrayList<>();
+        Set<String> dirs = new HashSet<>();
+
+        int numberOfDelimitersOfPrefix = StringUtils.countMatches(prefix, BucketPath.BUCKET_SEPARATOR);
+        if (prefix.length() > BucketPath.BUCKET_SEPARATOR.length()) {
+            numberOfDelimitersOfPrefix++;
+        }
+        int numberOfDelimitersExpected = numberOfDelimitersOfPrefix;
+
+        keys.forEach(key -> {
+            if (recursive.equals(ListRecursiveFlag.TRUE)) {
+                result.add(getStorageMetadata(new BucketPath(container, key)));
+            } else {
+                int numberOfDelimitersOfKey = StringUtils.countMatches(key, BucketPath.BUCKET_SEPARATOR);
+                if (numberOfDelimitersOfKey == numberOfDelimitersExpected) {
+                    result.add(getStorageMetadata(new BucketPath(container, key)));
+                }
+            }
+
+            if (recursive.equals(ListRecursiveFlag.TRUE)) {
+                int lastDelimiter = key.lastIndexOf(BucketPath.BUCKET_SEPARATOR);
+                String dir = key.substring(0, lastDelimiter);
+                if (dir.length() == 0) {
+                    dir = BucketPath.BUCKET_SEPARATOR;
+                }
+                dirs.add(dir);
+            } else {
+                int numberOfDelimitersOfKey = StringUtils.countMatches(key, BucketPath.BUCKET_SEPARATOR);
+                if (numberOfDelimitersOfKey == numberOfDelimitersExpected + 1) {
+                    int lastDelimiter = key.lastIndexOf(BucketPath.BUCKET_SEPARATOR);
+                    String dir = key.substring(0, lastDelimiter);
+                    dirs.add(dir);
+                }
+            }
+
+        });
+        {
+            if (dirs.isEmpty() && result.isEmpty()) {
+                if (blobExists(new BucketPath(container, prefix))) {
+                    // die If-Abfrage dient dem Spezialfall, dass jemand einen BucketPath als BucketDirectory uebergeben hat.
+                    // Dann gibt es diesen bereits als file, dann muss eine leere Liste zurücgeben werden
+                    return new ArrayList<>();
+                }
+            }
+            // Auch wenn kein file gefunden wurde, das Verzeichnis exisitiert und ist daher zurückzugeben
+            dirs.add(prefix);
+        }
+
+        for (String dir : dirs) {
+            SimpleStorageMetadataImpl storageMetadata = new SimpleStorageMetadataImpl();
+            storageMetadata.setType(StorageType.FOLDER);
+            storageMetadata.setName(BucketPathUtil.getAsString(new BucketDirectory(new BucketPath(container, dir))));
+            result.add(storageMetadata);
+        }
+        return result;
+    }
     private void putBlobStreamWithMemory(BucketPath bucketPath, PayloadStream payloadStream, int size) {
         try {
-            byte[] bytes = IOUtils.toByteArray(payloadStream.openStream());
             LOGGER.debug("write stream for " + bucketPath + " with known length " + size);
             ObjectMetadata objectMetadata = new ObjectMetadata();
             objectMetadata.setContentLength(size);

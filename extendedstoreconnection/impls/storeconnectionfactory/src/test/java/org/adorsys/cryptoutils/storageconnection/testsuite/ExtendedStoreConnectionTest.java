@@ -409,6 +409,23 @@ public class ExtendedStoreConnectionTest {
     }
 
     @Test
+    public void createBucketWithDotAndTestFileForDir() {
+        LOGGER.debug("START TEST " + new RuntimeException("").getStackTrace()[0].getMethodName());
+        BucketPath bucketPath = new BucketPath("user1/.hidden/Affenfile.txt");
+        byte[] documentContent = "Affe".getBytes();
+        s.createContainer(bucketPath.getBucketDirectory());
+        s.putBlob(bucketPath, new SimplePayloadImpl(new SimpleStorageMetadataImpl(), documentContent));
+        BucketDirectory bd = new BucketDirectory(bucketPath);
+        LOGGER.debug("bucketPath " + bucketPath);
+        LOGGER.debug("pathAsDir  " + bd);
+        List<StorageMetadata> list = s.list(bd, ListRecursiveFlag.TRUE);
+        list.forEach(el -> LOGGER.debug("found " + el.getName() + " " + el.getType()));
+        Assert.assertTrue(list.isEmpty());
+    }
+
+
+
+    @Test
     public void createManyBuckets() {
         ExtendedStoreConnection c = ExtendedStoreConnectionFactory.get();
         for (int i = 0; i < 200; i++) {

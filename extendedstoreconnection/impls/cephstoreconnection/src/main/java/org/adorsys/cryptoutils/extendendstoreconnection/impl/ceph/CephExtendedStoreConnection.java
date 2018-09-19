@@ -221,6 +221,12 @@ public class CephExtendedStoreConnection implements ExtendedStoreConnection {
             prefix = BucketPath.BUCKET_SEPARATOR + prefix;
         }
 
+        if (blobExists(new BucketPath(container, prefix))) {
+            // diese If-Abfrage dient dem Spezialfall, dass jemand einen BucketPath als BucketDirectory uebergeben hat.
+            // Dann gibt es diesen bereits als file, dann muss eine leere Liste zurücgeben werden
+            return new ArrayList<>();
+        }
+
         LOGGER.debug("search in " + container + " with prefix " + prefix + " " + listRecursiveFlag);
         String searchKey = prefix.substring(1); // remove first slash
         ObjectListing ol = connection.listObjects(container, searchKey);
@@ -279,13 +285,6 @@ public class CephExtendedStoreConnection implements ExtendedStoreConnection {
 
         });
         {
-            if (dirs.isEmpty() && result.isEmpty()) {
-                if (blobExists(new BucketPath(container, prefix))) {
-                    // die If-Abfrage dient dem Spezialfall, dass jemand einen BucketPath als BucketDirectory uebergeben hat.
-                    // Dann gibt es diesen bereits als file, dann muss eine leere Liste zurücgeben werden
-                    return new ArrayList<>();
-                }
-            }
             // Auch wenn kein file gefunden wurde, das Verzeichnis exisitiert und ist daher zurückzugeben
             dirs.add(prefix);
         }

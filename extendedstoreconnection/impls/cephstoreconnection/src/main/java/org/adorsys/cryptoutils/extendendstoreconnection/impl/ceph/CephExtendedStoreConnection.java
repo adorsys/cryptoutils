@@ -11,6 +11,7 @@ import com.amazonaws.services.s3.AmazonS3ClientBuilder;
 import com.amazonaws.services.s3.model.*;
 import org.adorsys.cryptoutils.exceptions.BaseException;
 import org.adorsys.cryptoutils.exceptions.BaseExceptionHandler;
+import org.adorsys.cryptoutils.utils.HexUtil;
 import org.adorsys.encobject.complextypes.BucketDirectory;
 import org.adorsys.encobject.complextypes.BucketPath;
 import org.adorsys.encobject.complextypes.BucketPathUtil;
@@ -19,6 +20,7 @@ import org.adorsys.encobject.domain.PayloadStream;
 import org.adorsys.encobject.domain.StorageMetadata;
 import org.adorsys.encobject.domain.StorageType;
 import org.adorsys.encobject.exceptions.StorageConnectionException;
+import org.adorsys.encobject.filesystem.StorageMetadataFlattenerGSON;
 import org.adorsys.encobject.service.api.ExtendedStoreConnection;
 import org.adorsys.encobject.service.impl.SimplePayloadImpl;
 import org.adorsys.encobject.service.impl.SimplePayloadStreamImpl;
@@ -34,7 +36,6 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.InputStream;
 import java.net.URL;
-import java.nio.charset.Charset;
 import java.nio.file.StandardCopyOption;
 import java.util.*;
 
@@ -46,7 +47,8 @@ public class CephExtendedStoreConnection implements ExtendedStoreConnection {
     private AmazonS3 connection = null;
     private final static String CEPH_TMP_FILE_PREFIX = "CEPH_TMP_FILE_";
     private final static String CEPH_TMP_FILE_SUFFIX = "";
-
+    private static final String STORAGE_METADATA_KEY = "StorageMetadata";
+    private StorageMetadataFlattenerGSON gsonHelper = new StorageMetadataFlattenerGSON();
 
     public CephExtendedStoreConnection(URL url, AmazonS3AccessKey accessKey, AmazonS3SecretKey secretKey) {
 
@@ -120,8 +122,7 @@ public class CephExtendedStoreConnection implements ExtendedStoreConnection {
         GetObjectRequest getObjectRequest = new GetObjectRequest(bucketPath.getObjectHandle().getContainer(), bucketPath.getObjectHandle().getName());
         S3Object object = connection.getObject(getObjectRequest);
         S3ObjectInputStream objectContent = object.getObjectContent();
-        StorageMetadata storageMetadata2 = new SimpleStorageMetadataImpl();
-        object.getObjectMetadata().getUserMetadata().keySet().forEach(key -> storageMetadata2.getUserMetadata().put(key, object.getObjectMetadata().getUserMetadata().get(key)));
+        StorageMetadata storageMetadata2 = getStorageMetadataFromObjectdata(object.getObjectMetadata(), bucketPath);
         PayloadStream payloadStream = new SimplePayloadStreamImpl(storageMetadata2, objectContent);
         LOGGER.debug("read ok for " + bucketPath);
         return payloadStream;
@@ -134,14 +135,12 @@ public class CephExtendedStoreConnection implements ExtendedStoreConnection {
 
     @Override
     public StorageMetadata getStorageMetadata(BucketPath bucketPath) {
+        LOGGER.debug("getStorageMetaData for " + bucketPath);
         GetObjectMetadataRequest getObjectMetadataRequest = new GetObjectMetadataRequest(
                 bucketPath.getObjectHandle().getContainer(),
                 bucketPath.getObjectHandle().getName());
         ObjectMetadata objectMetadata = connection.getObjectMetadata(getObjectMetadataRequest);
-        SimpleStorageMetadataImpl storageMetadata = new SimpleStorageMetadataImpl();
-        storageMetadata.setType(StorageType.BLOB);
-        storageMetadata.setName(BucketPathUtil.getAsString(bucketPath));
-        objectMetadata.getUserMetadata().keySet().forEach(key -> storageMetadata.getUserMetadata().put(key, objectMetadata.getUserMetadata().get(key)));
+        StorageMetadata storageMetadata = getStorageMetadataFromObjectdata(objectMetadata, bucketPath);
         return storageMetadata;
     }
 
@@ -160,8 +159,8 @@ public class CephExtendedStoreConnection implements ExtendedStoreConnection {
 
     @Override
     public void removeBlob(BucketPath bucketPath) {
-            LOGGER.debug("removeBlob " + bucketPath);
-            connection.deleteObject(bucketPath.getObjectHandle().getContainer(), bucketPath.getObjectHandle().getName());
+        LOGGER.debug("removeBlob " + bucketPath);
+        connection.deleteObject(bucketPath.getObjectHandle().getContainer(), bucketPath.getObjectHandle().getName());
     }
 
     @Override
@@ -299,14 +298,16 @@ public class CephExtendedStoreConnection implements ExtendedStoreConnection {
         }
         return result;
     }
+
     private void putBlobStreamWithMemory(BucketPath bucketPath, PayloadStream payloadStream, int size) {
         try {
             LOGGER.debug("write stream for " + bucketPath + " with known length " + size);
-            ObjectMetadata objectMetadata = new ObjectMetadata();
+            SimpleStorageMetadataImpl storageMetadata = new SimpleStorageMetadataImpl(payloadStream.getStorageMetadata());
+            storageMetadata.setName(BucketPathUtil.getAsString(bucketPath));
+            storageMetadata.setType(StorageType.BLOB);
+            ObjectMetadata objectMetadata = geteObjectMetadataFromStorageMetadata(storageMetadata);
             objectMetadata.setContentLength(size);
-            Map<String, String> userMetaData = new HashMap<>();
-            payloadStream.getStorageMetadata().getUserMetadata().keySet().forEach(key -> userMetaData.put(key, payloadStream.getStorageMetadata().getUserMetadata().get(key)));
-            objectMetadata.setUserMetadata(userMetaData);
+
             PutObjectRequest putObjectRequest = new PutObjectRequest(bucketPath.getObjectHandle().getContainer(), bucketPath.getObjectHandle().getName(), payloadStream.openStream(), objectMetadata);
             PutObjectResult putObjectResult = connection.putObject(putObjectRequest);
             // LOGGER.debug("write of stream for :" + bucketPath + " -> " + putObjectResult.toString());
@@ -328,11 +329,12 @@ public class CephExtendedStoreConnection implements ExtendedStoreConnection {
             LOGGER.debug(bucketPath + " with tmpfile " + targetFile.getAbsolutePath() + " written with " + targetFile.length() + " bytes -> will now be copied to minio");
             FileInputStream fis = new FileInputStream(targetFile);
 
-            ObjectMetadata objectMetadata = new ObjectMetadata();
+            SimpleStorageMetadataImpl storageMetadata = new SimpleStorageMetadataImpl(payloadStream.getStorageMetadata());
+            storageMetadata.setName(BucketPathUtil.getAsString(bucketPath));
+            storageMetadata.setType(StorageType.BLOB);
+            ObjectMetadata objectMetadata = geteObjectMetadataFromStorageMetadata(storageMetadata);
             objectMetadata.setContentLength(targetFile.length());
-            Map<String, String> userMetaData = new HashMap<>();
-            payloadStream.getStorageMetadata().getUserMetadata().keySet().forEach(key -> userMetaData.put(key, payloadStream.getStorageMetadata().getUserMetadata().get(key)));
-            objectMetadata.setUserMetadata(userMetaData);
+
             PutObjectRequest putObjectRequest = new PutObjectRequest(bucketPath.getObjectHandle().getContainer(), bucketPath.getObjectHandle().getName(), payloadStream.openStream(), objectMetadata);
             PutObjectResult putObjectResult = connection.putObject(putObjectRequest);
             IOUtils.closeQuietly(fis);
@@ -342,5 +344,37 @@ public class CephExtendedStoreConnection implements ExtendedStoreConnection {
             throw BaseExceptionHandler.handle(e);
         }
     }
+
+    // Ceph speichert die UserMetaData im header des Requests. Dadurch sind sie
+    // - caseInsensitive
+    // - längenbeschränkt
+    // Abgesehen davon gibt es auch Probleme den JsonsString direkt zu übernehmen. Die Excpion beim Put verrät allerdings nicht,
+    // was für Probleme das sind. Daher werden die Metadaten in einen lesbaren ByteCode umgewandelt.
+    private ObjectMetadata geteObjectMetadataFromStorageMetadata(SimpleStorageMetadataImpl storageMetadata) {
+        String metadataAsString = gsonHelper.toJson(storageMetadata);
+        String metadataAsHexString = HexUtil.convertBytesToHexString(metadataAsString.getBytes());
+        Map<String, String> userMetaData = new HashMap<>();
+        userMetaData.put(STORAGE_METADATA_KEY, metadataAsHexString);
+        ObjectMetadata objectMetadata = new ObjectMetadata();
+        objectMetadata.setUserMetadata(userMetaData);
+        return objectMetadata;
+    }
+
+    private StorageMetadata getStorageMetadataFromObjectdata(ObjectMetadata objectMetadata, BucketPath bucketPath) {
+        String metadataAsHexString = objectMetadata.getUserMetadata().get(STORAGE_METADATA_KEY);
+        if (metadataAsHexString == null) {
+            throw new BaseException("UserData do not contain mandatory " + STORAGE_METADATA_KEY + " for " + bucketPath);
+/*
+            LOGGER.error ("UserData do not contain mandatory " + STORAGE_METADATA_KEY + " for " + bucketPath);
+            SimpleStorageMetadataImpl storageMetadata = new SimpleStorageMetadataImpl();
+            storageMetadata.setType(StorageType.BLOB);
+            storageMetadata.setName(BucketPathUtil.getAsString(bucketPath));
+            return storageMetadata;
+            */
+        }
+        String metadataAsString = new String(HexUtil.convertHexStringToBytes(metadataAsHexString));
+        return gsonHelper.fromJson(metadataAsString);
+    }
+
 
 }

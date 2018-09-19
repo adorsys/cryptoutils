@@ -408,7 +408,7 @@ public class ExtendedStoreConnectionTest {
         Assert.assertFalse(s.blobExists(filea));
     }
 
-    // @Test
+    @Test
     public void createManyBuckets() {
         ExtendedStoreConnection c = ExtendedStoreConnectionFactory.get();
         for (int i = 0; i < 200; i++) {

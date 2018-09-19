@@ -335,7 +335,7 @@ public class CephExtendedStoreConnection implements ExtendedStoreConnection {
             ObjectMetadata objectMetadata = geteObjectMetadataFromStorageMetadata(storageMetadata);
             objectMetadata.setContentLength(targetFile.length());
 
-            PutObjectRequest putObjectRequest = new PutObjectRequest(bucketPath.getObjectHandle().getContainer(), bucketPath.getObjectHandle().getName(), payloadStream.openStream(), objectMetadata);
+            PutObjectRequest putObjectRequest = new PutObjectRequest(bucketPath.getObjectHandle().getContainer(), bucketPath.getObjectHandle().getName(), fis, objectMetadata);
             PutObjectResult putObjectResult = connection.putObject(putObjectRequest);
             IOUtils.closeQuietly(fis);
             LOGGER.debug("stored " + bucketPath + " to minio with size " + targetFile.length());

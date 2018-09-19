@@ -197,7 +197,7 @@ public class ExtendedStoreConnectionTest {
 
 
         content = s.list(bd, ListRecursiveFlag.FALSE);
-        LOGGER.debug("plain " + content.toString());
+        LOGGER.debug("plain " + show(content));
         Assert.assertEquals("Anzahl Einträge", 4, content.size());
         {
             List<BucketPath> files = getFilesOnly(content);

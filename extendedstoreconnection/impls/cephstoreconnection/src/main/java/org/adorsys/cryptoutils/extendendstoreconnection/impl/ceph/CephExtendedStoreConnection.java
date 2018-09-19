@@ -18,6 +18,7 @@ import org.adorsys.encobject.domain.Payload;
 import org.adorsys.encobject.domain.PayloadStream;
 import org.adorsys.encobject.domain.StorageMetadata;
 import org.adorsys.encobject.domain.StorageType;
+import org.adorsys.encobject.exceptions.StorageConnectionException;
 import org.adorsys.encobject.service.api.ExtendedStoreConnection;
 import org.adorsys.encobject.service.impl.SimplePayloadImpl;
 import org.adorsys.encobject.service.impl.SimplePayloadStreamImpl;
@@ -166,14 +167,18 @@ public class CephExtendedStoreConnection implements ExtendedStoreConnection {
     @Override
     public void removeBlobFolder(BucketDirectory bucketDirectory) {
         LOGGER.debug("remove blob folder " + bucketDirectory);
+        if (bucketDirectory.getObjectHandle().getName() == null) {
+            throw new StorageConnectionException("not a valid bucket directory " + bucketDirectory);
+        }
+
         List<StorageMetadata> storageMetadatas = list(bucketDirectory, ListRecursiveFlag.TRUE);
         storageMetadatas.forEach(metadata -> {
-            BucketPath fullName = new BucketPath(metadata.getName());
-            connection.deleteObject(fullName.getObjectHandle().getContainer(),
-                    fullName.getObjectHandle().getName());
+            if (metadata.getType().equals(StorageType.BLOB)) {
+                BucketPath fullName = new BucketPath(metadata.getName());
+                connection.deleteObject(fullName.getObjectHandle().getContainer(),
+                        fullName.getObjectHandle().getName());
+            }
         });
-
-
     }
 
     @Override
@@ -213,6 +218,8 @@ public class CephExtendedStoreConnection implements ExtendedStoreConnection {
         String prefix = bucketDirectory.getObjectHandle().getName();
         if (prefix == null) {
             prefix = BucketPath.BUCKET_SEPARATOR;
+        } else {
+            prefix = BucketPath.BUCKET_SEPARATOR + prefix;
         }
 
         LOGGER.debug("search in " + container + " with prefix " + prefix + " " + listRecursiveFlag);
@@ -302,7 +309,7 @@ public class CephExtendedStoreConnection implements ExtendedStoreConnection {
             objectMetadata.setUserMetadata(userMetaData);
             PutObjectRequest putObjectRequest = new PutObjectRequest(bucketPath.getObjectHandle().getContainer(), bucketPath.getObjectHandle().getName(), payloadStream.openStream(), objectMetadata);
             PutObjectResult putObjectResult = connection.putObject(putObjectRequest);
-            LOGGER.debug("write of stream for :" + bucketPath + " -> " + putObjectResult.toString());
+            // LOGGER.debug("write of stream for :" + bucketPath + " -> " + putObjectResult.toString());
         } catch (Exception e) {
             throw BaseExceptionHandler.handle(e);
         }

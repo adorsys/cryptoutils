@@ -135,6 +135,7 @@ public class CephExtendedStoreConnection implements ExtendedStoreConnection {
 
     @Override
     public StorageMetadata getStorageMetadata(BucketPath bucketPath) {
+        LOGGER.debug("readmetadata " + bucketPath); // Dies LogZeile ist fuer den JUNIT-Tests StorageMetaDataTest
         LOGGER.debug("getStorageMetaData for " + bucketPath);
         GetObjectMetadataRequest getObjectMetadataRequest = new GetObjectMetadataRequest(
                 bucketPath.getObjectHandle().getContainer(),
@@ -195,6 +196,9 @@ public class CephExtendedStoreConnection implements ExtendedStoreConnection {
     @Override
     public void deleteContainer(BucketDirectory bucketDirectory) {
         LOGGER.debug("delete bucket " + bucketDirectory);
+        if (!containerExists(bucketDirectory)) {
+            return;
+        }
         List<StorageMetadata> list = list(bucketDirectory, ListRecursiveFlag.TRUE);
         for (StorageMetadata storageMetadata : list) {
             if (storageMetadata.getType().equals(StorageType.BLOB)) {
@@ -325,7 +329,7 @@ public class CephExtendedStoreConnection implements ExtendedStoreConnection {
                     targetFile.toPath(),
                     StandardCopyOption.REPLACE_EXISTING);
             IOUtils.closeQuietly(is);
-            LOGGER.debug(bucketPath + " with tmpfile " + targetFile.getAbsolutePath() + " written with " + targetFile.length() + " bytes -> will now be copied to minio");
+            LOGGER.debug(bucketPath + " with tmpfile " + targetFile.getAbsolutePath() + " written with " + targetFile.length() + " bytes -> will now be copied to ceph");
             FileInputStream fis = new FileInputStream(targetFile);
 
             SimpleStorageMetadataImpl storageMetadata = new SimpleStorageMetadataImpl(payloadStream.getStorageMetadata());
@@ -337,7 +341,7 @@ public class CephExtendedStoreConnection implements ExtendedStoreConnection {
             PutObjectRequest putObjectRequest = new PutObjectRequest(bucketPath.getObjectHandle().getContainer(), bucketPath.getObjectHandle().getName(), fis, objectMetadata);
             PutObjectResult putObjectResult = connection.putObject(putObjectRequest);
             IOUtils.closeQuietly(fis);
-            LOGGER.debug("stored " + bucketPath + " to minio with size " + targetFile.length());
+            LOGGER.debug("stored " + bucketPath + " to ceph with size " + targetFile.length());
             targetFile.delete();
         } catch (Exception e) {
             throw BaseExceptionHandler.handle(e);

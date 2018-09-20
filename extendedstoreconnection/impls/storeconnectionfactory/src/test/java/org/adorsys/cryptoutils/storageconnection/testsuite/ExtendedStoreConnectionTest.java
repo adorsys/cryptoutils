@@ -423,6 +423,16 @@ public class ExtendedStoreConnectionTest {
         Assert.assertTrue(list.isEmpty());
     }
 
+    @Test
+    public void destroyBucketTwice() {
+        LOGGER.debug("START TEST " + new RuntimeException("").getStackTrace()[0].getMethodName());
+        BucketPath bucketPath = new BucketPath("user1/.hidden/Affenfile.txt");
+        byte[] documentContent = "Affe".getBytes();
+        s.createContainer(bucketPath.getBucketDirectory());
+        s.putBlob(bucketPath, new SimplePayloadImpl(new SimpleStorageMetadataImpl(), documentContent));
+        s.deleteContainer(bucketPath.getBucketDirectory());
+        s.deleteContainer(bucketPath.getBucketDirectory());
+    }
 
 
     @Test

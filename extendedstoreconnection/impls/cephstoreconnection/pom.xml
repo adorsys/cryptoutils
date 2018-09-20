@@ -5,7 +5,7 @@
     <parent>
         <groupId>de.adorsys.cryptoutils</groupId>
         <artifactId>storeconnection-impls</artifactId>
-        <version>0.20.0</version>
+        <version>0.20.1-SNAPSHOT</version>
     </parent>
 
     <artifactId>cephstoreconnection</artifactId>

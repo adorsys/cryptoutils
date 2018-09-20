@@ -44,6 +44,7 @@ import java.util.*;
  */
 public class CephExtendedStoreConnection implements ExtendedStoreConnection {
     private final static Logger LOGGER = LoggerFactory.getLogger(CephExtendedStoreConnection.class);
+    private static final Logger SPECIAL_LOGGER = LoggerFactory.getLogger("SPECIAL_LOGGER");
     private AmazonS3 connection = null;
     private final static String CEPH_TMP_FILE_PREFIX = "CEPH_TMP_FILE_";
     private final static String CEPH_TMP_FILE_SUFFIX = "";
@@ -68,7 +69,7 @@ public class CephExtendedStoreConnection implements ExtendedStoreConnection {
         AwsClientBuilder.EndpointConfiguration endpoint = new AwsClientBuilder.EndpointConfiguration(url.toString(), "US");
 
         ClientConfiguration clientConfig = new ClientConfiguration();
-        clientConfig.setSocketTimeout(500);
+        // clientConfig.setSocketTimeout(10000);
         clientConfig.setProtocol(Protocol.HTTP);
         clientConfig.disableSocketProxy();
         connection = AmazonS3ClientBuilder.standard()
@@ -135,8 +136,8 @@ public class CephExtendedStoreConnection implements ExtendedStoreConnection {
 
     @Override
     public StorageMetadata getStorageMetadata(BucketPath bucketPath) {
-        LOGGER.debug("readmetadata " + bucketPath); // Dies LogZeile ist fuer den JUNIT-Tests StorageMetaDataTest
-        LOGGER.debug("getStorageMetaData for " + bucketPath);
+        SPECIAL_LOGGER.debug("readmetadata " + bucketPath); // Dies LogZeile ist fuer den JUNIT-Tests StorageMetaDataTest
+        LOGGER.debug("readmetadata " + bucketPath);
         GetObjectMetadataRequest getObjectMetadataRequest = new GetObjectMetadataRequest(
                 bucketPath.getObjectHandle().getContainer(),
                 bucketPath.getObjectHandle().getName());
@@ -170,15 +171,7 @@ public class CephExtendedStoreConnection implements ExtendedStoreConnection {
         if (bucketDirectory.getObjectHandle().getName() == null) {
             throw new StorageConnectionException("not a valid bucket directory " + bucketDirectory);
         }
-
-        List<StorageMetadata> storageMetadatas = list(bucketDirectory, ListRecursiveFlag.TRUE);
-        storageMetadatas.forEach(metadata -> {
-            if (metadata.getType().equals(StorageType.BLOB)) {
-                BucketPath fullName = new BucketPath(metadata.getName());
-                connection.deleteObject(fullName.getObjectHandle().getContainer(),
-                        fullName.getObjectHandle().getName());
-            }
-        });
+        internalRemoveMultiple(bucketDirectory);
     }
 
     @Override
@@ -196,6 +189,11 @@ public class CephExtendedStoreConnection implements ExtendedStoreConnection {
     @Override
     public void deleteContainer(BucketDirectory bucketDirectory) {
         LOGGER.debug("delete bucket " + bucketDirectory);
+        internalRemoveMultiple(new BucketDirectory(bucketDirectory.getObjectHandle().getContainer()));
+    }
+
+    public void deleteContainerORIG(BucketDirectory bucketDirectory) {
+        LOGGER.debug("delete bucket " + bucketDirectory);
         if (!containerExists(bucketDirectory)) {
             return;
         }
@@ -205,7 +203,11 @@ public class CephExtendedStoreConnection implements ExtendedStoreConnection {
                 removeBlob(new BucketPath(storageMetadata.getName()));
             }
         }
-        connection.deleteBucket(bucketDirectory.getObjectHandle().getContainer());
+        String fullBucketDirectoryString = BucketPathUtil.getAsString(bucketDirectory);
+        String containerString = bucketDirectory.getObjectHandle().getContainer();
+        if (fullBucketDirectoryString.equals(containerString)) {
+            connection.deleteBucket(bucketDirectory.getObjectHandle().getContainer());
+        }
     }
 
     @Override
@@ -237,7 +239,9 @@ public class CephExtendedStoreConnection implements ExtendedStoreConnection {
         final List<String> keys = new ArrayList<>();
         ol.getObjectSummaries().forEach(el -> keys.add(BucketPath.BUCKET_SEPARATOR + el.getKey()));
         returnList = filter(container, prefix, keys, listRecursiveFlag);
-        returnList.forEach(el -> LOGGER.debug("return for " + bucketDirectory + " :" + el.getName() + " type " + el.getType()));
+        if (LOGGER.isTraceEnabled()) {
+            returnList.forEach(el -> LOGGER.trace("return for " + bucketDirectory + " :" + el.getName() + " type " + el.getType()));
+        }
         return returnList;
     }
 
@@ -248,6 +252,31 @@ public class CephExtendedStoreConnection implements ExtendedStoreConnection {
         connection.listBuckets().forEach(bucket -> buckets.add(new BucketDirectory(bucket.getName())));
         return buckets;
     }
+
+    public void cleanDatabase() {
+        LOGGER.warn("DELETE DATABASE");
+        Iterator<Bucket> iterator = connection.listBuckets().iterator();
+        while (iterator.hasNext()) {
+            deleteContainer(new BucketDirectory(iterator.next().getName()));
+        }
+    }
+
+    public void showDatabase() {
+        try {
+            Iterator<Bucket> iterator = connection.listBuckets().iterator();
+            while (iterator.hasNext()) {
+                String realBucketName = iterator.next().getName();
+                ObjectListing ol = connection.listObjects(realBucketName);
+                List<DeleteObjectsRequest.KeyVersion> keys = new ArrayList<>();
+                for (S3ObjectSummary key : ol.getObjectSummaries()) {
+                    LOGGER.debug(realBucketName + " -> " + key.getKey());
+                }
+            }
+        } catch (Exception e) {
+            throw BaseExceptionHandler.handle(e);
+        }
+    }
+
 
     // ==========================================================================
 
@@ -378,6 +407,55 @@ public class CephExtendedStoreConnection implements ExtendedStoreConnection {
         String metadataAsString = new String(HexUtil.convertHexStringToBytes(metadataAsHexString));
         return gsonHelper.fromJson(metadataAsString);
     }
+
+    private void internalRemoveMultiple(BucketDirectory bucketDirectory) {
+        String container = bucketDirectory.getObjectHandle().getContainer();
+        String prefix = bucketDirectory.getObjectHandle().getName();
+        if (prefix == null) {
+            prefix = "";
+        }
+        if (! connection.doesBucketExistV2(container)) {
+            return;
+        }
+        ObjectListing ol = connection.listObjects(container, prefix);
+        if (ol.getObjectSummaries().isEmpty()) {
+            LOGGER.debug("no files found in " + container + " with prefix " + prefix);
+        }
+
+        List<DeleteObjectsRequest.KeyVersion> keys = new ArrayList<>();
+        for (S3ObjectSummary key : ol.getObjectSummaries()) {
+            keys.add(new DeleteObjectsRequest.KeyVersion(key.getKey()));
+            if (keys.size() == 100) {
+                DeleteObjectsRequest deleteObjectsRequest = new DeleteObjectsRequest(container);
+                deleteObjectsRequest.setKeys(keys);
+                LOGGER.debug("DELETE CHUNK CONTENTS OF BUCKET " + container + " with " + keys.size() + " elements");
+                DeleteObjectsResult deleteObjectsResult = connection.deleteObjects(deleteObjectsRequest);
+                LOGGER.debug("CEPH SERVER CONFIRMED DELETION OF " + deleteObjectsResult.getDeletedObjects().size() + " elements");
+                ObjectListing ol2 = connection.listObjects(container);
+                LOGGER.debug("CEPH SERVER has remaining " + ol2.getObjectSummaries().size() + " elements");
+                if (ol2.getObjectSummaries().size() == ol.getObjectSummaries().size()) {
+                    throw new BaseException("Fatal error. Ceph Server confirmied deleltion of " + keys.size() + " elements, but still " + ol.getObjectSummaries().size() + " elementents in " + container);
+                }
+            }
+        }
+        if (!keys.isEmpty()) {
+            DeleteObjectsRequest deleteObjectsRequest = new DeleteObjectsRequest(container);
+            deleteObjectsRequest.setKeys(keys);
+            LOGGER.debug("DELETE CONTENTS OF BUCKET " + container + " with " + keys.size() + " elements");
+            DeleteObjectsResult deleteObjectsResult = connection.deleteObjects(deleteObjectsRequest);
+            LOGGER.debug("CEPH SERVER CONFIRMED DELETION OF " + deleteObjectsResult.getDeletedObjects().size() + " elements");
+        }
+        String fullBucketDirectoryString = BucketPathUtil.getAsString(bucketDirectory);
+        if (fullBucketDirectoryString.endsWith(BucketPath.BUCKET_SEPARATOR)) {
+            fullBucketDirectoryString = fullBucketDirectoryString.substring(0, fullBucketDirectoryString.length()-1);
+        }
+        String containerString = bucketDirectory.getObjectHandle().getContainer();
+        if (fullBucketDirectoryString.equals(containerString)) {
+            LOGGER.debug("delete container " + bucketDirectory.getObjectHandle().getContainer());
+            connection.deleteBucket(bucketDirectory.getObjectHandle().getContainer());
+        }
+    }
+
 
 
 }

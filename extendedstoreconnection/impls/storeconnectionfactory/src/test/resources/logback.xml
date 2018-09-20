@@ -24,24 +24,12 @@
         </triggeringPolicy>
     </appender>
 
-    <!-- please do not remove the following 5 loggers, because it is required for the tests -->
-    <logger name="org.adorsys.cryptoutils.storageconnection.testsuite.StorageMetaDataTest" level="DEBUG" additivity="false">
+    <!-- please do not remove the following 2 loggers, because it is required for the tests -->
+    <logger name="SPECIAL_LOGGER" level="DEBUG" additivity="false">
         <appender-ref ref="STDOUT" />
         <appender-ref ref="FILE" />
     </logger>
-    <logger name="org.adorsys.cryptoutils.mongodbstoreconnection.MongoDBExtendedStoreConnection" level="DEBUG" additivity="false">
-        <appender-ref ref="STDOUT" />
-        <appender-ref ref="FILE" />
-    </logger>
-    <logger name="org.adorsys.cryptoutils.miniostoreconnection.MinioExtendedStoreConnection" level="DEBUG" additivity="false">
-        <appender-ref ref="STDOUT" />
-        <appender-ref ref="FILE" />
-    </logger>
-    <logger name="org.adorsys.encobject.filesystem.ZipFileHelper" level="DEBUG" additivity="false">
-        <appender-ref ref="STDOUT" />
-        <appender-ref ref="FILE" />
-    </logger>
-    <logger name="org.adorsys.cryptoutils.extendendstoreconnection.impl.ceph.CephExtendedStoreConnection" level="DEBUG" additivity="false">
+    <logger name="org.adorsys.cryptoutils.storageconnection.testsuite" level="debug" additivity="false">
         <appender-ref ref="STDOUT" />
         <appender-ref ref="FILE" />
     </logger>
@@ -50,7 +38,7 @@
 
 
     <!-- can be changed or removed -->
-    <logger name="org.adorsys.encobject" level="debug" additivity="false">
+    <logger name="org.adorsys.cryptoutils." level="info" additivity="false">
         <appender-ref ref="STDOUT" />
         <appender-ref ref="FILE" />
     </logger>

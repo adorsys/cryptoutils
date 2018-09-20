@@ -1,6 +1,7 @@
 package org.adorsys.cryptoutils.storageconnection.testsuite;
 
 import junit.framework.Assert;
+import org.adorsys.cryptoutils.extendendstoreconnection.impl.ceph.CephExtendedStoreConnection;
 import org.adorsys.cryptoutils.miniostoreconnection.MinioExtendedStoreConnection;
 import org.adorsys.cryptoutils.storeconnectionfactory.ExtendedStoreConnectionFactory;
 import org.adorsys.encobject.complextypes.BucketDirectory;
@@ -48,7 +49,7 @@ public class ExtendedStoreConnectionTest {
         }
     }
 
-    // @Test
+    @Test
     public void cleanDB() {
         ExtendedStoreConnection c = ExtendedStoreConnectionFactory.get();
         c.listAllBuckets().forEach(el -> c.deleteContainer(el));
@@ -236,9 +237,63 @@ public class ExtendedStoreConnectionTest {
         Assert.assertEquals(0, files.size());
     }
 
-    /**
-     * Anlegen einer tieferen Verzeichnisstruktur
-     */
+    @Test
+    public void deleteDatabase() {
+        if (s instanceof MinioExtendedStoreConnection) {
+            ((MinioExtendedStoreConnection) s).cleanDatabase();
+        }
+        if (s instanceof CephExtendedStoreConnection) {
+            ((CephExtendedStoreConnection) s).cleanDatabase();
+        }
+    }
+
+    @Test
+    public void testDeleteFolder() {
+        LOGGER.debug("START TEST " + new RuntimeException("").getStackTrace()[0].getMethodName());
+        BucketDirectory bd = new BucketDirectory("deletedeep");
+        s.createContainer(bd);
+        containers.add(bd);
+
+        /**
+         * Anlegen einer tieferen Verzeichnisstruktur
+         */
+        createFilesAndFoldersRecursivly(bd, 2,2,5, s);
+
+        if (s instanceof MinioExtendedStoreConnection) {
+            ((MinioExtendedStoreConnection) s).showDatabase();
+        }
+        if (s instanceof CephExtendedStoreConnection) {
+            ((CephExtendedStoreConnection) s).showDatabase();
+        }
+
+        List<StorageMetadata> listAll = s.list(bd, ListRecursiveFlag.TRUE);
+        List<BucketPath> filesOnlyAll = getFilesOnly(listAll);
+        LOGGER.debug("number of all files under " + bd + " is " + filesOnlyAll.size());
+
+        BucketDirectory bd00 = bd.appendDirectory("subdir0/subdir0");
+        List<StorageMetadata> list00 = s.list(bd00, ListRecursiveFlag.TRUE);
+        List<BucketPath> filesOnly00 = getFilesOnly(list00);
+        LOGGER.debug("number of files under " + bd00 + " is " + filesOnly00.size());
+
+        s.removeBlobFolder(bd00);
+
+        List<StorageMetadata> listAllNew = s.list(bd, ListRecursiveFlag.TRUE);
+        List<BucketPath> filesOnlyAllNew = getFilesOnly(listAllNew);
+        LOGGER.debug("number of all files under " + bd + " is " + filesOnlyAllNew.size());
+
+        Assert.assertEquals(filesOnlyAllNew.size() + filesOnly00.size(), filesOnlyAll.size());
+
+        if (s instanceof MinioExtendedStoreConnection) {
+            ((MinioExtendedStoreConnection) s).cleanDatabase();
+        }
+        if (s instanceof CephExtendedStoreConnection) {
+            ((CephExtendedStoreConnection) s).cleanDatabase();
+        }
+    }
+
+        /**
+         * Anlegen einer tieferen Verzeichnisstruktur
+         */
     @Test
     public void testList8() {
         LOGGER.debug("START TEST " + new RuntimeException("").getStackTrace()[0].getMethodName());
@@ -437,11 +492,10 @@ public class ExtendedStoreConnectionTest {
 
     @Test
     public void createManyBuckets() {
-        ExtendedStoreConnection c = ExtendedStoreConnectionFactory.get();
         for (int i = 0; i < 200; i++) {
             BucketDirectory bd = new BucketDirectory("bucket" + i);
             containers.add(bd);
-            c.createContainer(bd);
+            s.createContainer(bd);
         }
     }
 

@@ -437,11 +437,10 @@ public class ExtendedStoreConnectionTest {
 
     @Test
     public void createManyBuckets() {
-        ExtendedStoreConnection c = ExtendedStoreConnectionFactory.get();
         for (int i = 0; i < 200; i++) {
             BucketDirectory bd = new BucketDirectory("bucket" + i);
             containers.add(bd);
-            c.createContainer(bd);
+            s.createContainer(bd);
         }
     }
 

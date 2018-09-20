@@ -68,7 +68,7 @@ public class CephExtendedStoreConnection implements ExtendedStoreConnection {
         AwsClientBuilder.EndpointConfiguration endpoint = new AwsClientBuilder.EndpointConfiguration(url.toString(), "US");
 
         ClientConfiguration clientConfig = new ClientConfiguration();
-        clientConfig.setSocketTimeout(500);
+        // clientConfig.setSocketTimeout(10000);
         clientConfig.setProtocol(Protocol.HTTP);
         clientConfig.disableSocketProxy();
         connection = AmazonS3ClientBuilder.standard()

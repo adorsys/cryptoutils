@@ -196,6 +196,43 @@ public class CephExtendedStoreConnection implements ExtendedStoreConnection {
     @Override
     public void deleteContainer(BucketDirectory bucketDirectory) {
         LOGGER.debug("delete bucket " + bucketDirectory);
+        Iterator<Bucket> iterator = connection.listBuckets().iterator();
+        String container = bucketDirectory.getObjectHandle().getContainer();
+        String prefix = bucketDirectory.getObjectHandle().getName();
+        ObjectListing ol = connection.listObjects(container, prefix);
+
+        List<DeleteObjectsRequest.KeyVersion> keys = new ArrayList<>();
+        for (S3ObjectSummary key : ol.getObjectSummaries()) {
+            keys.add(new DeleteObjectsRequest.KeyVersion(key.getKey()));
+            if (keys.size() == 100) {
+                DeleteObjectsRequest deleteObjectsRequest = new DeleteObjectsRequest(container);
+                deleteObjectsRequest.setKeys(keys);
+                LOGGER.debug("DELETE CHUNK CONTENTS OF BUCKET " + container + " with " + keys.size() + " elements");
+                DeleteObjectsResult deleteObjectsResult = connection.deleteObjects(deleteObjectsRequest);
+                LOGGER.debug("CEPH SERVER CONFIRMED DELETION OF " + deleteObjectsResult.getDeletedObjects().size() + " elements");
+                ObjectListing ol2 = connection.listObjects(container);
+                LOGGER.debug("CEPH SERVER has remaining " + ol2.getObjectSummaries().size() + " elements");
+                if (ol2.getObjectSummaries().size() == ol.getObjectSummaries().size()) {
+                    throw new BaseException("Fatal error. Ceph Server confirmied deleltion of " + keys.size() + " elements, but still " + ol.getObjectSummaries().size() + " elementents in " + container);
+                }
+            }
+        }
+        if (!keys.isEmpty()) {
+            DeleteObjectsRequest deleteObjectsRequest = new DeleteObjectsRequest(container);
+            deleteObjectsRequest.setKeys(keys);
+            LOGGER.debug("DELETE CONTENTS OF BUCKET " + container + " with " + keys.size() + " elements");
+            DeleteObjectsResult deleteObjectsResult = connection.deleteObjects(deleteObjectsRequest);
+            LOGGER.debug("CEPH SERVER CONFIRMED DELETION OF " + deleteObjectsResult.getDeletedObjects().size() + " elements");
+        }
+        String fullBucketDirectoryString = BucketPathUtil.getAsString(bucketDirectory);
+        String containerString = bucketDirectory.getObjectHandle().getContainer();
+        if (fullBucketDirectoryString.equals(containerString)) {
+            connection.deleteBucket(bucketDirectory.getObjectHandle().getContainer());
+        }
+    }
+
+    public void deleteContainerORIG(BucketDirectory bucketDirectory) {
+        LOGGER.debug("delete bucket " + bucketDirectory);
         if (!containerExists(bucketDirectory)) {
             return;
         }
@@ -205,7 +242,11 @@ public class CephExtendedStoreConnection implements ExtendedStoreConnection {
                 removeBlob(new BucketPath(storageMetadata.getName()));
             }
         }
-        connection.deleteBucket(bucketDirectory.getObjectHandle().getContainer());
+        String fullBucketDirectoryString = BucketPathUtil.getAsString(bucketDirectory);
+        String containerString = bucketDirectory.getObjectHandle().getContainer();
+        if (fullBucketDirectoryString.equals(containerString)) {
+            connection.deleteBucket(bucketDirectory.getObjectHandle().getContainer());
+        }
     }
 
     @Override
@@ -237,7 +278,9 @@ public class CephExtendedStoreConnection implements ExtendedStoreConnection {
         final List<String> keys = new ArrayList<>();
         ol.getObjectSummaries().forEach(el -> keys.add(BucketPath.BUCKET_SEPARATOR + el.getKey()));
         returnList = filter(container, prefix, keys, listRecursiveFlag);
-        returnList.forEach(el -> LOGGER.debug("return for " + bucketDirectory + " :" + el.getName() + " type " + el.getType()));
+        if (LOGGER.isTraceEnabled()) {
+            returnList.forEach(el -> LOGGER.trace("return for " + bucketDirectory + " :" + el.getName() + " type " + el.getType()));
+        }
         return returnList;
     }
 
@@ -248,6 +291,31 @@ public class CephExtendedStoreConnection implements ExtendedStoreConnection {
         connection.listBuckets().forEach(bucket -> buckets.add(new BucketDirectory(bucket.getName())));
         return buckets;
     }
+
+    public void cleanDatabase() {
+        LOGGER.warn("DELETE DATABASE");
+        Iterator<Bucket> iterator = connection.listBuckets().iterator();
+        while (iterator.hasNext()) {
+            deleteContainer(new BucketDirectory(iterator.next().getName()));
+        }
+    }
+
+    public void showDatabase() {
+        try {
+            Iterator<Bucket> iterator = connection.listBuckets().iterator();
+            while (iterator.hasNext()) {
+                String realBucketName = iterator.next().getName();
+                ObjectListing ol = connection.listObjects(realBucketName);
+                List<DeleteObjectsRequest.KeyVersion> keys = new ArrayList<>();
+                for (S3ObjectSummary key : ol.getObjectSummaries()) {
+                    LOGGER.debug(realBucketName + " -> " + key.getKey());
+                }
+            }
+        } catch (Exception e) {
+            throw BaseExceptionHandler.handle(e);
+        }
+    }
+
 
     // ==========================================================================
 

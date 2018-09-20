@@ -50,7 +50,7 @@
 
 
     <!-- can be changed or removed -->
-    <logger name="org.adorsys.encobject" level="debug" additivity="false">
+    <logger name="org.adorsys.cryptoutils.storageconnection.testsuite" level="debug" additivity="false">
         <appender-ref ref="STDOUT" />
         <appender-ref ref="FILE" />
     </logger>

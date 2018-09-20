@@ -45,6 +45,8 @@ import java.util.Set;
  */
 public class MinioExtendedStoreConnection implements ExtendedStoreConnection {
     private final static Logger LOGGER = LoggerFactory.getLogger(MinioExtendedStoreConnection.class);
+    private static final Logger SPECIAL_LOGGER = LoggerFactory.getLogger("SPECIAL_LOGGER");
+
     private final static String CONTENT_TYPE = "";
     private final static String METADATA_EXT = ".metadata.extension.";
     private final static String MINIO_TMP_FILE_PREFIX = "MINIO_TMP_FILE_";
@@ -152,6 +154,7 @@ public class MinioExtendedStoreConnection implements ExtendedStoreConnection {
 
     @Override
     public StorageMetadata getStorageMetadata(BucketPath bucketPath) {
+        SPECIAL_LOGGER.debug("readmetadata " + bucketPath); // Dies LogZeile ist fuer den JUNIT-Tests StorageMetaDataTest
         LOGGER.debug("readmetadata " + bucketPath);
         try {
             if (!blobExists(bucketPath)) {

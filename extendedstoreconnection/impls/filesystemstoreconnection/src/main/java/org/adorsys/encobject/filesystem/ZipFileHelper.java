@@ -33,6 +33,7 @@ import java.util.zip.ZipOutputStream;
  */
 public class ZipFileHelper {
     private static final Logger LOGGER = LoggerFactory.getLogger(ZipFileHelper.class);
+    private static final Logger SPECIAL_LOGGER = LoggerFactory.getLogger("SPECIAL_LOGGER");
     protected static final String ZIP_STORAGE_METADATA_JSON = "StorageMetadata.json";
     protected static final String ZIP_CONTENT_BINARY = "Content.binary";
     protected static final String ZIP_SUFFIX = ".zip";
@@ -201,7 +202,7 @@ public class ZipFileHelper {
     }
 
     public StorageMetadata readZipMetadataOnly(BucketPath bucketPath) {
-        LOGGER.debug("readmetadata " + bucketPath);
+        SPECIAL_LOGGER.debug("readmetadata " + bucketPath); // Dies LogZeile ist fuer den JUNIT-Tests StorageMetaDataTest
         try {
             File file = BucketPathFileHelper.getAsFile(baseDir.append(bucketPath.add(ZIP_SUFFIX)), absolutePath);
             if (!file.exists()) {

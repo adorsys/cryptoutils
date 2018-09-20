@@ -55,6 +55,8 @@ import static com.mongodb.client.model.Filters.regex;
  */
 public class MongoDBExtendedStoreConnection implements ExtendedStoreConnection {
     private final static Logger LOGGER = LoggerFactory.getLogger(MongoDBExtendedStoreConnection.class);
+    private static final Logger SPECIAL_LOGGER = LoggerFactory.getLogger("SPECIAL_LOGGER");
+
     private static final String STORAGE_METADATA_KEY = "StorageMetadata";
     private static final String FILENAME_TAG = "filename";
     private static final String BUCKET_ID_FILENAME = ".bucket.creation.date.";
@@ -147,6 +149,7 @@ public class MongoDBExtendedStoreConnection implements ExtendedStoreConnection {
 
     @Override
     public StorageMetadata getStorageMetadata(BucketPath bucketPath) {
+        SPECIAL_LOGGER.debug("readmetadata " + bucketPath); // Dies LogZeile ist fuer den JUNIT-Tests StorageMetaDataTest
         LOGGER.debug("readmetadata " + bucketPath);
 
         GridFSBucket bucket = getGridFSBucket(bucketPath);

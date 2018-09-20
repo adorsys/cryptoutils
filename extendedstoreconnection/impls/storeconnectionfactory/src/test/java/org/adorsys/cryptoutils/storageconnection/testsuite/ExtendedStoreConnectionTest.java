@@ -49,7 +49,7 @@ public class ExtendedStoreConnectionTest {
         }
     }
 
-    // @Test
+    @Test
     public void cleanDB() {
         ExtendedStoreConnection c = ExtendedStoreConnectionFactory.get();
         c.listAllBuckets().forEach(el -> c.deleteContainer(el));
@@ -275,7 +275,7 @@ public class ExtendedStoreConnectionTest {
         List<BucketPath> filesOnly00 = getFilesOnly(list00);
         LOGGER.debug("number of files under " + bd00 + " is " + filesOnly00.size());
 
-        s.deleteContainer(bd00);
+        s.removeBlobFolder(bd00);
 
         List<StorageMetadata> listAllNew = s.list(bd, ListRecursiveFlag.TRUE);
         List<BucketPath> filesOnlyAllNew = getFilesOnly(listAllNew);

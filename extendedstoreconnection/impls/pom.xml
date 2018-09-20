@@ -5,13 +5,14 @@
     <parent>
         <groupId>de.adorsys.cryptoutils</groupId>
         <artifactId>extendedstoreconnection</artifactId>
-        <version>0.18.10</version>
+        <version>0.20.0</version>
     </parent>
     <modelVersion>4.0.0</modelVersion>
 
     <artifactId>storeconnection-impls</artifactId>
 
     <modules>
+        <module>cephstoreconnection</module>
         <module>filesystemstoreconnection</module>
         <module>mongodbstoreconnection</module>
         <module>miniostoreconnection</module>

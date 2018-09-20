@@ -1,6 +1,7 @@
 package org.adorsys.cryptoutils.storeconnectionfactory;
 
 import org.adorsys.cryptoutils.exceptions.BaseException;
+import org.adorsys.cryptoutils.extendendstoreconnection.impl.ceph.CephExtendedStoreConnection;
 import org.adorsys.cryptoutils.miniostoreconnection.MinioExtendedStoreConnection;
 import org.adorsys.cryptoutils.mongodbstoreconnection.MongoDBExtendedStoreConnection;
 import org.adorsys.cryptoutils.utils.Frame;
@@ -37,6 +38,12 @@ public class ExtendedStoreConnectionFactory {
                         config.minioParams.getMinioAccessKey(),
                         config.minioParams.getMinioSecretKey(),
                         config.minioParams.getRootBucketName());
+
+            case CEPH:
+                return new CephExtendedStoreConnection(
+                        config.cephParams.getUrl(),
+                        config.cephParams.getMinioAccessKey(),
+                        config.cephParams.getMinioSecretKey());
 
             case FILE_SYSTEM:
                 return new FileSystemExtendedStorageConnection(

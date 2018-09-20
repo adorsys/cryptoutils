@@ -1,6 +1,7 @@
 package org.adorsys.cryptoutils.storeconnectionfactory;
 
 import org.adorsys.cryptoutils.exceptions.BaseExceptionHandler;
+import org.adorsys.cryptoutils.extendendstoreconnection.impl.ceph.CephParamParser;
 import org.adorsys.cryptoutils.miniostoreconnection.MinioParamParser;
 import org.adorsys.cryptoutils.mongodbstoreconnection.MongoParamParser;
 import org.adorsys.encobject.filesystem.FileSystemParamParser;
@@ -19,10 +20,12 @@ public class ReadArguments {
     private static final String SYSTEM_PROPERTY_PREFIX = "-D";
     public static final String MONGO = "SC-MONGO";
     public static final String MINIO = "SC-MINIO";
+    public static final String CEPH = "SC-CEPH";
     public static final String FILESYSTEM = "SC-FILESYSTEM";
 
     public static final String MONGO_ARG = SYSTEM_PROPERTY_PREFIX + MONGO + "=";
     public static final String MINIO_ARG = SYSTEM_PROPERTY_PREFIX + MINIO + "=";
+    public static final String CEPH_ARG = SYSTEM_PROPERTY_PREFIX + CEPH + "=";
     public static final String FILESYSTEM_ARG = SYSTEM_PROPERTY_PREFIX + FILESYSTEM + "=";
 
     public ArgsAndConfig readArguments(String[] args) {
@@ -38,6 +41,9 @@ public class ReadArguments {
                     } else if (arg.startsWith(MINIO_ARG)) {
                         config.connectionType = StoreConnectionFactoryConfig.ConnectionType.MINIO;
                         config.minioParams = new MinioParamParser(arg.substring(MINIO_ARG.length()));
+                    } else if (arg.startsWith(CEPH_ARG)) {
+                        config.connectionType = StoreConnectionFactoryConfig.ConnectionType.CEPH;
+                        config.cephParams = new CephParamParser(arg.substring(CEPH_ARG.length()));
                     } else if (arg.startsWith(FILESYSTEM_ARG)) {
                         config.connectionType = StoreConnectionFactoryConfig.ConnectionType.FILE_SYSTEM;
                         config.fileSystemParamParser = new FileSystemParamParser(arg.substring(FILESYSTEM_ARG.length()));
@@ -64,6 +70,11 @@ public class ReadArguments {
             if (System.getProperty(MINIO) != null) {
                 config.connectionType = StoreConnectionFactoryConfig.ConnectionType.MINIO;
                 config.minioParams = new MinioParamParser(System.getProperty(MINIO));
+                return config;
+            }
+            if (System.getProperty(CEPH) != null) {
+                config.connectionType = StoreConnectionFactoryConfig.ConnectionType.CEPH;
+                config.cephParams = new CephParamParser(System.getProperty(CEPH));
                 return config;
             }
             if (System.getProperty(FILESYSTEM) != null) {

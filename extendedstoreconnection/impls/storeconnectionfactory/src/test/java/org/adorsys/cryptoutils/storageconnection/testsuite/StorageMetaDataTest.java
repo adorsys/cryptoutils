@@ -24,13 +24,13 @@ import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.io.File;
 import java.net.URI;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
+import java.util.stream.Collectors;
 
 /**
  * Created by peter on 20.02.18 at 16:53.
@@ -211,6 +211,37 @@ public class StorageMetaDataTest {
             LOGGER.debug("read 2 " + jsonString);
             GrantList grantList = gson.fromJson(jsonString, GrantList.class);
             Assert.assertEquals(RIGHT.WRITE, grantList.get("peter"));
+        }
+    }
+
+    /**
+     * Achtung, dieser Test möchte sicherstellen, dass in Cryptoutils die Methode zum Lesen der StorageMetadata
+     * wirklich nur einmal aufgerufen wird. Um das zu machen, wird einfach eine spezielle Logmeldung gesucht, die
+     * nach dem Test genau einmal mehr geschrieben sein muss, als vor dem Test. Daher wird für diesen Test
+     * logback benötigt, denn der Simpple-Logger schreibt nicht in Dateien.
+     */
+    @Test
+    public void checkMetaInfoOnlyReadOnceForDocument() {
+        try {
+            String logfilename = "storeconnectionfactory-test-log-file.log";
+            LOGGER.debug("START TEST " + new RuntimeException("").getStackTrace()[0].getMethodName());
+            String searchname = UUID.randomUUID().toString();
+            BucketPath bucketPath = new BucketPath("first/next/" + searchname);
+            waitUntilLogfileisSynched(logfilename);
+            int count1 = countReadMetaData(logfilename, searchname);
+            StorageMetadata storageMetadata = new SimpleStorageMetadataImpl();
+            byte[] documentContent = "Einfach nur a bisserl Text".getBytes();
+            Payload payload = new SimplePayloadImpl(storageMetadata, documentContent);
+            s.createContainer(bucketPath.getBucketDirectory());
+            s.putBlob(bucketPath, payload);
+            StorageMetadata storageMetadata1 = s.getStorageMetadata(bucketPath);
+            s.getBlob(bucketPath, storageMetadata1);
+            waitUntilLogfileisSynched(logfilename);
+            int count2 = countReadMetaData(logfilename, searchname);
+            org.junit.Assert.assertEquals(count1 + 1, count2);
+            LOGGER.debug("found " + count2 + " lines :-)");
+        } catch (Exception e) {
+            throw BaseExceptionHandler.handle(e);
         }
     }
 
@@ -411,6 +442,52 @@ public class StorageMetaDataTest {
             return 1;
         }
         return 0;
+    }
+
+    private void waitUntilLogfileisSynched(String logfilename) {
+        try {
+            if (!new File(logfilename).exists()) {
+                throw new BaseException("logfile " + logfilename + " not found. I am in "
+                        + new java.io.File(".").getCanonicalPath()
+                        + "This tests requires the logfilefile to succeed.");
+            }
+            int MAX_WAIT = 10;
+            int trials = 0;
+            String unique = UUID.randomUUID().toString();
+            int count = 0;
+
+            LOGGER.debug(unique);
+            do {
+                if (trials > MAX_WAIT) {
+                    throw new BaseException("Did not find unique entry in logfile for " + MAX_WAIT + " seconds.");
+                }
+                Thread.currentThread().sleep(1000);
+                count = Files.lines(Paths.get(logfilename))
+                        .filter(line -> line.indexOf(unique) != -1)
+                        .collect(Collectors.toSet())
+                        .size();
+                trials++;
+            } while (count != 1);
+        } catch (Exception e) {
+            throw BaseExceptionHandler.handle(e);
+        }
+    }
+
+    private int countReadMetaData(String logfilename, String searchname) {
+        try {
+            if (!new File(logfilename).exists()) {
+                throw new BaseException("logfile " + logfilename + " not found. I am in "
+                        + new java.io.File(".").getCanonicalPath()
+                        + "This tests requires the logfilefile to succeed.");
+            }
+            return Files.lines(Paths.get(logfilename))
+                    .filter(line -> line.indexOf("readmetadata ") != -1)
+                    .filter(line -> line.indexOf(searchname) != -1)
+                    .collect(Collectors.toSet())
+                    .size();
+        } catch (Exception e) {
+            throw BaseExceptionHandler.handle(e);
+        }
     }
 
 

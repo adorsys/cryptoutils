@@ -48,19 +48,10 @@ public class ExtendedStoreConnectionTest {
         }
     }
 
+    // @Test
     public void cleanDB() {
         ExtendedStoreConnection c = ExtendedStoreConnectionFactory.get();
         c.listAllBuckets().forEach(el -> c.deleteContainer(el));
-    }
-
-    @Test
-    public void createManyBuckets() {
-        ExtendedStoreConnection c = ExtendedStoreConnectionFactory.get();
-        for (int i = 0; i < 200; i++) {
-            BucketDirectory bd = new BucketDirectory("bucket" + i);
-            containers.add(bd);
-            c.createContainer(bd);
-        }
     }
 
     /**
@@ -206,7 +197,7 @@ public class ExtendedStoreConnectionTest {
 
 
         content = s.list(bd, ListRecursiveFlag.FALSE);
-        LOGGER.debug("plain " + content.toString());
+        LOGGER.debug("plain " + show(content));
         Assert.assertEquals("Anzahl Einträge", 4, content.size());
         {
             List<BucketPath> files = getFilesOnly(content);
@@ -416,6 +407,45 @@ public class ExtendedStoreConnectionTest {
         s.removeBlob(filea);
         Assert.assertFalse(s.blobExists(filea));
     }
+
+    @Test
+    public void createBucketWithDotAndTestFileForDir() {
+        LOGGER.debug("START TEST " + new RuntimeException("").getStackTrace()[0].getMethodName());
+        BucketPath bucketPath = new BucketPath("user1/.hidden/Affenfile.txt");
+        byte[] documentContent = "Affe".getBytes();
+        s.createContainer(bucketPath.getBucketDirectory());
+        s.putBlob(bucketPath, new SimplePayloadImpl(new SimpleStorageMetadataImpl(), documentContent));
+        BucketDirectory bd = new BucketDirectory(bucketPath);
+        LOGGER.debug("bucketPath " + bucketPath);
+        LOGGER.debug("pathAsDir  " + bd);
+        List<StorageMetadata> list = s.list(bd, ListRecursiveFlag.TRUE);
+        list.forEach(el -> LOGGER.debug("found " + el.getName() + " " + el.getType()));
+        Assert.assertTrue(list.isEmpty());
+    }
+
+    @Test
+    public void destroyBucketTwice() {
+        LOGGER.debug("START TEST " + new RuntimeException("").getStackTrace()[0].getMethodName());
+        BucketPath bucketPath = new BucketPath("user1/.hidden/Affenfile.txt");
+        byte[] documentContent = "Affe".getBytes();
+        s.createContainer(bucketPath.getBucketDirectory());
+        s.putBlob(bucketPath, new SimplePayloadImpl(new SimpleStorageMetadataImpl(), documentContent));
+        s.deleteContainer(bucketPath.getBucketDirectory());
+        s.deleteContainer(bucketPath.getBucketDirectory());
+    }
+
+
+    @Test
+    public void createManyBuckets() {
+        ExtendedStoreConnection c = ExtendedStoreConnectionFactory.get();
+        for (int i = 0; i < 200; i++) {
+            BucketDirectory bd = new BucketDirectory("bucket" + i);
+            containers.add(bd);
+            c.createContainer(bd);
+        }
+    }
+
+
    /* =========================================================================================================== */
 
     private void createFiles(ExtendedStoreConnection extendedStoreConnection, BucketDirectory rootDirectory,

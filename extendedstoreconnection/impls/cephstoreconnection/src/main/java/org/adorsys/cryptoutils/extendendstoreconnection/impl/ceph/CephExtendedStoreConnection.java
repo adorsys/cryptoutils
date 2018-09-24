@@ -11,6 +11,7 @@ import com.amazonaws.services.s3.AmazonS3ClientBuilder;
 import com.amazonaws.services.s3.model.*;
 import org.adorsys.cryptoutils.exceptions.BaseException;
 import org.adorsys.cryptoutils.exceptions.BaseExceptionHandler;
+import org.adorsys.cryptoutils.utils.Frame;
 import org.adorsys.cryptoutils.utils.HexUtil;
 import org.adorsys.encobject.complextypes.BucketDirectory;
 import org.adorsys.encobject.complextypes.BucketPath;
@@ -52,6 +53,14 @@ public class CephExtendedStoreConnection implements ExtendedStoreConnection {
     private StorageMetadataFlattenerGSON gsonHelper = new StorageMetadataFlattenerGSON();
 
     public CephExtendedStoreConnection(URL url, AmazonS3AccessKey accessKey, AmazonS3SecretKey secretKey) {
+        Frame frame = new Frame();
+        frame.add("USE CEPH SYSTEM");
+        frame.add("(ceph has be up and running )");
+        frame.add("url: " + url.toString());
+        frame.add("accessKey: " + accessKey.getValue());
+        frame.add("secretKey: " + secretKey.getValue());
+        LOGGER.info(frame.toString());
+        new BaseException("JUST A STACK, TO SEE WHERE THE CONNECTION IS CREATED");
 
 
         AWSCredentialsProvider credentialsProvider = new AWSCredentialsProvider() {
@@ -177,7 +186,9 @@ public class CephExtendedStoreConnection implements ExtendedStoreConnection {
     @Override
     public void createContainer(BucketDirectory bucketDirectory) {
         LOGGER.debug("create bucket " + bucketDirectory);
-        connection.createBucket(bucketDirectory.getObjectHandle().getContainer());
+        if (! containerExists(bucketDirectory)) {
+            connection.createBucket(bucketDirectory.getObjectHandle().getContainer());
+        }
     }
 
     @Override

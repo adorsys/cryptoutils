@@ -443,7 +443,6 @@ public class ExtendedStoreConnectionTest {
         foundBuckets.forEach(b -> LOGGER.debug("found bucket " + b));
         Assert.assertTrue(foundBuckets.containsAll(mybuckets));
         Assert.assertTrue(mybuckets.containsAll(foundBuckets));
-
     }
 
     @Test

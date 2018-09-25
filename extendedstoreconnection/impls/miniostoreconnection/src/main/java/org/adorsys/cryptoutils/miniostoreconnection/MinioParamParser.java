@@ -16,8 +16,9 @@ public class MinioParamParser {
     private URL url;
     private MinioAccessKey minioAccessKey;
     private MinioSecretKey minioSecretKey;
-    private String rootBucketName;
+    private String rootBucketName = MinioExtendedStoreConnection.DEFAULT_ROOT_BUCKET_NAME;
     private final static String DELIMITER = ",";
+    private final static String EXPECTED_PARAMS = "<url>,<accesskey>,<secretkey>[,<rootbucket>]";
 
     public MinioParamParser(String params) {
         LOGGER.debug("parse:" + params);
@@ -31,11 +32,9 @@ public class MinioParamParser {
             minioSecretKey = new MinioSecretKey(secretKey);
             if (st.hasMoreElements()) {
                 rootBucketName = st.nextToken();
-            } else {
-                rootBucketName = MinioExtendedStoreConnection.DEFAULT_ROOT_BUCKET_NAME;
             }
         } catch (Exception e) {
-            throw new ParamParserException(params, DELIMITER);
+            throw new ParamParserException(params, DELIMITER, EXPECTED_PARAMS);
         }
     }
 

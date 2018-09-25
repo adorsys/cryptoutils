@@ -43,7 +43,7 @@ public class ReadArguments {
                         config.minioParams = new MinioParamParser(arg.substring(MINIO_ARG.length()));
                     } else if (arg.startsWith(AMAZONS3_ARG)) {
                         config.connectionType = StoreConnectionFactoryConfig.ConnectionType.AMAZONS3;
-                        config.cephParams = new AmazonS3ParamParser(arg.substring(AMAZONS3_ARG.length()));
+                        config.amazonS3Params = new AmazonS3ParamParser(arg.substring(AMAZONS3_ARG.length()));
                     } else if (arg.startsWith(FILESYSTEM_ARG)) {
                         config.connectionType = StoreConnectionFactoryConfig.ConnectionType.FILE_SYSTEM;
                         config.fileSystemParamParser = new FileSystemParamParser(arg.substring(FILESYSTEM_ARG.length()));
@@ -74,7 +74,7 @@ public class ReadArguments {
             }
             if (System.getProperty(AMAZONS3) != null) {
                 config.connectionType = StoreConnectionFactoryConfig.ConnectionType.AMAZONS3;
-                config.cephParams = new AmazonS3ParamParser(System.getProperty(AMAZONS3));
+                config.amazonS3Params = new AmazonS3ParamParser(System.getProperty(AMAZONS3));
                 return config;
             }
             if (System.getProperty(FILESYSTEM) != null) {

@@ -15,24 +15,26 @@ public class AmazonS3ParamParser {
     private URL url;
     private AmazonS3AccessKey amazonS3AccessKey;
     private AmazonS3SecretKey amazonS3SecretKey;
-    private AmazonS3Region amazonS3Region = new AmazonS3Region("US");
     private final static String DELIMITER = ",";
+    private final static String EXPECTED_PARAMS = "<url>,<accesskey>,<secretkey>[,<region>][,<rootbucket>]";
+    private AmazonS3Region amazonS3Region = AmazonS3ExtendedStoreConnection.DEFAULT_REGION;
+    private AmazonS3RootBucket amazonS3RootBucket = AmazonS3ExtendedStoreConnection.DEFAULT_BUCKET;
 
     public AmazonS3ParamParser(String params) {
         LOGGER.debug("parse:" + params);
         try {
             StringTokenizer st = new StringTokenizer(params, DELIMITER);
-            String urlString = st.nextToken();
-            String accessKey = st.nextToken();
-            String secretKey = st.nextToken();
+            url = new URL(st.nextToken());
+            amazonS3AccessKey = new AmazonS3AccessKey(st.nextToken());
+            amazonS3SecretKey = new AmazonS3SecretKey(st.nextToken());
             if (st.hasMoreTokens()) {
                 amazonS3Region = new AmazonS3Region(st.nextToken());
             }
-            url = new URL(urlString);
-            amazonS3AccessKey = new AmazonS3AccessKey(accessKey);
-            amazonS3SecretKey = new AmazonS3SecretKey(secretKey);
+            if (st.hasMoreTokens()) {
+                amazonS3RootBucket = new AmazonS3RootBucket(st.nextToken());
+            }
         } catch (Exception e) {
-            throw new ParamParserException(params, DELIMITER);
+            throw new ParamParserException(params, DELIMITER, EXPECTED_PARAMS);
         }
     }
 
@@ -50,5 +52,9 @@ public class AmazonS3ParamParser {
 
     public AmazonS3Region getAmazonS3Region() {
         return amazonS3Region;
+    }
+
+    public AmazonS3RootBucket getAmazonS3RootBucket() {
+        return amazonS3RootBucket;
     }
 }

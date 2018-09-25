@@ -283,7 +283,7 @@ public class StorageMetaDataTest {
     public static final String MODIFIED_DATE = "2018-02-20-14:54:41";
     public static final String ISO3166_CODE = "Iso3166Code";
     public static final int NUMBER_OF_ISOCODECS = 1;
-    public static final int NUMBER_OF_KEY_VALUE_PAIRS = 5;
+    public static final int NUMBER_OF_KEY_VALUE_PAIRS = 4;
     public static final String SHOULD_BE_COMPRESSED = "true";
     public static final String CONTENT_TYPE = "application/xml";
 

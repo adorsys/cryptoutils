@@ -37,10 +37,11 @@ public class ExtendedStoreConnectionFactory {
 
             case AMAZONS3:
                 return new AmazonS3ExtendedStoreConnection(
-                        config.cephParams.getUrl(),
-                        config.cephParams.getAmazonS3AccessKey(),
-                        config.cephParams.getAmazonS3SecretKey(),
-                        config.cephParams.getAmazonS3Region());
+                        config.amazonS3Params.getUrl(),
+                        config.amazonS3Params.getAmazonS3AccessKey(),
+                        config.amazonS3Params.getAmazonS3SecretKey(),
+                        config.amazonS3Params.getAmazonS3Region(),
+                        config.amazonS3Params.getAmazonS3RootBucket());
 
             case FILE_SYSTEM:
                 return new FileSystemExtendedStorageConnection(

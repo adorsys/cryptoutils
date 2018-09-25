@@ -12,7 +12,7 @@ public class StoreConnectionFactoryConfig {
 
     public ConnectionType connectionType = ConnectionType.FILE_SYSTEM;
     public MinioParamParser minioParams = null;
-    public AmazonS3ParamParser cephParams = null;
+    public AmazonS3ParamParser amazonS3Params = null;
     public MongoParamParser mongoParams = null;
     public FileSystemParamParser fileSystemParamParser = new FileSystemParamParser("");
 

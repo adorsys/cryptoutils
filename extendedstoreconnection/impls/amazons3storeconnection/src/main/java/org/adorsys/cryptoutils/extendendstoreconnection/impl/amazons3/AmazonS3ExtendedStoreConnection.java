@@ -79,8 +79,9 @@ public class AmazonS3ExtendedStoreConnection implements ExtendedStoreConnection 
         frame.add("region:      " + amazonS3Region.getValue());
         frame.add("root bucket: " + amazonS3RootBucket.getObjectHandle().getContainer());
         LOGGER.info(frame.toString());
-        new BaseException("JUST A STACK, TO SEE WHERE THE CONNECTION IS CREATED");
-
+        if (LOGGER.isDebugEnabled()) {
+            new BaseException("JUST A STACK, TO SEE WHERE THE CONNECTION IS CREATED");
+        }
 
         AWSCredentialsProvider credentialsProvider = new AWSCredentialsProvider() {
             @Override

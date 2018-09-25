@@ -1,7 +1,7 @@
 package org.adorsys.cryptoutils.storageconnection.testsuite;
 
 import junit.framework.Assert;
-import org.adorsys.cryptoutils.extendendstoreconnection.impl.ceph.CephExtendedStoreConnection;
+import org.adorsys.cryptoutils.extendendstoreconnection.impl.amazons3.AmazonS3ExtendedStoreConnection;
 import org.adorsys.cryptoutils.miniostoreconnection.MinioExtendedStoreConnection;
 import org.adorsys.cryptoutils.storeconnectionfactory.ExtendedStoreConnectionFactory;
 import org.adorsys.encobject.complextypes.BucketDirectory;
@@ -242,8 +242,8 @@ public class ExtendedStoreConnectionTest {
         if (s instanceof MinioExtendedStoreConnection) {
             ((MinioExtendedStoreConnection) s).cleanDatabase();
         }
-        if (s instanceof CephExtendedStoreConnection) {
-            ((CephExtendedStoreConnection) s).cleanDatabase();
+        if (s instanceof AmazonS3ExtendedStoreConnection) {
+            ((AmazonS3ExtendedStoreConnection) s).cleanDatabase();
         }
     }
 
@@ -262,8 +262,8 @@ public class ExtendedStoreConnectionTest {
         if (s instanceof MinioExtendedStoreConnection) {
             ((MinioExtendedStoreConnection) s).showDatabase();
         }
-        if (s instanceof CephExtendedStoreConnection) {
-            ((CephExtendedStoreConnection) s).showDatabase();
+        if (s instanceof AmazonS3ExtendedStoreConnection) {
+            ((AmazonS3ExtendedStoreConnection) s).showDatabase();
         }
 
         List<StorageMetadata> listAll = s.list(bd, ListRecursiveFlag.TRUE);
@@ -286,8 +286,8 @@ public class ExtendedStoreConnectionTest {
         if (s instanceof MinioExtendedStoreConnection) {
             ((MinioExtendedStoreConnection) s).cleanDatabase();
         }
-        if (s instanceof CephExtendedStoreConnection) {
-            ((CephExtendedStoreConnection) s).cleanDatabase();
+        if (s instanceof AmazonS3ExtendedStoreConnection) {
+            ((AmazonS3ExtendedStoreConnection) s).cleanDatabase();
         }
     }
 
@@ -443,7 +443,6 @@ public class ExtendedStoreConnectionTest {
         foundBuckets.forEach(b -> LOGGER.debug("found bucket " + b));
         Assert.assertTrue(foundBuckets.containsAll(mybuckets));
         Assert.assertTrue(mybuckets.containsAll(foundBuckets));
-
     }
 
     @Test

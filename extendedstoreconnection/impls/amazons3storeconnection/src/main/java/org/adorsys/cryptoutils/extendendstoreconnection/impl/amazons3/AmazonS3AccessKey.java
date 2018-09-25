@@ -1,4 +1,4 @@
-package org.adorsys.cryptoutils.extendendstoreconnection.impl.ceph;
+package org.adorsys.cryptoutils.extendendstoreconnection.impl.amazons3;
 
 import org.adorsys.cryptoutils.basetypes.BaseTypeString;
 

@@ -11,13 +11,11 @@ import com.amazonaws.services.s3.AmazonS3ClientBuilder;
 import com.amazonaws.services.s3.model.*;
 import org.adorsys.cryptoutils.exceptions.BaseException;
 import org.adorsys.cryptoutils.exceptions.BaseExceptionHandler;
-import org.adorsys.cryptoutils.extendendstoreconnection.impl.ceph.AmazonS3AccessKey;
-import org.adorsys.cryptoutils.extendendstoreconnection.impl.ceph.AmazonS3SecretKey;
+import org.adorsys.cryptoutils.extendendstoreconnection.impl.amazons3.AmazonS3AccessKey;
+import org.adorsys.cryptoutils.extendendstoreconnection.impl.amazons3.AmazonS3SecretKey;
 import org.adorsys.cryptoutils.utils.HexUtil;
-import org.apache.commons.codec.binary.Hex;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
-import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -31,9 +29,11 @@ import java.util.*;
 @SuppressWarnings("Duplicates")
 /**
  * Created by peter on 19.09.18.
+ * Dieser Test kann direkt für Ceph, Amazon oder Minio benutzt werden. Er ist aber auskommentiert,
+ * da hier die Credentials fest verdrahtet sind.
  */
-public class CephTest {
-    private final static Logger LOGGER = LoggerFactory.getLogger(CephTest.class);
+public class DirectAmazonS3Test {
+    private final static Logger LOGGER = LoggerFactory.getLogger(DirectAmazonS3Test.class);
     private AmazonS3AccessKey accessKey = new AmazonS3AccessKey("V8AC3QWHH8EEANV7UBPD");
     private AmazonS3SecretKey secretKey = new AmazonS3SecretKey("mDFxMKg1uFzQLtW4wNOH7RSPjTg9OE3uBFbA5hi0");
     private String urlString = "http://192.168.178.60:8000";

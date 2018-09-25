@@ -16,6 +16,7 @@ public class MongoParamParser {
     private Integer port=27017;
     private String databasename = "mongodb";
     private final static String DELIMITER = ",";
+    private final static String EXPECTED_PARAMS = "<host>,<port>,<databasename>";
 
     public MongoParamParser(String params) {
 
@@ -29,7 +30,7 @@ public class MongoParamParser {
                 databasename = st.nextToken();
             }
         } catch (Exception e) {
-            throw new ParamParserException(params, DELIMITER);
+            throw new ParamParserException(params, DELIMITER, EXPECTED_PARAMS);
         }
     }
 

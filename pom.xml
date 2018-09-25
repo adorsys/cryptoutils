@@ -3,7 +3,7 @@
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>de.adorsys.cryptoutils</groupId>
 	<artifactId>cryptoutils</artifactId>
-	<version>0.20.1</version>
+	<version>0.20.2</version>
     <name>Cryptographic helpers for Secure Banking</name>
     <description>Utility Components for the development of secure banking modules. Components developed under this tree
         are released as jar.
@@ -73,11 +73,7 @@
                 <artifactId>storeconnection-impls</artifactId>
                 <version>${project.version}</version>
             </dependency>
-            <dependency>
-                <groupId>de.adorsys.cryptoutils</groupId>
-                <artifactId>mongodbstoreconnection</artifactId>
-                <version>${project.version}</version>
-            </dependency>
+
             <dependency>
                 <groupId>de.adorsys.cryptoutils</groupId>
                 <artifactId>filesystemstoreconnection</artifactId>
@@ -88,6 +84,17 @@
                 <artifactId>miniostoreconnection</artifactId>
                 <version>${project.version}</version>
             </dependency>
+            <dependency>
+                <groupId>de.adorsys.cryptoutils</groupId>
+                <artifactId>mongodbstoreconnection</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>de.adorsys.cryptoutils</groupId>
+                <artifactId>amazons3storeconnection</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+
             <dependency>
                 <groupId>de.adorsys.cryptoutils</groupId>
                 <artifactId>storeconnectionfactory</artifactId>

@@ -233,6 +233,7 @@ public class StorageMetaDataTest {
             byte[] documentContent = "Einfach nur a bisserl Text".getBytes();
             Payload payload = new SimplePayloadImpl(storageMetadata, documentContent);
             s.createContainer(bucketPath.getBucketDirectory());
+            containers.add(bucketPath.getBucketDirectory());
             s.putBlob(bucketPath, payload);
             StorageMetadata storageMetadata1 = s.getStorageMetadata(bucketPath);
             s.getBlob(bucketPath, storageMetadata1);
@@ -282,7 +283,8 @@ public class StorageMetaDataTest {
     public static final String CREATION_DATE = "2018-02-20-14:54:18";
     public static final String MODIFIED_DATE = "2018-02-20-14:54:41";
     public static final String ISO3166_CODE = "Iso3166Code";
-    public static final int NUMBER_OF_ISOCODECS = 5;
+    public static final int NUMBER_OF_ISOCODECS = 1;
+    public static final int NUMBER_OF_KEY_VALUE_PAIRS = 4;
     public static final String SHOULD_BE_COMPRESSED = "true";
     public static final String CONTENT_TYPE = "application/xml";
 
@@ -317,8 +319,8 @@ public class StorageMetaDataTest {
 
                 }
                 storageMetadata.setUri(java.net.URI.create(URI_VALUE));
-                for (int i = 0; i < 10; i++) {
-                    storageMetadata.getUserMetadata().put("key_" + i + " mit json elementen: " + JSON_STRING_ELEMENT, JSON_STRING_ELEMENT);
+                for (int i = 0; i < NUMBER_OF_KEY_VALUE_PAIRS; i++) {
+                    storageMetadata.getUserMetadata().put("key_" + i, JSON_STRING_ELEMENT);
                 }
             }
             // StorageMetaData
@@ -413,7 +415,7 @@ public class StorageMetaDataTest {
                 }
             }
             {
-                if (m1.getUserMetadata().keySet().size() != m2.getUserMetadata().keySet().size() || m1.getUserMetadata().keySet().size() != 10) {
+                if (m1.getUserMetadata().keySet().size() != m2.getUserMetadata().keySet().size() || m1.getUserMetadata().keySet().size() != NUMBER_OF_KEY_VALUE_PAIRS) {
                     LOGGER.debug("User MetaData Anzahl Element stimmt nicht " + m1.getUserMetadata().keySet().size() + " "
                             + m2.getUserMetadata().keySet().size() + " " + 10);
                     fehler += 1;
@@ -481,6 +483,7 @@ public class StorageMetaDataTest {
                         + "This tests requires the logfilefile to succeed.");
             }
             return Files.lines(Paths.get(logfilename))
+                    .filter(line -> line.indexOf("SPECIAL_LOGGER") != -1)
                     .filter(line -> line.indexOf("readmetadata ") != -1)
                     .filter(line -> line.indexOf(searchname) != -1)
                     .collect(Collectors.toSet())

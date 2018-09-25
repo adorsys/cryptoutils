@@ -1,6 +1,6 @@
 package org.adorsys.cryptoutils.storeconnectionfactory;
 
-import org.adorsys.cryptoutils.extendendstoreconnection.impl.ceph.CephParamParser;
+import org.adorsys.cryptoutils.extendendstoreconnection.impl.amazons3.AmazonS3ParamParser;
 import org.adorsys.cryptoutils.miniostoreconnection.MinioParamParser;
 import org.adorsys.cryptoutils.mongodbstoreconnection.MongoParamParser;
 import org.adorsys.encobject.filesystem.FileSystemParamParser;
@@ -12,7 +12,7 @@ public class StoreConnectionFactoryConfig {
 
     public ConnectionType connectionType = ConnectionType.FILE_SYSTEM;
     public MinioParamParser minioParams = null;
-    public CephParamParser cephParams = null;
+    public AmazonS3ParamParser amazonS3Params = null;
     public MongoParamParser mongoParams = null;
     public FileSystemParamParser fileSystemParamParser = new FileSystemParamParser("");
 
@@ -20,6 +20,6 @@ public class StoreConnectionFactoryConfig {
         FILE_SYSTEM,
         MONGO,
         MINIO,
-        CEPH
+        AMAZONS3
     }
 }

@@ -51,7 +51,7 @@ public class AmazonS3ExtendedStoreConnection implements ExtendedStoreConnection 
     private final static String CEPH_TMP_FILE_SUFFIX = "";
     private static final String STORAGE_METADATA_KEY = "StorageMetadata";
     private StorageMetadataFlattenerGSON gsonHelper = new StorageMetadataFlattenerGSON();
-    private final static int  AMAZON_S3_META_LIMIT = 1024*4;
+    private final static int  AMAZON_S3_META_LIMIT = 1024*2;
 
     public AmazonS3ExtendedStoreConnection(URL url, AmazonS3AccessKey accessKey, AmazonS3SecretKey secretKey, AmazonS3Region amazonS3Region) {
         Frame frame = new Frame();

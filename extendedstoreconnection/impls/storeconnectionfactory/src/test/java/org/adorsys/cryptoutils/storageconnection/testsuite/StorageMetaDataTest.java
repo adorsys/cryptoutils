@@ -233,6 +233,7 @@ public class StorageMetaDataTest {
             byte[] documentContent = "Einfach nur a bisserl Text".getBytes();
             Payload payload = new SimplePayloadImpl(storageMetadata, documentContent);
             s.createContainer(bucketPath.getBucketDirectory());
+            containers.add(bucketPath.getBucketDirectory());
             s.putBlob(bucketPath, payload);
             StorageMetadata storageMetadata1 = s.getStorageMetadata(bucketPath);
             s.getBlob(bucketPath, storageMetadata1);

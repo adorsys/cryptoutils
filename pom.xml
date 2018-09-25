@@ -73,11 +73,7 @@
                 <artifactId>storeconnection-impls</artifactId>
                 <version>${project.version}</version>
             </dependency>
-            <dependency>
-                <groupId>de.adorsys.cryptoutils</groupId>
-                <artifactId>mongodbstoreconnection</artifactId>
-                <version>${project.version}</version>
-            </dependency>
+
             <dependency>
                 <groupId>de.adorsys.cryptoutils</groupId>
                 <artifactId>filesystemstoreconnection</artifactId>
@@ -88,6 +84,17 @@
                 <artifactId>miniostoreconnection</artifactId>
                 <version>${project.version}</version>
             </dependency>
+            <dependency>
+                <groupId>de.adorsys.cryptoutils</groupId>
+                <artifactId>mongodbstoreconnection</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>de.adorsys.cryptoutils</groupId>
+                <artifactId>amazons3storeconnection</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+
             <dependency>
                 <groupId>de.adorsys.cryptoutils</groupId>
                 <artifactId>storeconnectionfactory</artifactId>

@@ -27,7 +27,7 @@
         </dependency>
         <dependency>
             <groupId>de.adorsys.cryptoutils</groupId>
-            <artifactId>cephstoreconnection</artifactId>
+            <artifactId>amazons3storeconnection</artifactId>
         </dependency>
 
         <dependency>
@@ -66,8 +66,7 @@
         </dependency>
         <dependency>
             <groupId>de.adorsys.cryptoutils</groupId>
-            <artifactId>cephstoreconnection</artifactId>
-            <version>0.20.2-SNAPSHOT</version>
+            <artifactId>amazons3storeconnection</artifactId>
         </dependency>
 
     </dependencies>

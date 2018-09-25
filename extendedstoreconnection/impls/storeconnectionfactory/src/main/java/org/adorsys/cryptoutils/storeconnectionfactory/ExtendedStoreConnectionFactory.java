@@ -1,17 +1,13 @@
 package org.adorsys.cryptoutils.storeconnectionfactory;
 
 import org.adorsys.cryptoutils.exceptions.BaseException;
-import org.adorsys.cryptoutils.extendendstoreconnection.impl.ceph.CephExtendedStoreConnection;
+import org.adorsys.cryptoutils.extendendstoreconnection.impl.amazons3.AmazonS3ExtendedStoreConnection;
 import org.adorsys.cryptoutils.miniostoreconnection.MinioExtendedStoreConnection;
 import org.adorsys.cryptoutils.mongodbstoreconnection.MongoDBExtendedStoreConnection;
-import org.adorsys.cryptoutils.utils.Frame;
 import org.adorsys.encobject.filesystem.FileSystemExtendedStorageConnection;
 import org.adorsys.encobject.service.api.ExtendedStoreConnection;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import java.util.ArrayList;
-import java.util.List;
 
 /**
  * Created by peter on 15.03.18 at 11:38.
@@ -39,11 +35,12 @@ public class ExtendedStoreConnectionFactory {
                         config.minioParams.getMinioSecretKey(),
                         config.minioParams.getRootBucketName());
 
-            case CEPH:
-                return new CephExtendedStoreConnection(
+            case AMAZONS3:
+                return new AmazonS3ExtendedStoreConnection(
                         config.cephParams.getUrl(),
-                        config.cephParams.getMinioAccessKey(),
-                        config.cephParams.getMinioSecretKey());
+                        config.cephParams.getAmazonS3AccessKey(),
+                        config.cephParams.getAmazonS3SecretKey(),
+                        config.cephParams.getAmazonS3Region());
 
             case FILE_SYSTEM:
                 return new FileSystemExtendedStorageConnection(

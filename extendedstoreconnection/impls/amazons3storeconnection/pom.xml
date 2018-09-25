@@ -8,7 +8,7 @@
         <version>0.20.2-SNAPSHOT</version>
     </parent>
 
-    <artifactId>cephstoreconnection</artifactId>
+    <artifactId>amazons3storeconnection</artifactId>
 
     <properties>
         <maven.compiler.source>1.8</maven.compiler.source>
@@ -17,7 +17,7 @@
     </properties>
 
     <build>
-        <finalName>cephstoreconnection</finalName>
+        <finalName>amazons3storeconnection</finalName>
         <plugins>
             <plugin>
                 <groupId>com.github.os72</groupId>

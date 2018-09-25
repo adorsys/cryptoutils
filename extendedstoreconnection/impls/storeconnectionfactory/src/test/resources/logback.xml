@@ -38,7 +38,7 @@
 
 
     <!-- can be changed or removed -->
-    <logger name="org.adorsys.cryptoutils." level="info" additivity="false">
+    <logger name="org.adorsys" level="debug" additivity="false">
         <appender-ref ref="STDOUT" />
         <appender-ref ref="FILE" />
     </logger>

@@ -1,4 +1,4 @@
-package org.adorsys.cryptoutils.extendendstoreconnection.impl.ceph;
+package org.adorsys.cryptoutils.extendendstoreconnection.impl.amazons3;
 
 import com.amazonaws.ClientConfiguration;
 import com.amazonaws.Protocol;
@@ -43,22 +43,24 @@ import java.util.*;
 /**
  * Created by peter on 17.09.18.
  */
-public class CephExtendedStoreConnection implements ExtendedStoreConnection {
-    private final static Logger LOGGER = LoggerFactory.getLogger(CephExtendedStoreConnection.class);
+public class AmazonS3ExtendedStoreConnection implements ExtendedStoreConnection {
+    private final static Logger LOGGER = LoggerFactory.getLogger(AmazonS3ExtendedStoreConnection.class);
     private static final Logger SPECIAL_LOGGER = LoggerFactory.getLogger("SPECIAL_LOGGER");
     private AmazonS3 connection = null;
     private final static String CEPH_TMP_FILE_PREFIX = "CEPH_TMP_FILE_";
     private final static String CEPH_TMP_FILE_SUFFIX = "";
     private static final String STORAGE_METADATA_KEY = "StorageMetadata";
     private StorageMetadataFlattenerGSON gsonHelper = new StorageMetadataFlattenerGSON();
+    private final static int  AMAZON_S3_META_LIMIT = 1024*4;
 
-    public CephExtendedStoreConnection(URL url, AmazonS3AccessKey accessKey, AmazonS3SecretKey secretKey) {
+    public AmazonS3ExtendedStoreConnection(URL url, AmazonS3AccessKey accessKey, AmazonS3SecretKey secretKey, AmazonS3Region amazonS3Region) {
         Frame frame = new Frame();
-        frame.add("USE CEPH SYSTEM");
+        frame.add("USE AMAZON S3 SYSTEM");
         frame.add("(ceph has be up and running )");
         frame.add("url: " + url.toString());
         frame.add("accessKey: " + accessKey.getValue());
         frame.add("secretKey: " + secretKey.getValue());
+        frame.add("region:    " + amazonS3Region.getValue());
         LOGGER.info(frame.toString());
         new BaseException("JUST A STACK, TO SEE WHERE THE CONNECTION IS CREATED");
 
@@ -75,7 +77,7 @@ public class CephExtendedStoreConnection implements ExtendedStoreConnection {
             }
         };
 
-        AwsClientBuilder.EndpointConfiguration endpoint = new AwsClientBuilder.EndpointConfiguration(url.toString(), "US");
+        AwsClientBuilder.EndpointConfiguration endpoint = new AwsClientBuilder.EndpointConfiguration(url.toString(), amazonS3Region.getValue());
 
         ClientConfiguration clientConfig = new ClientConfiguration();
         // clientConfig.setSocketTimeout(10000);
@@ -398,6 +400,12 @@ public class CephExtendedStoreConnection implements ExtendedStoreConnection {
         String metadataAsHexString = HexUtil.convertBytesToHexString(metadataAsString.getBytes());
         Map<String, String> userMetaData = new HashMap<>();
         userMetaData.put(STORAGE_METADATA_KEY, metadataAsHexString);
+        int sizeOfMetadataHexString =  metadataAsHexString.length();
+        if (sizeOfMetadataHexString > AMAZON_S3_META_LIMIT) {
+            throw new BaseException("Die Metadaten haben im HexFormat eine Länge von " + sizeOfMetadataHexString + ". Das Limit liegt aber bei " +  AMAZON_S3_META_LIMIT + ". Der original String der Daten ist " + metadataAsString.length() + " Zeichen groß. Hier die Daten:"  + metadataAsString);
+        } else {
+            LOGGER.debug("SIZE OF METADATA IS IN HEXFORMAT " + sizeOfMetadataHexString);
+        }
         ObjectMetadata objectMetadata = new ObjectMetadata();
         objectMetadata.setUserMetadata(userMetaData);
         return objectMetadata;

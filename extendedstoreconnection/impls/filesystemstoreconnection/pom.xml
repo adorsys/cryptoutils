@@ -68,6 +68,11 @@
             <groupId>de.adorsys.cryptoutils</groupId>
             <artifactId>storeconnection-api</artifactId>
         </dependency>
+        <dependency>
+            <groupId>de.adorsys.cryptoutils</groupId>
+            <artifactId>pathencryption</artifactId>
+        </dependency>
+
 
         <dependency>
             <groupId>com.google.code.gson</groupId>

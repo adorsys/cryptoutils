@@ -69,6 +69,10 @@
             <artifactId>storeconnection-api</artifactId>
         </dependency>
         <dependency>
+            <groupId>de.adorsys.cryptoutils</groupId>
+            <artifactId>pathencryption</artifactId>
+        </dependency>
+        <dependency>
             <groupId>com.amazonaws</groupId>
             <artifactId>aws-java-sdk-core</artifactId>
             <version>${amazon.aws.version}</version>

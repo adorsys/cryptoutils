@@ -17,6 +17,7 @@
         <module>mongodbstoreconnection</module>
         <module>miniostoreconnection</module>
         <module>storeconnectionfactory</module>
+        <module>pathencryption</module>
     </modules>
 
     <packaging>pom</packaging>

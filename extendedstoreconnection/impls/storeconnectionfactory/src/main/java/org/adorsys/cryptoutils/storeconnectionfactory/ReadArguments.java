@@ -5,6 +5,7 @@ import org.adorsys.cryptoutils.extendendstoreconnection.impl.amazons3.AmazonS3Pa
 import org.adorsys.cryptoutils.miniostoreconnection.MinioParamParser;
 import org.adorsys.cryptoutils.mongodbstoreconnection.MongoParamParser;
 import org.adorsys.encobject.filesystem.FileSystemParamParser;
+import org.adorsys.encobject.types.BucketPathEncryptionPassword;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -22,11 +23,15 @@ public class ReadArguments {
     public static final String MINIO = "SC-MINIO";
     public static final String AMAZONS3 = "SC-AMAZONS3";
     public static final String FILESYSTEM = "SC-FILESYSTEM";
+    public static final String ENCRYPTION_PASSWORD = "SC-ENCRYPTION-PASSWORD";
+    public static final String NO_ENCRYPTION_PASSWORD = "SC-NO-ENCRYPTION-PASSWORD";
 
     public static final String MONGO_ARG = SYSTEM_PROPERTY_PREFIX + MONGO + "=";
     public static final String MINIO_ARG = SYSTEM_PROPERTY_PREFIX + MINIO + "=";
     public static final String AMAZONS3_ARG = SYSTEM_PROPERTY_PREFIX + AMAZONS3 + "=";
     public static final String FILESYSTEM_ARG = SYSTEM_PROPERTY_PREFIX + FILESYSTEM + "=";
+    public static final String ENCRYPTION_PASSWORD_ARG = SYSTEM_PROPERTY_PREFIX + ENCRYPTION_PASSWORD + "=";
+    public static final String NO_ENCRYPTION_PASSWORD_ARG = SYSTEM_PROPERTY_PREFIX + NO_ENCRYPTION_PASSWORD + "=";
 
     public ArgsAndConfig readArguments(String[] args) {
         Arrays.stream(args).forEach(arg -> LOGGER.debug("readArguments arg:" + arg));
@@ -47,6 +52,10 @@ public class ReadArguments {
                     } else if (arg.startsWith(FILESYSTEM_ARG)) {
                         config.connectionType = StoreConnectionFactoryConfig.ConnectionType.FILE_SYSTEM;
                         config.fileSystemParamParser = new FileSystemParamParser(arg.substring(FILESYSTEM_ARG.length()));
+                    } else if (arg.startsWith(ENCRYPTION_PASSWORD_ARG)) {
+                        config.bucketPathEncryptionPassword = new BucketPathEncryptionPassword(arg.substring(ENCRYPTION_PASSWORD_ARG.length()));
+                    } else if (arg.startsWith(NO_ENCRYPTION_PASSWORD_ARG)) {
+                        config.bucketPathEncryptionPassword = null;
                     } else {
                         remainingArgs.add(arg);
                     }
@@ -81,6 +90,12 @@ public class ReadArguments {
                 config.connectionType = StoreConnectionFactoryConfig.ConnectionType.FILE_SYSTEM;
                 config.fileSystemParamParser = new FileSystemParamParser(System.getProperty(FILESYSTEM));
                 return config;
+            }
+            if (System.getProperty(ENCRYPTION_PASSWORD) != null) {
+                config.bucketPathEncryptionPassword = new BucketPathEncryptionPassword(System.getProperty(ENCRYPTION_PASSWORD));
+            }
+            if (System.getProperty(NO_ENCRYPTION_PASSWORD) != null) {
+                config.bucketPathEncryptionPassword = null;
             }
             config.connectionType = StoreConnectionFactoryConfig.ConnectionType.FILE_SYSTEM;
             config.fileSystemParamParser = new FileSystemParamParser("");

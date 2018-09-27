@@ -284,7 +284,7 @@ public class StorageMetaDataTest {
     public static final String MODIFIED_DATE = "2018-02-20-14:54:41";
     public static final String ISO3166_CODE = "Iso3166Code";
     public static final int NUMBER_OF_ISOCODECS = 1;
-    public static final int NUMBER_OF_KEY_VALUE_PAIRS = 4;
+    public static final int NUMBER_OF_KEY_VALUE_PAIRS = 1;
     public static final String SHOULD_BE_COMPRESSED = "true";
     public static final String CONTENT_TYPE = "application/xml";
 
@@ -476,6 +476,8 @@ public class StorageMetaDataTest {
     }
 
     private int countReadMetaData(String logfilename, String searchname) {
+        // Seit die Pfade verschluesselt werden, ist es nicht mehr moeglich nach dem namen zu suchen.
+        // In der Annahme, dass die Tests nicht parallel laufen, reicht es, nur das tag zu suchen
         try {
             if (!new File(logfilename).exists()) {
                 throw new BaseException("logfile " + logfilename + " not found. I am in "
@@ -485,7 +487,7 @@ public class StorageMetaDataTest {
             return Files.lines(Paths.get(logfilename))
                     .filter(line -> line.indexOf("SPECIAL_LOGGER") != -1)
                     .filter(line -> line.indexOf("readmetadata ") != -1)
-                    .filter(line -> line.indexOf(searchname) != -1)
+             //       .filter(line -> line.indexOf(searchname) != -1)
                     .collect(Collectors.toSet())
                     .size();
         } catch (Exception e) {

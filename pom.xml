@@ -3,7 +3,7 @@
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>de.adorsys.cryptoutils</groupId>
 	<artifactId>cryptoutils</artifactId>
-	<version>0.20.2</version>
+	<version>0.21.0</version>
     <name>Cryptographic helpers for Secure Banking</name>
     <description>Utility Components for the development of secure banking modules. Components developed under this tree
         are released as jar.
@@ -58,6 +58,11 @@
 
     <dependencyManagement>
         <dependencies>
+            <dependency>
+                <groupId>de.adorsys.cryptoutils</groupId>
+                <artifactId>pathencryption</artifactId>
+                <version>${project.version}</version>
+            </dependency>
             <dependency>
                 <groupId>de.adorsys.cryptoutils</groupId>
                 <artifactId>extendedstoreconnection</artifactId>
@@ -170,14 +175,8 @@
             <dependency>
                 <groupId>junit</groupId>
                 <artifactId>junit</artifactId>
-                <version>4.10</version>
+                <version>4.12</version>
                 <scope>test</scope>
-                <exclusions>
-                    <exclusion>
-                        <groupId>org.hamcrest</groupId>
-                        <artifactId>hamcrest-core</artifactId>
-                    </exclusion>
-                </exclusions>
             </dependency>
 
             <dependency>

@@ -1,6 +1,5 @@
 package org.adorsys.cryptoutils.miniostoreconnection;
 
-import org.adorsys.cryptoutils.exceptions.BaseExceptionHandler;
 import org.adorsys.encobject.exceptions.ParamParserException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

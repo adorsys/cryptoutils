@@ -26,14 +26,16 @@ public class ExtendedStoreConnectionFactory {
                 return new MongoDBExtendedStoreConnection(
                         config.mongoParams.getHost(),
                         config.mongoParams.getPort(),
-                        config.mongoParams.getDatabasename());
+                        config.mongoParams.getDatabasename(),
+                        config.bucketPathEncryptionPassword);
 
             case MINIO:
                 return new MinioExtendedStoreConnection(
                         config.minioParams.getUrl(),
                         config.minioParams.getMinioAccessKey(),
                         config.minioParams.getMinioSecretKey(),
-                        config.minioParams.getRootBucketName());
+                        config.minioParams.getRootBucketName(),
+                        config.bucketPathEncryptionPassword);
 
             case AMAZONS3:
                 return new AmazonS3ExtendedStoreConnection(
@@ -41,11 +43,13 @@ public class ExtendedStoreConnectionFactory {
                         config.amazonS3Params.getAmazonS3AccessKey(),
                         config.amazonS3Params.getAmazonS3SecretKey(),
                         config.amazonS3Params.getAmazonS3Region(),
-                        config.amazonS3Params.getAmazonS3RootBucket());
+                        config.amazonS3Params.getAmazonS3RootBucket(),
+                        config.bucketPathEncryptionPassword);
 
             case FILE_SYSTEM:
                 return new FileSystemExtendedStorageConnection(
-                        config.fileSystemParamParser.getFilesystembase());
+                        config.fileSystemParamParser.getFilesystembase(),
+                        config.bucketPathEncryptionPassword);
 
             default:
                 throw new BaseException("missing switch");

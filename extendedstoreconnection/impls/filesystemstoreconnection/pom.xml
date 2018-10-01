@@ -5,7 +5,7 @@
     <parent>
         <groupId>de.adorsys.cryptoutils</groupId>
         <artifactId>storeconnection-impls</artifactId>
-        <version>0.21.0</version>
+        <version>0.21.1</version>
     </parent>
 
     <artifactId>filesystemstoreconnection</artifactId>

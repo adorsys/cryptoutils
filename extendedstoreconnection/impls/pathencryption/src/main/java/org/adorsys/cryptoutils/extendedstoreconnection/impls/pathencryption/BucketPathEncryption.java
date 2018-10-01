@@ -20,6 +20,7 @@ import java.util.StringTokenizer;
 
 /**
  * Created by peter on 25.09.18.
+ * Quellcode aus https://blog.axxg.de/java-aes-verschluesselung-mit-beispiel/
  */
 public class BucketPathEncryption {
     private final static Logger LOGGER = LoggerFactory.getLogger(BucketPathEncryption.class);

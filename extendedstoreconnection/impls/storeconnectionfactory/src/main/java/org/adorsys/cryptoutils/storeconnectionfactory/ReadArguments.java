@@ -31,7 +31,7 @@ public class ReadArguments {
     public static final String AMAZONS3_ARG = SYSTEM_PROPERTY_PREFIX + AMAZONS3 + "=";
     public static final String FILESYSTEM_ARG = SYSTEM_PROPERTY_PREFIX + FILESYSTEM + "=";
     public static final String ENCRYPTION_PASSWORD_ARG = SYSTEM_PROPERTY_PREFIX + ENCRYPTION_PASSWORD + "=";
-    public static final String NO_ENCRYPTION_PASSWORD_ARG = SYSTEM_PROPERTY_PREFIX + NO_ENCRYPTION_PASSWORD + "=";
+    public static final String NO_ENCRYPTION_PASSWORD_ARG = SYSTEM_PROPERTY_PREFIX + NO_ENCRYPTION_PASSWORD;
 
     public ArgsAndConfig readArguments(String[] args) {
         Arrays.stream(args).forEach(arg -> LOGGER.debug("readArguments arg:" + arg));
@@ -71,6 +71,12 @@ public class ReadArguments {
 
         try {
             StoreConnectionFactoryConfig config = new StoreConnectionFactoryConfig();
+            if (System.getProperty(ENCRYPTION_PASSWORD) != null) {
+                config.bucketPathEncryptionPassword = new BucketPathEncryptionPassword(System.getProperty(ENCRYPTION_PASSWORD));
+            }
+            if (System.getProperty(NO_ENCRYPTION_PASSWORD) != null) {
+                config.bucketPathEncryptionPassword = null;
+            }
             if (System.getProperty(MONGO) != null) {
                 config.connectionType = StoreConnectionFactoryConfig.ConnectionType.MONGO;
                 config.mongoParams = new MongoParamParser(System.getProperty(MONGO));
@@ -90,12 +96,6 @@ public class ReadArguments {
                 config.connectionType = StoreConnectionFactoryConfig.ConnectionType.FILE_SYSTEM;
                 config.fileSystemParamParser = new FileSystemParamParser(System.getProperty(FILESYSTEM));
                 return config;
-            }
-            if (System.getProperty(ENCRYPTION_PASSWORD) != null) {
-                config.bucketPathEncryptionPassword = new BucketPathEncryptionPassword(System.getProperty(ENCRYPTION_PASSWORD));
-            }
-            if (System.getProperty(NO_ENCRYPTION_PASSWORD) != null) {
-                config.bucketPathEncryptionPassword = null;
             }
             config.connectionType = StoreConnectionFactoryConfig.ConnectionType.FILE_SYSTEM;
             config.fileSystemParamParser = new FileSystemParamParser("");

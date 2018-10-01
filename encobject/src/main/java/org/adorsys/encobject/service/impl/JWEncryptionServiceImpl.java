@@ -47,7 +47,7 @@ public class JWEncryptionServiceImpl implements EncryptionService {
             }
 
             JWEHeader header = headerBuilder.build();
-            JWEEncrypter jweEncrypter = JWEEncryptedSelector.geEncrypter(key, encParams.getEncAlgo(), encParams.getEncMethod());
+            JWEEncrypter jweEncrypter = JWEEncryptedSelector.getEncrypter(key, encParams.getEncAlgo(), encParams.getEncMethod());
 
             JWEObject jweObject = new JWEObject(header, new Payload(data));
             jweObject.encrypt(jweEncrypter);

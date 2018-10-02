@@ -86,7 +86,15 @@ public class JWEEncryptedSelector {
 			}
 		}
 
-		throw new UnsupportedEncAlgorithmException("Unknown Algorithm");
+		throw new UnsupportedEncAlgorithmException("Unknown Algorithm " + encAlgo.getName() + " and EncryptionMethod " + encMethod.getName());
+	}
+
+	public static boolean isSupportedByAesCrypter(JWEAlgorithm encAlgo, EncryptionMethod encMethod) {
+		return AESEncrypter.SUPPORTED_ALGORITHMS.contains(encAlgo) && AESEncrypter.SUPPORTED_ENCRYPTION_METHODS.contains(encMethod);
+	}
+
+	public static boolean isSupportedByRsaCrypter(JWEAlgorithm encAlgo, EncryptionMethod encMethod) {
+		return RSAEncrypter.SUPPORTED_ALGORITHMS.contains(encAlgo) && RSAEncrypter.SUPPORTED_ENCRYPTION_METHODS.contains(encMethod);
 	}
 
 	/**

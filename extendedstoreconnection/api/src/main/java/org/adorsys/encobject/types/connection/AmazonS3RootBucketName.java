@@ -1,4 +1,4 @@
-package org.adorsys.cryptoutils.extendendstoreconnection.impl.amazons3;
+package org.adorsys.encobject.types.connection;
 
 import org.adorsys.cryptoutils.basetypes.BaseTypeString;
 
@@ -7,8 +7,8 @@ import org.adorsys.cryptoutils.basetypes.BaseTypeString;
  * Entspricht einem pyhsischen Bucket, dieser ist für die Benutzer der Schnittstelle transaprent. Alle in
  * der Schnittstelle angelegten Buckets liegen unterhalb dieses Buckets
  */
-public class AmazonS3RootBucket extends BaseTypeString {
-    public AmazonS3RootBucket(String s) {
+public class AmazonS3RootBucketName extends BaseTypeString {
+    public AmazonS3RootBucketName(String s) {
         super (s);
     }
 }

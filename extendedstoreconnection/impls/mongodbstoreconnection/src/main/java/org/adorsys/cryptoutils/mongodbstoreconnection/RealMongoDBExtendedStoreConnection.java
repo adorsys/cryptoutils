@@ -32,6 +32,9 @@ import org.adorsys.encobject.service.impl.SimplePayloadStreamImpl;
 import org.adorsys.encobject.service.impl.SimpleStorageMetadataImpl;
 import org.adorsys.encobject.service.impl.StoreConnectionListHelper;
 import org.adorsys.encobject.types.ListRecursiveFlag;
+import org.adorsys.encobject.types.connection.MongoDatabaseName;
+import org.adorsys.encobject.types.connection.MongoHost;
+import org.adorsys.encobject.types.connection.MongoPort;
 import org.apache.commons.io.IOUtils;
 import org.bson.Document;
 import org.bson.types.ObjectId;
@@ -64,7 +67,7 @@ class RealMongoDBExtendedStoreConnection implements ExtendedStoreConnection {
     private DB databaseDeprecated;
     protected StorageMetadataFlattenerGSON gsonHelper = new StorageMetadataFlattenerGSON();
 
-    public RealMongoDBExtendedStoreConnection(String host, Integer port, String databasename) {
+    public RealMongoDBExtendedStoreConnection(MongoHost host, MongoPort port, MongoDatabaseName databasename) {
         Frame frame = new Frame();
         frame.add("USE MONGO DB");
         frame.add("mongo db has be up and running )");
@@ -73,9 +76,9 @@ class RealMongoDBExtendedStoreConnection implements ExtendedStoreConnection {
         frame.add("database: " + databasename);
         LOGGER.info(frame.toString());
 
-        MongoClient mongoClient = new MongoClient(host, port);
-        database = mongoClient.getDatabase(databasename);
-        databaseDeprecated = mongoClient.getDB(databasename);
+        MongoClient mongoClient = new MongoClient(host.getValue(), port.getValue().intValue());
+        database = mongoClient.getDatabase(databasename.getValue());
+        databaseDeprecated = mongoClient.getDB(databasename.getValue());
     }
 
     @Override

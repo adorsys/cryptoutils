@@ -27,6 +27,10 @@ import org.adorsys.encobject.service.impl.SimplePayloadImpl;
 import org.adorsys.encobject.service.impl.SimplePayloadStreamImpl;
 import org.adorsys.encobject.service.impl.SimpleStorageMetadataImpl;
 import org.adorsys.encobject.types.ListRecursiveFlag;
+import org.adorsys.encobject.types.connection.AmazonS3AccessKey;
+import org.adorsys.encobject.types.connection.AmazonS3Region;
+import org.adorsys.encobject.types.connection.AmazonS3RootBucketName;
+import org.adorsys.encobject.types.connection.AmazonS3SecretKey;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
@@ -56,9 +60,9 @@ class RealAmazonS3ExtendedStoreConnection implements ExtendedStoreConnection {
     private BucketDirectory amazonS3RootContainersBucket;
     private AmazonS3Region amazonS3Region;
 
-    public RealAmazonS3ExtendedStoreConnection(URL url, AmazonS3AccessKey accessKey, AmazonS3SecretKey secretKey, AmazonS3Region anAmazonS3Region, AmazonS3RootBucket anAmazonS3RootBucket) {
+    public RealAmazonS3ExtendedStoreConnection(URL url, AmazonS3AccessKey accessKey, AmazonS3SecretKey secretKey, AmazonS3Region anAmazonS3Region, AmazonS3RootBucketName anAmazonS3RootBucketName) {
         amazonS3Region = anAmazonS3Region;
-        amazonS3RootBucket = new BucketDirectory(anAmazonS3RootBucket.getValue());
+        amazonS3RootBucket = new BucketDirectory(anAmazonS3RootBucketName.getValue());
         amazonS3RootContainersBucket = new BucketDirectory(amazonS3RootBucket.getObjectHandle().getContainer() + ".containers");
         Frame frame = new Frame();
         frame.add("USE AMAZON S3 COMPLIANT SYSTEM");

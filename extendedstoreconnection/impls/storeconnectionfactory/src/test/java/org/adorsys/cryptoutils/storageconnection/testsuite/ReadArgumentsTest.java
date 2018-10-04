@@ -1,9 +1,8 @@
 package org.adorsys.cryptoutils.storageconnection.testsuite;
 
 import org.adorsys.cryptoutils.exceptions.BaseException;
-import org.adorsys.cryptoutils.storeconnectionfactory.ExtendedStoreConnectionFactory;
 import org.adorsys.cryptoutils.storeconnectionfactory.ReadArguments;
-import org.adorsys.cryptoutils.storeconnectionfactory.StoreConnectionFactoryConfig;
+import org.adorsys.encobject.types.properties.*;
 import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
@@ -49,102 +48,98 @@ public class ReadArgumentsTest {
     @Test
     public void testEnvMinio1() {
         System.setProperty(ReadArguments.MINIO, "http://localhost,accesskey,secretkey");
-        StoreConnectionFactoryConfig config = new ReadArguments().readEnvironment();
-        Assert.assertEquals(StoreConnectionFactoryConfig.ConnectionType.MINIO, config.connectionType);
-        Assert.assertTrue(config.bucketPathEncryptionPassword != null);
+        ConnectionProperties properties = new ReadArguments().readEnvironment();
+        Assert.assertTrue(properties instanceof  MinioConnectionProperties);
+        Assert.assertTrue(properties.getBucketPathEncryptionPassword() != null);
     }
 
     @Test(expected = BaseException.class)
     public void testEnvMinioWrong() {
         System.setProperty(ReadArguments.MINIO, "http://localhost accesskey,secretkey");
-        StoreConnectionFactoryConfig config = new ReadArguments().readEnvironment();
-        Assert.assertEquals(StoreConnectionFactoryConfig.ConnectionType.MINIO, config.connectionType);
-        Assert.assertTrue(config.bucketPathEncryptionPassword != null);
+        ConnectionProperties properties = new ReadArguments().readEnvironment();
     }
 
     @Test
     public void testEnvMongo1() {
         System.setProperty(ReadArguments.MONGO, "localhost,123,mongdb");
-        StoreConnectionFactoryConfig config = new ReadArguments().readEnvironment();
-        Assert.assertEquals(StoreConnectionFactoryConfig.ConnectionType.MONGO, config.connectionType);
-        Assert.assertTrue(config.bucketPathEncryptionPassword != null);
+        ConnectionProperties properties = new ReadArguments().readEnvironment();
+        Assert.assertTrue(properties instanceof  MongoConnectionProperties);
+        Assert.assertTrue(properties.getBucketPathEncryptionPassword() != null);
     }
 
     @Test(expected = BaseException.class)
     public void testEnvMongoWrong() {
         System.setProperty(ReadArguments.MONGO, "localhost,123|mongdb");
-        StoreConnectionFactoryConfig config = new ReadArguments().readEnvironment();
-        Assert.assertEquals(StoreConnectionFactoryConfig.ConnectionType.MONGO, config.connectionType);
-        Assert.assertTrue(config.bucketPathEncryptionPassword != null);
+        ConnectionProperties properties = new ReadArguments().readEnvironment();
     }
 
     @Test
     public void testEnvMongo2() {
         System.setProperty(ReadArguments.MONGO, "");
-        StoreConnectionFactoryConfig config = new ReadArguments().readEnvironment();
-        Assert.assertEquals(StoreConnectionFactoryConfig.ConnectionType.MONGO, config.connectionType);
-        Assert.assertTrue(config.bucketPathEncryptionPassword != null);
+        ConnectionProperties properties = new ReadArguments().readEnvironment();
+        Assert.assertTrue(properties instanceof MongoConnectionProperties);
+        Assert.assertTrue(properties.getBucketPathEncryptionPassword() != null);
     }
 
     @Test
     public void testEnvFilesystem1() {
         System.setProperty(ReadArguments.FILESYSTEM, "target/filesystem");
-        StoreConnectionFactoryConfig config = new ReadArguments().readEnvironment();
-        Assert.assertEquals(StoreConnectionFactoryConfig.ConnectionType.FILE_SYSTEM, config.connectionType);
-        Assert.assertTrue(config.bucketPathEncryptionPassword != null);
+        ConnectionProperties properties = new ReadArguments().readEnvironment();
+        Assert.assertTrue(properties instanceof  FilesystemConnectionProperties);
+        Assert.assertTrue(properties.getBucketPathEncryptionPassword() != null);
     }
 
     @Test
     public void testEnvFilesystem2() {
         System.setProperty(ReadArguments.FILESYSTEM, "");
-        StoreConnectionFactoryConfig config = new ReadArguments().readEnvironment();
-        Assert.assertEquals(StoreConnectionFactoryConfig.ConnectionType.FILE_SYSTEM, config.connectionType);
-        Assert.assertTrue(config.bucketPathEncryptionPassword != null);
+        ConnectionProperties properties = new ReadArguments().readEnvironment();
+        Assert.assertTrue(properties instanceof  FilesystemConnectionProperties);
+        Assert.assertTrue(properties.getBucketPathEncryptionPassword() != null);
     }
 
     @Test
     public void testArgMinio1() {
         String[] args = new String[1];
         args[0] = ReadArguments.MINIO_ARG+ "http://localhost,accesskey,secretkey";
-        ReadArguments.ArgsAndConfig argsAndConfig = new ReadArguments().readArguments(args);
-        Assert.assertEquals(0, argsAndConfig.remainingArgs.length);
-        Assert.assertTrue(argsAndConfig.config.bucketPathEncryptionPassword != null);
+        ReadArguments.ArgsAndProperties argsAndProperties = new ReadArguments().readArguments(args);
+        Assert.assertEquals(0, argsAndProperties.remainingArgs.length);
+        Assert.assertTrue(argsAndProperties.properties.getBucketPathEncryptionPassword() != null);
     }
 
     @Test
     public void testArgMongo1() {
         String[] args = new String[1];
         args[0] = ReadArguments.MONGO_ARG + "localhost,123,mongdb";
-        ReadArguments.ArgsAndConfig argsAndConfig = new ReadArguments().readArguments(args);
-        Assert.assertEquals(0, argsAndConfig.remainingArgs.length);
-        Assert.assertTrue(argsAndConfig.config.bucketPathEncryptionPassword != null);
+        ReadArguments.ArgsAndProperties argsAndProperties = new ReadArguments().readArguments(args);
+        Assert.assertEquals(0, argsAndProperties.remainingArgs.length);
+        Assert.assertTrue(argsAndProperties.properties.getBucketPathEncryptionPassword() != null);
     }
 
     @Test
     public void testArgMongo2() {
         String[] args = new String[1];
         args[0] = ReadArguments.MONGO_ARG;
-        ReadArguments.ArgsAndConfig argsAndConfig = new ReadArguments().readArguments(args);
-        Assert.assertEquals(0, argsAndConfig.remainingArgs.length);
-        Assert.assertTrue(argsAndConfig.config.bucketPathEncryptionPassword != null);
+        ReadArguments.ArgsAndProperties argsAndProperties = new ReadArguments().readArguments(args);
+        Assert.assertEquals(0, argsAndProperties.remainingArgs.length);
+        Assert.assertTrue(argsAndProperties.properties.getBucketPathEncryptionPassword() != null);
     }
 
     @Test
     public void testArgFilesystem1() {
         String[] args = new String[1];
         args[0] = ReadArguments.FILESYSTEM_ARG + "target/filesystem";
-        ReadArguments.ArgsAndConfig argsAndConfig = new ReadArguments().readArguments(args);
-        Assert.assertEquals(0, argsAndConfig.remainingArgs.length);
-        Assert.assertTrue(argsAndConfig.config.bucketPathEncryptionPassword != null);
+        ReadArguments.ArgsAndProperties argsAndProperties = new ReadArguments().readArguments(args);
+        Assert.assertEquals(0, argsAndProperties.remainingArgs.length);
+        Assert.assertTrue(argsAndProperties.properties.getBucketPathEncryptionPassword() != null);
     }
 
     @Test
     public void tesArgFilesystem2() {
         String[] args = new String[1];
         args[0] = ReadArguments.FILESYSTEM_ARG;
-        ReadArguments.ArgsAndConfig argsAndConfig = new ReadArguments().readArguments(args);
-        Assert.assertEquals(0, argsAndConfig.remainingArgs.length);
-        Assert.assertTrue(argsAndConfig.config.bucketPathEncryptionPassword != null);
+        ReadArguments.ArgsAndProperties argsAndProperties = new ReadArguments().readArguments(args);
+        Assert.assertEquals(0, argsAndProperties.remainingArgs.length);
+        Assert.assertTrue(argsAndProperties.properties.getBucketPathEncryptionPassword() != null);
     }
 
     @Test
@@ -153,9 +148,9 @@ public class ReadArgumentsTest {
         args[0] = ReadArguments.AMAZONS3_ARG + "http:1,key,key";
         args[1] = ReadArguments.NO_ENCRYPTION_PASSWORD_ARG;
         args[2] = "anyParam";
-        ReadArguments.ArgsAndConfig argsAndConfig = new ReadArguments().readArguments(args);
-        Assert.assertEquals(1, argsAndConfig.remainingArgs.length);
-        Assert.assertTrue(argsAndConfig.config.bucketPathEncryptionPassword == null);
+        ReadArguments.ArgsAndProperties argsAndProperties = new ReadArguments().readArguments(args);
+        Assert.assertEquals(1, argsAndProperties.remainingArgs.length);
+        Assert.assertTrue(argsAndProperties.properties.getBucketPathEncryptionPassword() == null);
     }
 
 
@@ -164,8 +159,9 @@ public class ReadArgumentsTest {
         System.setProperty(ReadArguments.AMAZONS3,"http:1,key,key");
         System.setProperty(ReadArguments.NO_ENCRYPTION_PASSWORD,"any");
         System.setProperty("any","any");
-        StoreConnectionFactoryConfig config = new ReadArguments().readEnvironment();
-        Assert.assertTrue(config.bucketPathEncryptionPassword == null);
+        ConnectionProperties properties = new ReadArguments().readEnvironment();
+        Assert.assertTrue(properties instanceof AmazonS3ConnectionProperties);
+        Assert.assertTrue(properties.getBucketPathEncryptionPassword() == null);
     }
 
 }

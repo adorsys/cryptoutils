@@ -2,6 +2,10 @@ package org.adorsys.cryptoutils.mongodbstoreconnection;
 
 import org.adorsys.cryptoutils.exceptions.BaseExceptionHandler;
 import org.adorsys.encobject.exceptions.ParamParserException;
+import org.adorsys.encobject.types.connection.MongoDatabaseName;
+import org.adorsys.encobject.types.connection.MongoHost;
+import org.adorsys.encobject.types.connection.MongoPort;
+import org.adorsys.encobject.types.properties.MongoConnectionProperties;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -12,37 +16,24 @@ import java.util.StringTokenizer;
  */
 public class MongoParamParser {
     private final static Logger LOGGER = LoggerFactory.getLogger(MongoParamParser.class);
-    private String host="127.0.0.1";
-    private Integer port=27017;
-    private String databasename = "mongodb";
     private final static String DELIMITER = ",";
     private final static String EXPECTED_PARAMS = "<host>,<port>,<databasename>";
 
-    public MongoParamParser(String params) {
-
+    public static MongoConnectionProperties getProperties(String params) {
         LOGGER.debug("parse:" + params);
         try {
+            MongoConnectionPropertiesImpl props = new MongoConnectionPropertiesImpl();
+
             if (params.length() > 0) {
                 StringTokenizer st = new StringTokenizer(params, DELIMITER);
-                host = st.nextToken();
+                props.setMongoHost(new MongoHost(st.nextToken()));
                 String portString = st.nextToken();
-                port = Integer.parseInt(portString);
-                databasename = st.nextToken();
+                props.setMongoPort(new MongoPort(Long.parseLong(portString)));
+                props.setMongoDatabaseName(new MongoDatabaseName(st.nextToken()));
             }
+            return props;
         } catch (Exception e) {
             throw new ParamParserException(params, DELIMITER, EXPECTED_PARAMS);
         }
-    }
-
-    public String getHost() {
-        return host;
-    }
-
-    public Integer getPort() {
-        return port;
-    }
-
-    public String getDatabasename() {
-        return databasename;
     }
 }

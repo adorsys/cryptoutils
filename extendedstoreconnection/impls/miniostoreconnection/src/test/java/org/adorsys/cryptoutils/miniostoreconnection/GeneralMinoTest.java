@@ -3,6 +3,9 @@ package org.adorsys.cryptoutils.miniostoreconnection;
 import io.minio.MinioClient;
 import org.adorsys.cryptoutils.exceptions.BaseExceptionHandler;
 import org.adorsys.encobject.complextypes.BucketDirectory;
+import org.adorsys.encobject.types.connection.MinioAccessKey;
+import org.adorsys.encobject.types.connection.MinioSecretKey;
+import org.adorsys.encobject.types.properties.MinioConnectionProperties;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -66,12 +69,12 @@ public class GeneralMinoTest {
 
     // @Test
     public void b() {
-        new MinioExtendedStoreConnection(url, accessKey, secretKey, null).showDatabase();
+        new MinioExtendedStoreConnection(url, accessKey, secretKey, MinioConnectionProperties.defaultBucketname, null).showDatabase();
     }
 
     // @Test
     public void c() {
-        new MinioExtendedStoreConnection(url, accessKey, secretKey, null).cleanDatabase();
+        new MinioExtendedStoreConnection(url, accessKey, secretKey, MinioConnectionProperties.defaultBucketname, null).cleanDatabase();
     }
 
 }

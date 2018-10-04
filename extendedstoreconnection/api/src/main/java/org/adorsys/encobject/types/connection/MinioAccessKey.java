@@ -1,4 +1,4 @@
-package org.adorsys.cryptoutils.miniostoreconnection;
+package org.adorsys.encobject.types.connection;
 
 import org.adorsys.cryptoutils.basetypes.BaseTypeString;
 

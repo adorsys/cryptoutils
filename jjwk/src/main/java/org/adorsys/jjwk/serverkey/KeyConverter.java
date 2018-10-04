@@ -1,10 +1,5 @@
 package org.adorsys.jjwk.serverkey;
 
-import java.security.Key;
-import java.security.KeyPair;
-import java.security.KeyStore;
-import java.security.KeyStoreException;
-
 import com.nimbusds.jose.Algorithm;
 import com.nimbusds.jose.JOSEException;
 import com.nimbusds.jose.JWSAlgorithm;
@@ -12,15 +7,14 @@ import com.nimbusds.jose.JWSSigner;
 import com.nimbusds.jose.crypto.ECDSASigner;
 import com.nimbusds.jose.crypto.MACSigner;
 import com.nimbusds.jose.crypto.RSASSASigner;
-import com.nimbusds.jose.jwk.AssymetricJWK;
-import com.nimbusds.jose.jwk.ECKey;
-import com.nimbusds.jose.jwk.JWK;
-import com.nimbusds.jose.jwk.JWKSet;
-import com.nimbusds.jose.jwk.KeyType;
-import com.nimbusds.jose.jwk.OctetSequenceKey;
-import com.nimbusds.jose.jwk.PasswordLookup;
-import com.nimbusds.jose.jwk.RSAKey;
-import com.nimbusds.jose.jwk.SecretJWK;
+import com.nimbusds.jose.jwk.*;
+import org.adorsys.cryptoutils.exceptions.BaseException;
+
+import javax.crypto.spec.SecretKeySpec;
+import java.security.Key;
+import java.security.KeyPair;
+import java.security.KeyStore;
+import java.security.KeyStoreException;
 
 public class KeyConverter {
 
@@ -44,6 +38,50 @@ public class KeyConverter {
                 }
             } else if (jwk instanceof SecretJWK) {
                 return ((SecretJWK)jwk).toSecretKey();
+            }
+        } catch (JOSEException e) {
+            return null;
+        }
+        return null;
+    }
+
+    /**
+     * Converts the specified of JSON Web Keys (JWK) it's standard Java
+     * class representation. Asymmetric {@link RSAKey RSA} and
+     * {@link ECKey EC key} pairs are converted to
+     * {@link java.security.PublicKey} and {@link java.security.PrivateKey}
+     * (if specified) objects. {@link OctetSequenceKey secret JWKs} are
+     * converted to {@link javax.crypto.SecretKey} objects.
+     *
+     * @param jwk jwk
+     * @return private key, secret key or nul;
+     */
+    public static Key toPrivateOrSecret(final JWK jwk, String alg) {
+        try {
+            if (jwk instanceof AssymetricJWK) {
+                KeyPair keyPair = ((AssymetricJWK)jwk).toKeyPair();
+                if (keyPair.getPrivate() != null) {
+                    return keyPair.getPrivate();
+                }
+            } else if (jwk instanceof SecretJWK) {
+				byte[] encodedKey = ((SecretJWK) jwk).toSecretKey().getEncoded();
+				return new SecretKeySpec(encodedKey, alg);
+            }
+        } catch (JOSEException e) {
+            return null;
+        }
+        return null;
+    }
+
+    public static Key toPublic(final JWK jwk) {
+        try {
+            if (jwk instanceof AssymetricJWK) {
+                KeyPair keyPair = ((AssymetricJWK)jwk).toKeyPair();
+                if (keyPair.getPublic() != null) {
+                    return keyPair.getPublic();
+                }
+            } else {
+                throw new BaseException("Cannot extract public key from non AssymetricJWK");
             }
         } catch (JOSEException e) {
             return null;

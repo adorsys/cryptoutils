@@ -20,28 +20,28 @@ public class BucketPathEncryptionTest {
     @Test
     public void testContainerOnly() {
         BucketPath bucketPath = new BucketPath("peter");
-        BucketPathEncryptionPassword bucketPathEncryptionPassword = new BucketPathEncryptionPassword("affe");
+        BucketPathEncryptionPassword bucketPathEncryptionPassword = new BucketPathEncryptionPassword("affeAFFE1!");
         doTest(bucketPath, bucketPathEncryptionPassword);
     }
 
     @Test
     public void testSimplePath() {
         BucketPath bucketPath = new BucketPath("peter/folder1");
-        BucketPathEncryptionPassword bucketPathEncryptionPassword = new BucketPathEncryptionPassword("affe");
+        BucketPathEncryptionPassword bucketPathEncryptionPassword = new BucketPathEncryptionPassword("affeAFFE1!");
         doTest(bucketPath, bucketPathEncryptionPassword);
     }
     @Test
     public void testDeepPathPath() {
         BucketPath bucketPath = new BucketPath("peter/folder1/1/2/3");
-        BucketPathEncryptionPassword bucketPathEncryptionPassword = new BucketPathEncryptionPassword("affe");
+        BucketPathEncryptionPassword bucketPathEncryptionPassword = new BucketPathEncryptionPassword("affeAFFE1!");
         doTest(bucketPath, bucketPathEncryptionPassword);
     }
 
     @Test (expected = PathDecryptionException.class)
     public void testWrongPassword() {
         BucketPath bucketPath = new BucketPath("peter/folder1/1/2/3");
-        BucketPathEncryptionPassword bucketPathEncryptionPassword1 = new BucketPathEncryptionPassword("affe1");
-        BucketPathEncryptionPassword bucketPathEncryptionPassword2 = new BucketPathEncryptionPassword("affe2");
+        BucketPathEncryptionPassword bucketPathEncryptionPassword1 = new BucketPathEncryptionPassword("affeAFFE1!");
+        BucketPathEncryptionPassword bucketPathEncryptionPassword2 = new BucketPathEncryptionPassword("affeAFFE2!");
         BucketPath encryptedBucketPath = BucketPathEncryption.encrypt(bucketPathEncryptionPassword1, bucketPath);
         BucketPath decryptedBucketPath = BucketPathEncryption.decrypt(bucketPathEncryptionPassword2, encryptedBucketPath);
     }
@@ -50,7 +50,7 @@ public class BucketPathEncryptionTest {
     public void lasttest() {
         int NUMBER = 1000;
         BucketPath bucketPath = new BucketPath("peter/folder1/1/2/3");
-        BucketPathEncryptionPassword bucketPathEncryptionPassword = new BucketPathEncryptionPassword("asdfasdfasdf45dda");
+        BucketPathEncryptionPassword bucketPathEncryptionPassword = new BucketPathEncryptionPassword("affeAFFE1!");
         StopWatch stopWatch = new StopWatch();
         stopWatch.start();
         for (int i = 0; i<NUMBER; i++) {
@@ -79,28 +79,28 @@ public class BucketPathEncryptionTest {
     @Test
     public void dtestContainerOnly() {
         BucketDirectory bucketDirectory = new BucketDirectory("peter");
-        BucketPathEncryptionPassword bucketPathEncryptionPassword = new BucketPathEncryptionPassword("affe");
+        BucketPathEncryptionPassword bucketPathEncryptionPassword = new BucketPathEncryptionPassword("affeAFFE1!");
         doTest(bucketDirectory, bucketPathEncryptionPassword);
     }
 
     @Test
     public void dtestSimplePath() {
         BucketDirectory bucketDirectory = new BucketDirectory("peter/folder1");
-        BucketPathEncryptionPassword bucketPathEncryptionPassword = new BucketPathEncryptionPassword("affe");
+        BucketPathEncryptionPassword bucketPathEncryptionPassword = new BucketPathEncryptionPassword("affeAFFE1!");
         doTest(bucketDirectory, bucketPathEncryptionPassword);
     }
     @Test
     public void dtestDeepPathPath() {
         BucketDirectory bucketDirectory = new BucketDirectory("peter/folder1/1/2/3");
-        BucketPathEncryptionPassword bucketPathEncryptionPassword = new BucketPathEncryptionPassword("affe");
+        BucketPathEncryptionPassword bucketPathEncryptionPassword = new BucketPathEncryptionPassword("affeAFFE1!");
         doTest(bucketDirectory, bucketPathEncryptionPassword);
     }
 
     @Test (expected = PathDecryptionException.class)
     public void dtestWrongPassword() {
         BucketDirectory BucketDirectory = new BucketDirectory("peter/folder1/1/2/3");
-        BucketPathEncryptionPassword bucketPathEncryptionPassword1 = new BucketPathEncryptionPassword("affe1");
-        BucketPathEncryptionPassword bucketPathEncryptionPassword2 = new BucketPathEncryptionPassword("affe2");
+        BucketPathEncryptionPassword bucketPathEncryptionPassword1 = new BucketPathEncryptionPassword("affeAFFE1!");
+        BucketPathEncryptionPassword bucketPathEncryptionPassword2 = new BucketPathEncryptionPassword("affeAFFE2!");
         org.adorsys.encobject.complextypes.BucketDirectory encryptedBucketDirectory = BucketPathEncryption.encrypt(bucketPathEncryptionPassword1, BucketDirectory);
         org.adorsys.encobject.complextypes.BucketDirectory decryptedBucketDirectory = BucketPathEncryption.decrypt(bucketPathEncryptionPassword2, encryptedBucketDirectory);
     }

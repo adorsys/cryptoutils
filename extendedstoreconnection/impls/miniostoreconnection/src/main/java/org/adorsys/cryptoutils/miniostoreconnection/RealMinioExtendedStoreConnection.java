@@ -67,8 +67,8 @@ class RealMinioExtendedStoreConnection implements ExtendedStoreConnection {
         frame.add("USE MINIO SYSTEM");
         frame.add("(minio has be up and running )");
         frame.add("url: " + url.toString());
-        frame.add("accessKey: " + minioAccessKey.getValue());
-        frame.add("secretKey: " + minioSecretKey.getValue());
+        frame.add("accessKey: " + minioAccessKey);
+        frame.add("secretKey: " + minioSecretKey);
         frame.add("root: " + rootBucketName);
         LOGGER.info(frame.toString());
 

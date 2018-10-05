@@ -60,7 +60,11 @@ class RealAmazonS3ExtendedStoreConnection implements ExtendedStoreConnection {
     private BucketDirectory amazonS3RootContainersBucket;
     private AmazonS3Region amazonS3Region;
 
-    public RealAmazonS3ExtendedStoreConnection(URL url, AmazonS3AccessKey accessKey, AmazonS3SecretKey secretKey, AmazonS3Region anAmazonS3Region, AmazonS3RootBucketName anAmazonS3RootBucketName) {
+    public RealAmazonS3ExtendedStoreConnection(URL url,
+                                               AmazonS3AccessKey accessKey,
+                                               AmazonS3SecretKey secretKey,
+                                               AmazonS3Region anAmazonS3Region,
+                                               AmazonS3RootBucketName anAmazonS3RootBucketName) {
         amazonS3Region = anAmazonS3Region;
         amazonS3RootBucket = new BucketDirectory(anAmazonS3RootBucketName.getValue());
         amazonS3RootContainersBucket = new BucketDirectory(amazonS3RootBucket.getObjectHandle().getContainer() + ".containers");
@@ -68,10 +72,10 @@ class RealAmazonS3ExtendedStoreConnection implements ExtendedStoreConnection {
         frame.add("USE AMAZON S3 COMPLIANT SYSTEM");
         frame.add("(has be up and running)");
         frame.add("url: " + url.toString());
-        frame.add("accessKey:   " + accessKey.getValue());
-        frame.add("secretKey:   " + secretKey.getValue());
-        frame.add("region:      " + amazonS3Region.getValue());
-        frame.add("root bucket: " + amazonS3RootBucket.getObjectHandle().getContainer());
+        frame.add("accessKey:   " + accessKey);
+        frame.add("secretKey:   " + secretKey);
+        frame.add("region:      " + amazonS3Region);
+        frame.add("root bucket: " + amazonS3RootBucket);
         LOGGER.info(frame.toString());
         if (LOGGER.isDebugEnabled()) {
             new BaseException("JUST A STACK, TO SEE WHERE THE CONNECTION IS CREATED");

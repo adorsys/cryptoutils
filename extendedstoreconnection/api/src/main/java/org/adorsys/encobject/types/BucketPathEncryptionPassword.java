@@ -13,7 +13,6 @@ public class BucketPathEncryptionPassword extends BaseTypePasswordString {
     public final static String specialChars = " <>{}^!\"§$%&/()=?´`{}#'*";
     public BucketPathEncryptionPassword(String s) {
         super(s);
-        LOGGER.info("schweinerei:" + s);
         if (s.equalsIgnoreCase("null")) {
             throw new BaseException("Password must not be \"null\". Null should set the password to NULL");
         }

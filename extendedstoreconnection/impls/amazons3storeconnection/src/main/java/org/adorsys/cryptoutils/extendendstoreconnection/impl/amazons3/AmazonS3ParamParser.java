@@ -1,6 +1,11 @@
 package org.adorsys.cryptoutils.extendendstoreconnection.impl.amazons3;
 
 import org.adorsys.encobject.exceptions.ParamParserException;
+import org.adorsys.encobject.types.connection.AmazonS3AccessKey;
+import org.adorsys.encobject.types.connection.AmazonS3Region;
+import org.adorsys.encobject.types.connection.AmazonS3RootBucketName;
+import org.adorsys.encobject.types.connection.AmazonS3SecretKey;
+import org.adorsys.encobject.types.properties.AmazonS3ConnectionProperties;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -12,49 +17,28 @@ import java.util.StringTokenizer;
  */
 public class AmazonS3ParamParser {
     private final static Logger LOGGER = LoggerFactory.getLogger(AmazonS3ParamParser.class);
-    private URL url;
-    private AmazonS3AccessKey amazonS3AccessKey;
-    private AmazonS3SecretKey amazonS3SecretKey;
     private final static String DELIMITER = ",";
     private final static String EXPECTED_PARAMS = "<url>,<accesskey>,<secretkey>[,<region>][,<rootbucket>]";
-    private AmazonS3Region amazonS3Region = AmazonS3ExtendedStoreConnection.DEFAULT_REGION;
-    private AmazonS3RootBucket amazonS3RootBucket = AmazonS3ExtendedStoreConnection.DEFAULT_BUCKET;
 
-    public AmazonS3ParamParser(String params) {
+    public static AmazonS3ConnectionProperties getProperties(String params) {
         LOGGER.debug("parse:" + params);
         try {
+            AmazonS3ConnectionProperitesImpl properites = new AmazonS3ConnectionProperitesImpl();
+
             StringTokenizer st = new StringTokenizer(params, DELIMITER);
-            url = new URL(st.nextToken());
-            amazonS3AccessKey = new AmazonS3AccessKey(st.nextToken());
-            amazonS3SecretKey = new AmazonS3SecretKey(st.nextToken());
+            properites.setUrl(new URL(st.nextToken()));
+            properites.setAmazonS3AccessKey(new AmazonS3AccessKey(st.nextToken()));
+            properites.setAmazonS3SecretKey(new AmazonS3SecretKey(st.nextToken()));
             if (st.hasMoreTokens()) {
-                amazonS3Region = new AmazonS3Region(st.nextToken());
+                properites.setAmazonS3Region(new AmazonS3Region(st.nextToken()));
             }
             if (st.hasMoreTokens()) {
-                amazonS3RootBucket = new AmazonS3RootBucket(st.nextToken());
+                properites.setAmazonS3RootBucketName(new AmazonS3RootBucketName(st.nextToken()));
             }
+            return properites;
         } catch (Exception e) {
             throw new ParamParserException(params, DELIMITER, EXPECTED_PARAMS);
         }
     }
 
-    public URL getUrl() {
-        return url;
-    }
-
-    public AmazonS3AccessKey getAmazonS3AccessKey() {
-        return amazonS3AccessKey;
-    }
-
-    public AmazonS3SecretKey getAmazonS3SecretKey() {
-        return amazonS3SecretKey;
-    }
-
-    public AmazonS3Region getAmazonS3Region() {
-        return amazonS3Region;
-    }
-
-    public AmazonS3RootBucket getAmazonS3RootBucket() {
-        return amazonS3RootBucket;
-    }
 }

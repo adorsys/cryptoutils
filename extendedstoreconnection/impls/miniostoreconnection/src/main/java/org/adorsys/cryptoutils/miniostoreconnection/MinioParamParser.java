@@ -1,6 +1,10 @@
 package org.adorsys.cryptoutils.miniostoreconnection;
 
 import org.adorsys.encobject.exceptions.ParamParserException;
+import org.adorsys.encobject.types.connection.MinioAccessKey;
+import org.adorsys.encobject.types.connection.MinioRootBucketName;
+import org.adorsys.encobject.types.connection.MinioSecretKey;
+import org.adorsys.encobject.types.properties.MinioConnectionProperties;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -12,44 +16,24 @@ import java.util.StringTokenizer;
  */
 public class MinioParamParser {
     private final static Logger LOGGER = LoggerFactory.getLogger(MinioParamParser.class);
-    private URL url;
-    private MinioAccessKey minioAccessKey;
-    private MinioSecretKey minioSecretKey;
-    private String rootBucketName = MinioExtendedStoreConnection.DEFAULT_ROOT_BUCKET_NAME;
     private final static String DELIMITER = ",";
     private final static String EXPECTED_PARAMS = "<url>,<accesskey>,<secretkey>[,<rootbucket>]";
 
-    public MinioParamParser(String params) {
+    public static MinioConnectionProperties getProperties(String params) {
         LOGGER.debug("parse:" + params);
         try {
+            MinioConnectionPropertiesImpl properties = new MinioConnectionPropertiesImpl();
+
             StringTokenizer st = new StringTokenizer(params, DELIMITER);
-            String urlString = st.nextToken();
-            String accessKey = st.nextToken();
-            String secretKey = st.nextToken();
-            url = new URL(urlString);
-            minioAccessKey = new MinioAccessKey(accessKey);
-            minioSecretKey = new MinioSecretKey(secretKey);
+            properties.setUrl(new URL(st.nextToken()));
+            properties.setMinioAccessKey(new MinioAccessKey(st.nextToken()));
+            properties.setMinioSecretKey(new MinioSecretKey(st.nextToken()));
             if (st.hasMoreElements()) {
-                rootBucketName = st.nextToken();
+                properties.setMinioRootBucketName(new MinioRootBucketName(st.nextToken()));
             }
+            return properties;
         } catch (Exception e) {
             throw new ParamParserException(params, DELIMITER, EXPECTED_PARAMS);
         }
-    }
-
-    public URL getUrl() {
-        return url;
-    }
-
-    public MinioAccessKey getMinioAccessKey() {
-        return minioAccessKey;
-    }
-
-    public MinioSecretKey getMinioSecretKey() {
-        return minioSecretKey;
-    }
-
-    public String getRootBucketName() {
-        return rootBucketName;
     }
 }

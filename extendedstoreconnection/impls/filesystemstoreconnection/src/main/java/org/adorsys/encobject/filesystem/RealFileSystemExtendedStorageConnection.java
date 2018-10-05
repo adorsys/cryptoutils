@@ -22,6 +22,7 @@ import org.adorsys.encobject.service.impl.SimplePayloadStreamImpl;
 import org.adorsys.encobject.service.impl.SimpleStorageMetadataImpl;
 import org.adorsys.encobject.types.BucketPathEncryptionPassword;
 import org.adorsys.encobject.types.ListRecursiveFlag;
+import org.adorsys.encobject.types.connection.FilesystemBasedirectoryName;
 import org.apache.commons.io.FileUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -43,15 +44,15 @@ class RealFileSystemExtendedStorageConnection implements ExtendedStoreConnection
     private ZipFileHelper zipFileHelper;
     private boolean absolutePath = false;
 
-    public RealFileSystemExtendedStorageConnection(String basedir) {
+    public RealFileSystemExtendedStorageConnection(FilesystemBasedirectoryName basedir) {
         try {
-            this.baseDir = new BucketDirectory(basedir);
-            this.absolutePath = (basedir.startsWith(BucketPath.BUCKET_SEPARATOR));
+            this.baseDir = new BucketDirectory(basedir.getValue());
+            this.absolutePath = (basedir.getValue().startsWith(BucketPath.BUCKET_SEPARATOR));
             Frame frame = new Frame();
             frame.add("USE FILE SYSTEM");
             if (!absolutePath) {
                 String currentDir = new File(".").getCanonicalPath();
-                String absoluteDirectory = basedir;
+                String absoluteDirectory = basedir.getValue();
                 absoluteDirectory = currentDir + absoluteDirectory;
                 frame.add("basedir     : " + basedir);
                 frame.add("absolutedir : " + absoluteDirectory);

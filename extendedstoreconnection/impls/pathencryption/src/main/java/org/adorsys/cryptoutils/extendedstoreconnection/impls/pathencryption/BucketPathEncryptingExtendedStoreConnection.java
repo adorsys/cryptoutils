@@ -1,5 +1,6 @@
 package org.adorsys.cryptoutils.extendedstoreconnection.impls.pathencryption;
 
+import org.adorsys.cryptoutils.utils.Frame;
 import org.adorsys.encobject.complextypes.BucketDirectory;
 import org.adorsys.encobject.complextypes.BucketPath;
 import org.adorsys.encobject.complextypes.BucketPathUtil;
@@ -12,6 +13,8 @@ import org.adorsys.encobject.service.impl.SimplePayloadStreamImpl;
 import org.adorsys.encobject.service.impl.SimpleStorageMetadataImpl;
 import org.adorsys.encobject.types.BucketPathEncryptionPassword;
 import org.adorsys.encobject.types.ListRecursiveFlag;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -20,6 +23,7 @@ import java.util.List;
  * Created by peter on 26.09.18.
  */
 public class BucketPathEncryptingExtendedStoreConnection implements ExtendedStoreConnection {
+    private final static Logger LOGGER = LoggerFactory.getLogger(BucketPathEncryptingExtendedStoreConnection.class);
     protected ExtendedStoreConnection extendedStoreConnection;
     BucketPathEncryption bucketPathEncryption;
     BucketPathEncryptionPassword bucketPathEncryptionPassword;
@@ -31,6 +35,14 @@ public class BucketPathEncryptingExtendedStoreConnection implements ExtendedStor
         this.bucketPathEncryption = new BucketPathEncryption();
         this.bucketPathEncryptionPassword = bucketPathEncryptionPassword;
         this.active = bucketPathEncryptionPassword != null;
+        Frame frame = new Frame();
+        if (active) {
+            frame.add(bucketPathEncryptionPassword.toString());
+        } else {
+            frame.add("Filenames will not be encrypted");
+        }
+        LOGGER.info(frame.toString());
+
     }
 
     @Override

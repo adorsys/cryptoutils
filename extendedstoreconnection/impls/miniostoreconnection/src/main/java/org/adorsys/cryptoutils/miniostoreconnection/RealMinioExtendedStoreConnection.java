@@ -25,6 +25,9 @@ import org.adorsys.encobject.service.impl.SimplePayloadStreamImpl;
 import org.adorsys.encobject.service.impl.SimpleStorageMetadataImpl;
 import org.adorsys.encobject.service.impl.StoreConnectionListHelper;
 import org.adorsys.encobject.types.ListRecursiveFlag;
+import org.adorsys.encobject.types.connection.MinioAccessKey;
+import org.adorsys.encobject.types.connection.MinioRootBucketName;
+import org.adorsys.encobject.types.connection.MinioSecretKey;
 import org.apache.commons.io.IOUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -59,19 +62,19 @@ class RealMinioExtendedStoreConnection implements ExtendedStoreConnection {
     private final MinioClient minioClient;
     private final StorageMetadataFlattenerGSON storageMetadataFlattenerGSON = new StorageMetadataFlattenerGSON();
 
-    public RealMinioExtendedStoreConnection(URL url, MinioAccessKey minioAccessKey, MinioSecretKey minioSecretKey, String rootBucketName) {
+    public RealMinioExtendedStoreConnection(URL url, MinioAccessKey minioAccessKey, MinioSecretKey minioSecretKey, MinioRootBucketName rootBucketName) {
         Frame frame = new Frame();
         frame.add("USE MINIO SYSTEM");
         frame.add("(minio has be up and running )");
         frame.add("url: " + url.toString());
-        frame.add("accessKey: " + minioAccessKey.getValue());
-        frame.add("secretKey: " + minioSecretKey.getValue());
+        frame.add("accessKey: " + minioAccessKey);
+        frame.add("secretKey: " + minioSecretKey);
         frame.add("root: " + rootBucketName);
         LOGGER.info(frame.toString());
 
         try {
-            rootBucket = new BucketDirectory(rootBucketName);
-            containerBucket = new BucketDirectory(rootBucketName + ".containers");
+            rootBucket = new BucketDirectory(rootBucketName.getValue());
+            containerBucket = new BucketDirectory(rootBucketName.getValue() + ".containers");
             this.minioClient = new MinioClient(url, minioAccessKey.getValue(), minioSecretKey.getValue());
             if (!minioClient.bucketExists(rootBucket.getObjectHandle().getContainer())) {
                 LOGGER.debug("real bucket " + rootBucket + " wird angelegt ");

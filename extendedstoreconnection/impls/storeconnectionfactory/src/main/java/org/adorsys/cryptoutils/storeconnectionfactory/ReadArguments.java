@@ -6,6 +6,8 @@ import org.adorsys.cryptoutils.miniostoreconnection.MinioParamParser;
 import org.adorsys.cryptoutils.mongodbstoreconnection.MongoParamParser;
 import org.adorsys.encobject.filesystem.FileSystemParamParser;
 import org.adorsys.encobject.types.BucketPathEncryptionPassword;
+import org.adorsys.encobject.types.properties.ConnectionProperties;
+import org.adorsys.encobject.types.properties.ConnectionPropertiesImpl;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -33,85 +35,85 @@ public class ReadArguments {
     public static final String ENCRYPTION_PASSWORD_ARG = SYSTEM_PROPERTY_PREFIX + ENCRYPTION_PASSWORD + "=";
     public static final String NO_ENCRYPTION_PASSWORD_ARG = SYSTEM_PROPERTY_PREFIX + NO_ENCRYPTION_PASSWORD;
 
-    public ArgsAndConfig readArguments(String[] args) {
+    public ArgsAndProperties readArguments(String[] args) {
         Arrays.stream(args).forEach(arg -> LOGGER.debug("readArguments arg:" + arg));
 
         List<String> remainingArgs = new ArrayList<>();
-        StoreConnectionFactoryConfig config = new StoreConnectionFactoryConfig();
+        ConnectionProperties properties = null;
+        BucketPathEncryptionPassword bucketPathEncryptionPassword = ConnectionProperties.defaultEncryptionPassword;
 
-        Arrays.stream(args).forEach(arg -> {
-                    if (arg.startsWith(MONGO_ARG)) {
-                        config.connectionType = StoreConnectionFactoryConfig.ConnectionType.MONGO;
-                        config.mongoParams = new MongoParamParser(arg.substring(MONGO_ARG.length()));
-                    } else if (arg.startsWith(MINIO_ARG)) {
-                        config.connectionType = StoreConnectionFactoryConfig.ConnectionType.MINIO;
-                        config.minioParams = new MinioParamParser(arg.substring(MINIO_ARG.length()));
-                    } else if (arg.startsWith(AMAZONS3_ARG)) {
-                        config.connectionType = StoreConnectionFactoryConfig.ConnectionType.AMAZONS3;
-                        config.amazonS3Params = new AmazonS3ParamParser(arg.substring(AMAZONS3_ARG.length()));
-                    } else if (arg.startsWith(FILESYSTEM_ARG)) {
-                        config.connectionType = StoreConnectionFactoryConfig.ConnectionType.FILE_SYSTEM;
-                        config.fileSystemParamParser = new FileSystemParamParser(arg.substring(FILESYSTEM_ARG.length()));
-                    } else if (arg.startsWith(ENCRYPTION_PASSWORD_ARG)) {
-                        config.bucketPathEncryptionPassword = new BucketPathEncryptionPassword(arg.substring(ENCRYPTION_PASSWORD_ARG.length()));
-                    } else if (arg.startsWith(NO_ENCRYPTION_PASSWORD_ARG)) {
-                        config.bucketPathEncryptionPassword = null;
-                    } else {
-                        remainingArgs.add(arg);
-                    }
-                }
-        );
+        for (String arg : args) {
+            if (arg.startsWith(MONGO_ARG)) {
+                properties = MongoParamParser.getProperties(arg.substring(MONGO_ARG.length()));
+            } else if (arg.startsWith(MINIO_ARG)) {
+                properties = MinioParamParser.getProperties(arg.substring(MINIO_ARG.length()));
+            } else if (arg.startsWith(AMAZONS3_ARG)) {
+                properties = AmazonS3ParamParser.getProperties(arg.substring(AMAZONS3_ARG.length()));
+            } else if (arg.startsWith(FILESYSTEM_ARG)) {
+                properties = FileSystemParamParser.getProperties(arg.substring(FILESYSTEM_ARG.length()));
+            } else if (arg.startsWith(ENCRYPTION_PASSWORD_ARG)) {
+                bucketPathEncryptionPassword = new BucketPathEncryptionPassword(arg.substring(ENCRYPTION_PASSWORD_ARG.length()));
+            } else if (arg.startsWith(NO_ENCRYPTION_PASSWORD_ARG)) {
+                bucketPathEncryptionPassword = null;
+            } else {
+                remainingArgs.add(arg);
+            }
+        }
+
+        if (properties == null) {
+            properties = FileSystemParamParser.getProperties("");
+        }
+
+        ((ConnectionPropertiesImpl) properties).setBucketPathEncryptionPassword(bucketPathEncryptionPassword);
+
         String[] remainingArgArray = new String[remainingArgs.size()];
         remainingArgArray = remainingArgs.toArray(remainingArgArray);
-        return new ArgsAndConfig(config, remainingArgArray);
+        return new ArgsAndProperties(properties, remainingArgArray);
     }
 
-    public StoreConnectionFactoryConfig readEnvironment() {
-        LOGGER.debug("readEnvironment");
-
+    public ConnectionProperties readEnvironment() {
         try {
-            StoreConnectionFactoryConfig config = new StoreConnectionFactoryConfig();
+            LOGGER.debug("readEnvironment");
+            BucketPathEncryptionPassword bucketPathEncryptionPassword = ConnectionProperties.defaultEncryptionPassword;
+            ConnectionProperties properties = null;
+
             if (System.getProperty(ENCRYPTION_PASSWORD) != null) {
-                config.bucketPathEncryptionPassword = new BucketPathEncryptionPassword(System.getProperty(ENCRYPTION_PASSWORD));
+                bucketPathEncryptionPassword = new BucketPathEncryptionPassword(System.getProperty(ENCRYPTION_PASSWORD));
             }
             if (System.getProperty(NO_ENCRYPTION_PASSWORD) != null) {
-                config.bucketPathEncryptionPassword = null;
+                bucketPathEncryptionPassword = null;
             }
             if (System.getProperty(MONGO) != null) {
-                config.connectionType = StoreConnectionFactoryConfig.ConnectionType.MONGO;
-                config.mongoParams = new MongoParamParser(System.getProperty(MONGO));
-                return config;
+                properties = MongoParamParser.getProperties(System.getProperty(MONGO));
             }
             if (System.getProperty(MINIO) != null) {
-                config.connectionType = StoreConnectionFactoryConfig.ConnectionType.MINIO;
-                config.minioParams = new MinioParamParser(System.getProperty(MINIO));
-                return config;
+                properties = MinioParamParser.getProperties(System.getProperty(MINIO));
             }
             if (System.getProperty(AMAZONS3) != null) {
-                config.connectionType = StoreConnectionFactoryConfig.ConnectionType.AMAZONS3;
-                config.amazonS3Params = new AmazonS3ParamParser(System.getProperty(AMAZONS3));
-                return config;
+                properties = AmazonS3ParamParser.getProperties(System.getProperty(AMAZONS3));
             }
             if (System.getProperty(FILESYSTEM) != null) {
-                config.connectionType = StoreConnectionFactoryConfig.ConnectionType.FILE_SYSTEM;
-                config.fileSystemParamParser = new FileSystemParamParser(System.getProperty(FILESYSTEM));
-                return config;
+                properties = FileSystemParamParser.getProperties(System.getProperty(FILESYSTEM));
             }
-            config.connectionType = StoreConnectionFactoryConfig.ConnectionType.FILE_SYSTEM;
-            config.fileSystemParamParser = new FileSystemParamParser("");
-            return config;
+            if (properties == null) {
+                properties = FileSystemParamParser.getProperties("");
+            }
+
+            ((ConnectionPropertiesImpl) properties).setBucketPathEncryptionPassword(bucketPathEncryptionPassword);
+
+            return properties;
         } catch (Exception e) {
             throw BaseExceptionHandler.handle(e);
         }
     }
 
 
-    public static class ArgsAndConfig {
-        public StoreConnectionFactoryConfig config;
+    public static class ArgsAndProperties {
+        public ConnectionProperties properties;
         public String[] remainingArgs;
 
-        public ArgsAndConfig(StoreConnectionFactoryConfig config, String[] remainingArgs) {
-            this.config = config;
+        public ArgsAndProperties(ConnectionProperties properties, String[] remainingArgs) {
+            this.properties = properties;
             this.remainingArgs = remainingArgs;
         }
     }

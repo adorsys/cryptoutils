@@ -5,6 +5,7 @@ import org.adorsys.encobject.complextypes.BucketDirectory;
 import org.adorsys.encobject.complextypes.BucketPath;
 import org.adorsys.encobject.service.impl.SimplePayloadImpl;
 import org.adorsys.encobject.service.impl.SimpleStorageMetadataImpl;
+import org.adorsys.encobject.types.connection.FilesystemBasedirectoryName;
 import org.junit.Assert;
 import org.junit.Test;
 import org.slf4j.Logger;
@@ -27,7 +28,7 @@ public class AbsoluteAndRelativePathTest {
             String relativeDirAsAbsoluteDir = currentDir + BucketPath.BUCKET_SEPARATOR + mydir;
             LOGGER.debug("relative Dir to be created is (absoute):" + relativeDirAsAbsoluteDir);
             Assert.assertFalse(new File(relativeDirAsAbsoluteDir).exists());
-            RealFileSystemExtendedStorageConnection con = new RealFileSystemExtendedStorageConnection(mydir);
+            RealFileSystemExtendedStorageConnection con = new RealFileSystemExtendedStorageConnection(new FilesystemBasedirectoryName(mydir));
             con.createContainer(new BucketDirectory("home"));
             con.putBlob(new BucketPath("/home/file1.txt"), new SimplePayloadImpl(new SimpleStorageMetadataImpl(), "affe".getBytes()));
             Assert.assertTrue(new File(relativeDirAsAbsoluteDir).exists());
@@ -51,7 +52,7 @@ public class AbsoluteAndRelativePathTest {
             String absoluteDir = tmpdir + "target" + BucketPath.BUCKET_SEPARATOR + UUID.randomUUID().toString();
             LOGGER.debug("my absolute path " + absoluteDir);
             Assert.assertFalse(new File(absoluteDir).exists());
-            RealFileSystemExtendedStorageConnection con = new RealFileSystemExtendedStorageConnection(absoluteDir);
+            RealFileSystemExtendedStorageConnection con = new RealFileSystemExtendedStorageConnection(new FilesystemBasedirectoryName(absoluteDir));
             con.createContainer(new BucketDirectory("home"));
             con.putBlob(new BucketPath("/home/file1.txt"), new SimplePayloadImpl(new SimpleStorageMetadataImpl(), "affe".getBytes()));
             LOGGER.debug(absoluteDir);

@@ -6,6 +6,7 @@ import org.adorsys.cryptoutils.miniostoreconnection.MinioExtendedStoreConnection
 import org.adorsys.cryptoutils.mongodbstoreconnection.MongoDBExtendedStoreConnection;
 import org.adorsys.encobject.filesystem.FileSystemExtendedStorageConnection;
 import org.adorsys.encobject.service.api.ExtendedStoreConnection;
+import org.adorsys.encobject.types.properties.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -14,50 +15,33 @@ import org.slf4j.LoggerFactory;
  */
 public class ExtendedStoreConnectionFactory {
     private final static Logger LOGGER = LoggerFactory.getLogger(ExtendedStoreConnectionFactory.class);
-    private static StoreConnectionFactoryConfig config = null;
+    private static ConnectionProperties properties = null;
+
+    public static ExtendedStoreConnection get(ConnectionProperties properties) {
+        if (properties instanceof MongoConnectionProperties) {
+            return new MongoDBExtendedStoreConnection((MongoConnectionProperties) properties);
+        }
+        if (properties instanceof MinioConnectionProperties) {
+            return new MinioExtendedStoreConnection((MinioConnectionProperties) properties);
+        }
+        if (properties instanceof AmazonS3ConnectionProperties) {
+            return new AmazonS3ExtendedStoreConnection((AmazonS3ConnectionProperties) properties);
+        }
+        if (properties instanceof FilesystemConnectionProperties) {
+            return new FileSystemExtendedStorageConnection((FilesystemConnectionProperties) properties);
+        }
+        throw new BaseException("Properties of unknown type: " + properties.getClass().getName());
+    }
 
     public static ExtendedStoreConnection get() {
-        if (config == null) {
-            config = new ReadArguments().readEnvironment();
+        if (properties == null) {
+            properties = new ReadArguments().readEnvironment();
         }
-
-        switch (config.connectionType) {
-            case MONGO:
-                return new MongoDBExtendedStoreConnection(
-                        config.mongoParams.getHost(),
-                        config.mongoParams.getPort(),
-                        config.mongoParams.getDatabasename(),
-                        config.bucketPathEncryptionPassword);
-
-            case MINIO:
-                return new MinioExtendedStoreConnection(
-                        config.minioParams.getUrl(),
-                        config.minioParams.getMinioAccessKey(),
-                        config.minioParams.getMinioSecretKey(),
-                        config.minioParams.getRootBucketName(),
-                        config.bucketPathEncryptionPassword);
-
-            case AMAZONS3:
-                return new AmazonS3ExtendedStoreConnection(
-                        config.amazonS3Params.getUrl(),
-                        config.amazonS3Params.getAmazonS3AccessKey(),
-                        config.amazonS3Params.getAmazonS3SecretKey(),
-                        config.amazonS3Params.getAmazonS3Region(),
-                        config.amazonS3Params.getAmazonS3RootBucket(),
-                        config.bucketPathEncryptionPassword);
-
-            case FILE_SYSTEM:
-                return new FileSystemExtendedStorageConnection(
-                        config.fileSystemParamParser.getFilesystembase(),
-                        config.bucketPathEncryptionPassword);
-
-            default:
-                throw new BaseException("missing switch");
-        }
+        return get(properties);
     }
 
     public static void reset() {
-        config = null;
+        properties = null;
     }
 
     /**
@@ -65,8 +49,8 @@ public class ExtendedStoreConnectionFactory {
      * @return die Argumente, die nicht verwertet werden konnten
      */
     public static String[] readArguments(String[] args) {
-        ReadArguments.ArgsAndConfig argsAndConfig = new ReadArguments().readArguments(args);
-        config = argsAndConfig.config;
-        return argsAndConfig.remainingArgs;
+        ReadArguments.ArgsAndProperties argsAndProperties = new ReadArguments().readArguments(args);
+        properties = argsAndProperties.properties;
+        return argsAndProperties.remainingArgs;
     }
 }

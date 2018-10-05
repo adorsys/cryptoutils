@@ -65,6 +65,19 @@ public class ReadArgumentsTest {
         ConnectionProperties properties = new ReadArguments().readEnvironment();
         Assert.assertTrue(properties instanceof  MongoConnectionProperties);
         Assert.assertTrue(properties.getBucketPathEncryptionPassword() != null);
+        MongoConnectionProperties m = (MongoConnectionProperties) properties;
+        Assert.assertTrue(m.getMongoUser() == null);
+        Assert.assertTrue(m.getMongoPassword() == null);
+    }
+    @Test
+    public void testEnvMongoWithAuth() {
+        System.setProperty(ReadArguments.MONGO, "localhost,123,mongdb,user,password");
+        ConnectionProperties properties = new ReadArguments().readEnvironment();
+        Assert.assertTrue(properties instanceof  MongoConnectionProperties);
+        Assert.assertTrue(properties.getBucketPathEncryptionPassword() != null);
+        MongoConnectionProperties m = (MongoConnectionProperties) properties;
+        Assert.assertTrue(m.getMongoUser() != null);
+        Assert.assertTrue(m.getMongoPassword() != null);
     }
 
     @Test(expected = BaseException.class)

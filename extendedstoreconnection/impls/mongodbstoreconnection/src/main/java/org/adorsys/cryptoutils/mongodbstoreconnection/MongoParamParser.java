@@ -2,9 +2,7 @@ package org.adorsys.cryptoutils.mongodbstoreconnection;
 
 import org.adorsys.cryptoutils.exceptions.BaseExceptionHandler;
 import org.adorsys.encobject.exceptions.ParamParserException;
-import org.adorsys.encobject.types.connection.MongoDatabaseName;
-import org.adorsys.encobject.types.connection.MongoHost;
-import org.adorsys.encobject.types.connection.MongoPort;
+import org.adorsys.encobject.types.connection.*;
 import org.adorsys.encobject.types.properties.MongoConnectionProperties;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -17,7 +15,7 @@ import java.util.StringTokenizer;
 public class MongoParamParser {
     private final static Logger LOGGER = LoggerFactory.getLogger(MongoParamParser.class);
     private final static String DELIMITER = ",";
-    private final static String EXPECTED_PARAMS = "<host>,<port>,<databasename>";
+    private final static String EXPECTED_PARAMS = "<host>,<port>,<databasename>[,<user>,<password>]";
 
     public static MongoConnectionProperties getProperties(String params) {
         LOGGER.debug("parse:" + params);
@@ -30,6 +28,10 @@ public class MongoParamParser {
                 String portString = st.nextToken();
                 props.setMongoPort(new MongoPort(Long.parseLong(portString)));
                 props.setMongoDatabaseName(new MongoDatabaseName(st.nextToken()));
+                if (st.hasMoreTokens()) {
+                    props.setMongoUser(new MongoUser(st.nextToken()));
+                    props.setMongoPassword(new MongoPassword(st.nextToken()));
+                }
             }
             return props;
         } catch (Exception e) {

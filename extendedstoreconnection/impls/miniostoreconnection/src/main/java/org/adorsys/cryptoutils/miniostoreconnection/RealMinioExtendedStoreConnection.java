@@ -74,7 +74,7 @@ class RealMinioExtendedStoreConnection implements ExtendedStoreConnection {
 
         try {
             rootBucket = new BucketDirectory(rootBucketName.getValue());
-            containerBucket = new BucketDirectory(rootBucketName + ".containers");
+            containerBucket = new BucketDirectory(rootBucketName.getValue() + ".containers");
             this.minioClient = new MinioClient(url, minioAccessKey.getValue(), minioSecretKey.getValue());
             if (!minioClient.bucketExists(rootBucket.getObjectHandle().getContainer())) {
                 LOGGER.debug("real bucket " + rootBucket + " wird angelegt ");

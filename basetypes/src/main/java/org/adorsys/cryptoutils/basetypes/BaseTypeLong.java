@@ -21,9 +21,7 @@ public class BaseTypeLong implements Serializable {
 
     @Override
     public String toString() {
-        return this.getClass().getSimpleName() + "{" +
-                "value=" + value +
-                '}';
+        return this.getClass().getSimpleName() + "{\'" + value + "\'}";
     }
 
     @Override

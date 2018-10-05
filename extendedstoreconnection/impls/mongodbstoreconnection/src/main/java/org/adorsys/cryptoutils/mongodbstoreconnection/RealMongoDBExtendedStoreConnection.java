@@ -1,8 +1,6 @@
 package org.adorsys.cryptoutils.mongodbstoreconnection;
 
-import com.mongodb.DB;
-import com.mongodb.MongoClient;
-import com.mongodb.MongoCommandException;
+import com.mongodb.*;
 import com.mongodb.client.MongoDatabase;
 import com.mongodb.client.gridfs.GridFSBucket;
 import com.mongodb.client.gridfs.GridFSBuckets;
@@ -32,9 +30,7 @@ import org.adorsys.encobject.service.impl.SimplePayloadStreamImpl;
 import org.adorsys.encobject.service.impl.SimpleStorageMetadataImpl;
 import org.adorsys.encobject.service.impl.StoreConnectionListHelper;
 import org.adorsys.encobject.types.ListRecursiveFlag;
-import org.adorsys.encobject.types.connection.MongoDatabaseName;
-import org.adorsys.encobject.types.connection.MongoHost;
-import org.adorsys.encobject.types.connection.MongoPort;
+import org.adorsys.encobject.types.connection.*;
 import org.apache.commons.io.IOUtils;
 import org.bson.Document;
 import org.bson.types.ObjectId;
@@ -67,16 +63,25 @@ class RealMongoDBExtendedStoreConnection implements ExtendedStoreConnection {
     private DB databaseDeprecated;
     protected StorageMetadataFlattenerGSON gsonHelper = new StorageMetadataFlattenerGSON();
 
-    public RealMongoDBExtendedStoreConnection(MongoHost host, MongoPort port, MongoDatabaseName databasename) {
+    public RealMongoDBExtendedStoreConnection(MongoHost host, MongoPort port, MongoDatabaseName databasename, MongoUser user, MongoPassword password) {
         Frame frame = new Frame();
         frame.add("USE MONGO DB");
         frame.add("mongo db has be up and running )");
         frame.add("host: " + host);
         frame.add("port: " + port);
         frame.add("database: " + databasename);
+        frame.add("user:" + user);
+        frame.add("password:" + password);
         LOGGER.info(frame.toString());
 
-        MongoClient mongoClient = new MongoClient(host.getValue(), port.getValue().intValue());
+        MongoClient mongoClient = null;
+        if (user == null && password == null) {
+            mongoClient = new MongoClient(host.getValue(), port.getValue().intValue());
+        } else {
+            MongoCredential mongoCredential = MongoCredential.createCredential(user.getValue(), databasename.getValue(), password.getValue().toCharArray());
+            ServerAddress serverAddress = new ServerAddress(host.getValue(), port.getValue().intValue());
+            mongoClient = new MongoClient(serverAddress, mongoCredential, MongoClientOptions.builder().build());
+        }
         database = mongoClient.getDatabase(databasename.getValue());
         databaseDeprecated = mongoClient.getDB(databasename.getValue());
     }
@@ -166,7 +171,7 @@ class RealMongoDBExtendedStoreConnection implements ExtendedStoreConnection {
     public boolean blobExists(BucketPath bucketPath) {
         LOGGER.debug("start blob Exists for " + bucketPath);
         GridFSBucket bucket = getGridFSBucket(bucketPath);
-        if (! containerExists(bucket)) {
+        if (!containerExists(bucket)) {
             return false;
         }
         String filename = bucketPath.getObjectHandle().getName();
@@ -302,7 +307,7 @@ class RealMongoDBExtendedStoreConnection implements ExtendedStoreConnection {
         List<BucketDirectory> list = new ArrayList<>();
         databaseDeprecated.getCollectionNames().forEach(el -> {
             if (el.endsWith(".files")) {
-                String collectionName= el.substring(0, el.length() - ".files".length());
+                String collectionName = el.substring(0, el.length() - ".files".length());
                 list.add(new BucketDirectory(collectionName));
             }
         });

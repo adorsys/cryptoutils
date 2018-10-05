@@ -5,7 +5,7 @@
     <parent>
         <groupId>de.adorsys.cryptoutils</groupId>
         <artifactId>storeconnection-impls</artifactId>
-        <version>0.21.3-SNAPSHOT</version>
+        <version>0.21.3</version>
     </parent>
 
     <modelVersion>4.0.0</modelVersion>

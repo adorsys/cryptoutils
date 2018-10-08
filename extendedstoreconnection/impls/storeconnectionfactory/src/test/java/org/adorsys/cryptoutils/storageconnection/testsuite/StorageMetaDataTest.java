@@ -1,8 +1,19 @@
 package org.adorsys.cryptoutils.storageconnection.testsuite;
 
-import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
-import junit.framework.Assert;
+import java.io.File;
+import java.net.URI;
+import java.nio.charset.Charset;
+import java.nio.file.Files;
+import java.nio.file.Paths;
+import java.text.SimpleDateFormat;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.UUID;
+import java.util.stream.Collectors;
+
 import org.adorsys.cryptoutils.exceptions.BaseException;
 import org.adorsys.cryptoutils.exceptions.BaseExceptionHandler;
 import org.adorsys.cryptoutils.storeconnectionfactory.ExtendedStoreConnectionFactory;
@@ -18,19 +29,17 @@ import org.adorsys.encobject.service.api.ExtendedStoreConnection;
 import org.adorsys.encobject.service.impl.SimpleLocationImpl;
 import org.adorsys.encobject.service.impl.SimplePayloadImpl;
 import org.adorsys.encobject.service.impl.SimpleStorageMetadataImpl;
+import org.apache.commons.lang3.SystemUtils;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.io.File;
-import java.net.URI;
-import java.nio.file.Files;
-import java.nio.file.Paths;
-import java.text.SimpleDateFormat;
-import java.util.*;
-import java.util.stream.Collectors;
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
+
+import junit.framework.Assert;
 
 /**
  * Created by peter on 20.02.18 at 16:53.
@@ -221,7 +230,7 @@ public class StorageMetaDataTest {
      * logback benötigt, denn der Simpple-Logger schreibt nicht in Dateien.
      */
     @Test
-    public void checkMetaInfoOnlyReadOnceForDocument() {
+    public void testCheckMetaInfoOnlyReadOnceForDocument() {
         try {
             String logfilename = "storeconnectionfactory-test-log-file.log";
             LOGGER.debug("START TEST " + new RuntimeException("").getStackTrace()[0].getMethodName());
@@ -464,7 +473,9 @@ public class StorageMetaDataTest {
                     throw new BaseException("Did not find unique entry in logfile for " + MAX_WAIT + " seconds.");
                 }
                 Thread.currentThread().sleep(1000);
-                count = Files.lines(Paths.get(logfilename))
+                
+                // Without the Charset, we get "java.nio.charset.MalformedInputException: Input length = 1" on Windows
+                count = Files.lines(Paths.get(logfilename), SystemUtils.IS_OS_WINDOWS ? Charset.forName("Cp1252") : Charset.defaultCharset())
                         .filter(line -> line.indexOf(unique) != -1)
                         .collect(Collectors.toSet())
                         .size();
@@ -484,7 +495,8 @@ public class StorageMetaDataTest {
                         + new java.io.File(".").getCanonicalPath()
                         + "This tests requires the logfilefile to succeed.");
             }
-            return Files.lines(Paths.get(logfilename))
+            // Without the Charset, we get "java.nio.charset.MalformedInputException: Input length = 1" on Windows
+            return Files.lines(Paths.get(logfilename), SystemUtils.IS_OS_WINDOWS ? Charset.forName("Cp1252") : Charset.defaultCharset())
                     .filter(line -> line.indexOf("SPECIAL_LOGGER") != -1)
                     .filter(line -> line.indexOf("readmetadata ") != -1)
              //       .filter(line -> line.indexOf(searchname) != -1)

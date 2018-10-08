@@ -43,6 +43,10 @@ public class AESEncryptionStreamServiceImpl implements EncryptionStreamService {
     public InputStream getDecryptedInputStream(UserMetaData userMetaData, InputStream inputStream, KeySource keySource, KeyID keyID) {
         Key key = keySource.readKey(keyID);
         CipherInputStream decryptionStream = createCipherInputStream(userMetaData, key.getEncoded(), inputStream, Cipher.DECRYPT_MODE);
+        userMetaData.remove(ENCRYPTION_PROVIDER_KEY);
+        userMetaData.remove(ENCRYPTION_CIPHER_ALGORITHM_KEY);
+        userMetaData.remove(ENCRYPTION_KEYGEN_ALGORITHM_KEY);
+
         return decryptionStream;
     }
 

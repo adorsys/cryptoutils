@@ -7,6 +7,7 @@ import org.adorsys.encobject.complextypes.BucketDirectory;
 import org.adorsys.encobject.complextypes.BucketPath;
 import org.adorsys.encobject.domain.Payload;
 import org.adorsys.encobject.domain.PayloadStream;
+import org.adorsys.encobject.domain.UserMetaData;
 import org.adorsys.encobject.service.api.ContainerPersistence;
 import org.adorsys.encobject.service.api.EncryptionStreamService;
 import org.adorsys.encobject.service.api.ExtendedStoreConnection;
@@ -62,8 +63,9 @@ public class EncryptedPersistenceServiceTest {
             EncryptionStreamService encryptionService = new VerySimpleEncryptionService();
             byte[] content = getTrickyContent();
             InputStream inputStream = new ByteArrayInputStream(content);
-            byte[] encrypted = IOUtils.toByteArray(encryptionService.getEncryptedInputStream(inputStream, null, null, null));
-            byte[] decrypted = IOUtils.toByteArray(encryptionService.getDecryptedInputStream(new ByteArrayInputStream(encrypted), null, null));
+            UserMetaData userMetaData = new UserMetaData();
+            byte[] encrypted = IOUtils.toByteArray(encryptionService.getEncryptedInputStream(userMetaData, inputStream, null, null, null));
+            byte[] decrypted = IOUtils.toByteArray(encryptionService.getDecryptedInputStream(userMetaData, new ByteArrayInputStream(encrypted), null, null));
             Assert.assertFalse(Arrays.equals(content, encrypted));
             Assert.assertTrue(Arrays.equals(content, decrypted));
         } catch (Exception e) {

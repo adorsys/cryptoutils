@@ -41,6 +41,7 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.InputStream;
 import java.net.URL;
+import java.nio.file.Files;
 import java.nio.file.StandardCopyOption;
 import java.util.*;
 
@@ -406,28 +407,29 @@ class RealAmazonS3ExtendedStoreConnection implements ExtendedStoreConnection {
     private void putBlobStreamWithTempFile(BucketPath abucketPath, PayloadStream payloadStream) {
         try {
             LOGGER.debug("putBlobStreamWithTempFile " + abucketPath + " to tmpfile with unknown size");
-            InputStream is = payloadStream.openStream();
             File targetFile = File.createTempFile(AMAZONS3_TMP_FILE_PREFIX, AMAZONS3_TMP_FILE_SUFFIX);
-            java.nio.file.Files.copy(
-                    is,
-                    targetFile.toPath(),
-                    StandardCopyOption.REPLACE_EXISTING);
-            IOUtils.closeQuietly(is);
+            try (InputStream is = payloadStream.openStream()) {          	
+                Files.copy(
+                        is,
+                        targetFile.toPath(),
+                        StandardCopyOption.REPLACE_EXISTING);
+            }
+            
             LOGGER.debug(abucketPath + " with tmpfile " + targetFile.getAbsolutePath() + " written with " + targetFile.length() + " bytes -> will now be copied to ceph");
-            FileInputStream fis = new FileInputStream(targetFile);
+            try (FileInputStream fis = new FileInputStream(targetFile)) {
+            	SimpleStorageMetadataImpl storageMetadata = new SimpleStorageMetadataImpl(payloadStream.getStorageMetadata());
+                storageMetadata.setName(BucketPathUtil.getAsString(abucketPath));
+                storageMetadata.setType(StorageType.BLOB);
+                ObjectMetadata objectMetadata = geteObjectMetadataFromStorageMetadata(storageMetadata);
+                objectMetadata.setContentLength(targetFile.length());
 
-            SimpleStorageMetadataImpl storageMetadata = new SimpleStorageMetadataImpl(payloadStream.getStorageMetadata());
-            storageMetadata.setName(BucketPathUtil.getAsString(abucketPath));
-            storageMetadata.setType(StorageType.BLOB);
-            ObjectMetadata objectMetadata = geteObjectMetadataFromStorageMetadata(storageMetadata);
-            objectMetadata.setContentLength(targetFile.length());
+                BucketPath bucketPath = amazonS3RootBucket.append(abucketPath);
 
-            BucketPath bucketPath = amazonS3RootBucket.append(abucketPath);
+                PutObjectRequest putObjectRequest = new PutObjectRequest(bucketPath.getObjectHandle().getContainer(), bucketPath.getObjectHandle().getName(), fis, objectMetadata);
+                PutObjectResult putObjectResult = connection.putObject(putObjectRequest);
+                LOGGER.debug("stored " + bucketPath + " to ceph with size " + targetFile.length());
+            }
 
-            PutObjectRequest putObjectRequest = new PutObjectRequest(bucketPath.getObjectHandle().getContainer(), bucketPath.getObjectHandle().getName(), fis, objectMetadata);
-            PutObjectResult putObjectResult = connection.putObject(putObjectRequest);
-            IOUtils.closeQuietly(fis);
-            LOGGER.debug("stored " + bucketPath + " to ceph with size " + targetFile.length());
             targetFile.delete();
         } catch (Exception e) {
             throw BaseExceptionHandler.handle(e);

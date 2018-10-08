@@ -1,5 +1,6 @@
 package org.adorsys.cryptoutils.extendedstoreconnection.impls.pathencryption;
 
+import org.adorsys.cryptoutils.exceptions.BaseException;
 import org.adorsys.cryptoutils.utils.Frame;
 import org.adorsys.encobject.complextypes.BucketDirectory;
 import org.adorsys.encobject.complextypes.BucketPath;
@@ -43,6 +44,9 @@ public class BucketPathEncryptingExtendedStoreConnection implements ExtendedStor
         }
         LOGGER.info(frame.toString());
 
+        if (LOGGER.isTraceEnabled()) {
+            new BaseException("JUST A STACK, TO SEE WHERE THE CONNECTION IS CREATED");
+        }
     }
 
     @Override

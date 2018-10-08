@@ -77,9 +77,6 @@ class RealAmazonS3ExtendedStoreConnection implements ExtendedStoreConnection {
         frame.add("region:      " + amazonS3Region);
         frame.add("root bucket: " + amazonS3RootBucket);
         LOGGER.info(frame.toString());
-        if (LOGGER.isDebugEnabled()) {
-            new BaseException("JUST A STACK, TO SEE WHERE THE CONNECTION IS CREATED");
-        }
 
         AWSCredentialsProvider credentialsProvider = new AWSCredentialsProvider() {
             @Override

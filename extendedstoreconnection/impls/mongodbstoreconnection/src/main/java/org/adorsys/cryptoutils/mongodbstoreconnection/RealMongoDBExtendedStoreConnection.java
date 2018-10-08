@@ -66,12 +66,12 @@ class RealMongoDBExtendedStoreConnection implements ExtendedStoreConnection {
     public RealMongoDBExtendedStoreConnection(MongoHost host, MongoPort port, MongoDatabaseName databasename, MongoUser user, MongoPassword password) {
         Frame frame = new Frame();
         frame.add("USE MONGO DB");
-        frame.add("mongo db has be up and running )");
+        frame.add("mongo db has be up and running");
         frame.add("host: " + host);
         frame.add("port: " + port);
         frame.add("database: " + databasename);
-        frame.add("user:" + user);
-        frame.add("password:" + password);
+        frame.add("user: " + user);
+        frame.add("password: " + password);
         LOGGER.info(frame.toString());
 
         MongoClient mongoClient = null;

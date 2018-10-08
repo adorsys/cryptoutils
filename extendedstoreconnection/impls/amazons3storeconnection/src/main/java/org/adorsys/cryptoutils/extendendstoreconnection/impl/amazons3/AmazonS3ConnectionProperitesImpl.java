@@ -15,8 +15,8 @@ import java.net.URL;
 public class AmazonS3ConnectionProperitesImpl extends ConnectionPropertiesImpl implements AmazonS3ConnectionProperties{
     private AmazonS3AccessKey amazonS3AccessKey;
     private AmazonS3SecretKey amazonS3SecretKey;
-    private AmazonS3Region amazonS3Region;
-    private AmazonS3RootBucketName amazonS3RootBucketName;
+    private AmazonS3Region amazonS3Region = defaultRegion;
+    private AmazonS3RootBucketName amazonS3RootBucketName = defaultRootBucketName;
     private URL url;
 
     @Override

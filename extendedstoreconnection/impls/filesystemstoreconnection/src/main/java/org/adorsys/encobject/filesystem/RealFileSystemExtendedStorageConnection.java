@@ -53,7 +53,7 @@ class RealFileSystemExtendedStorageConnection implements ExtendedStoreConnection
             if (!absolutePath) {
                 String currentDir = new File(".").getCanonicalPath();
                 String absoluteDirectory = basedir.getValue();
-                absoluteDirectory = currentDir + absoluteDirectory;
+                absoluteDirectory = currentDir + BucketPath.BUCKET_SEPARATOR + absoluteDirectory;
                 frame.add("basedir     : " + basedir);
                 frame.add("absolutedir : " + absoluteDirectory);
             } else {

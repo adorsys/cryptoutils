@@ -3,7 +3,7 @@
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>de.adorsys.cryptoutils</groupId>
 	<artifactId>cryptoutils</artifactId>
-	<version>0.21.3</version>
+	<version>0.22.0</version>
     <name>Cryptographic helpers for Secure Banking</name>
     <description>Utility Components for the development of secure banking modules. Components developed under this tree
         are released as jar.
@@ -45,6 +45,7 @@
         <slf4j-simple.version>1.7.25</slf4j-simple.version>
         <amazon.aws.version>1.11.409</amazon.aws.version>
         <apache.commons.lang3.version>3.8</apache.commons.lang3.version>
+        <catch.exception.version>2.0.0-beta-1</catch.exception.version>
     </properties>
 
     <modules>
@@ -207,6 +208,12 @@
             <groupId>org.slf4j</groupId>
             <artifactId>slf4j-simple</artifactId>
             <version>${slf4j-simple.version}</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>eu.codearte.catch-exception</groupId>
+            <artifactId>catch-exception</artifactId>
+            <version>${catch.exception.version}</version>
             <scope>test</scope>
         </dependency>
     </dependencies>

@@ -1,5 +1,6 @@
 package org.adorsys.encobject.service;
 
+import org.adorsys.encobject.domain.UserMetaData;
 import org.adorsys.encobject.service.api.EncryptionStreamService;
 import org.adorsys.encobject.service.api.KeySource;
 import org.adorsys.encobject.types.KeyID;
@@ -12,12 +13,12 @@ import java.io.InputStream;
  */
 public class VerySimpleEncryptionService implements EncryptionStreamService {
     @Override
-    public InputStream getEncryptedInputStream(InputStream inputStream, KeySource keySource, KeyID keyID, Boolean compress) {
+    public InputStream getEncryptedInputStream(UserMetaData userMetaData, InputStream inputStream, KeySource keySource, KeyID keyID, Boolean compress) {
         return new VerySimpleEncryptionStream(inputStream);
     }
 
     @Override
-    public InputStream getDecryptedInputStream(InputStream inputStream, KeySource keySource, KeyID keyID) {
+    public InputStream getDecryptedInputStream(UserMetaData userMetaData, InputStream inputStream, KeySource keySource, KeyID keyID) {
         return new VerySimpleEncryptionStream(inputStream);
     }
 

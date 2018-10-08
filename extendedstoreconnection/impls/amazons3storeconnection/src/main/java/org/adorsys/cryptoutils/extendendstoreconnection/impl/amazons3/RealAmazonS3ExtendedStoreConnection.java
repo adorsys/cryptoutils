@@ -221,13 +221,14 @@ class RealAmazonS3ExtendedStoreConnection implements ExtendedStoreConnection {
 
     @Override
     public boolean containerExists(BucketDirectory bucketDirectory) {
-        LOGGER.debug("containerExists " + bucketDirectory);
         BucketPath bucketPath = amazonS3RootContainersBucket.appendName(bucketDirectory.getObjectHandle().getContainer());
         try {
             // Nicht schön hier mit Exceptions zu arbeiten, aber schneller als mit list
             connection.getObjectMetadata(bucketPath.getObjectHandle().getContainer(), bucketPath.getObjectHandle().getName());
+            LOGGER.debug("containerExists " + bucketDirectory + " TRUE");
             return true;
         } catch (Exception e) {
+            LOGGER.debug("containerExists " + bucketDirectory + " FALSE (EXCEPTION)");
             return false;
         }
     }
@@ -488,6 +489,7 @@ class RealAmazonS3ExtendedStoreConnection implements ExtendedStoreConnection {
         if (prefix == null) {
             prefix = "";
         }
+        LOGGER.debug("listObjects(" + container + "," + prefix + ")");
         ObjectListing ol = connection.listObjects(container, prefix);
         if (ol.getObjectSummaries().isEmpty()) {
             LOGGER.debug("no files found in " + container + " with prefix " + prefix);

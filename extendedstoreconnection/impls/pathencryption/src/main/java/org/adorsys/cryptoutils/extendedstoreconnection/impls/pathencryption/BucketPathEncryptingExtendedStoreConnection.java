@@ -24,6 +24,12 @@ import java.util.List;
  * Created by peter on 26.09.18.
  */
 public class BucketPathEncryptingExtendedStoreConnection implements ExtendedStoreConnection {
+
+    // those two limits are not random. For Ceph and Mongo a path part longer than this
+    // can break the database
+    private final static int MAX_LENGTH_FOR_UNENCRYPTED = 179;
+    private final static int MAX_LENGTH_FOR_ENCRYPTED = 79;
+
     private final static Logger LOGGER = LoggerFactory.getLogger(BucketPathEncryptingExtendedStoreConnection.class);
     protected ExtendedStoreConnection extendedStoreConnection;
     BucketPathEncryption bucketPathEncryption;
@@ -51,81 +57,129 @@ public class BucketPathEncryptingExtendedStoreConnection implements ExtendedStor
 
     @Override
     public void putBlob(BucketPath bucketPath, Payload payload) {
+        if (LOGGER.isTraceEnabled()) {
+            LOGGER.trace("putBlob(" + bucketPath + ", payload)");
+        }
         extendedStoreConnection.putBlob(e(bucketPath), payload);
     }
 
     @Override
     public Payload getBlob(BucketPath bucketPath) {
+        if (LOGGER.isTraceEnabled()) {
+            LOGGER.trace("getBlob(" + bucketPath + ")");
+        }
         return d(extendedStoreConnection.getBlob(e(bucketPath)));
     }
 
     @Override
     public Payload getBlob(BucketPath bucketPath, StorageMetadata storageMetadata) {
+        if (LOGGER.isTraceEnabled()) {
+            LOGGER.trace("getBlob(" + bucketPath + " ,storageMetadata)");
+        }
         return d(extendedStoreConnection.getBlob(e(bucketPath), e(storageMetadata)));
     }
 
     @Override
     public void putBlobStream(BucketPath bucketPath, PayloadStream payloadStream) {
+        if (LOGGER.isTraceEnabled()) {
+            LOGGER.trace("putBlobStream(" + bucketPath + " ,payloadStream)");
+        }
         extendedStoreConnection.putBlobStream(e(bucketPath), payloadStream);
     }
 
     @Override
     public PayloadStream getBlobStream(BucketPath bucketPath) {
+        if (LOGGER.isTraceEnabled()) {
+            LOGGER.trace("getBlobStream(" + bucketPath + ")");
+        }
         return d(extendedStoreConnection.getBlobStream(e(bucketPath)));
     }
 
     @Override
     public PayloadStream getBlobStream(BucketPath bucketPath, StorageMetadata storageMetadata) {
+        if (LOGGER.isTraceEnabled()) {
+            LOGGER.trace("getBlobStream(" + bucketPath + " ,storageMetadata)");
+        }
         return d(extendedStoreConnection.getBlobStream(e(bucketPath), e(storageMetadata)));
     }
 
     @Override
     public void putBlob(BucketPath bucketPath, byte[] bytes) {
+        if (LOGGER.isTraceEnabled()) {
+            LOGGER.trace("putBlob(" + bucketPath + " ,byte[])");
+        }
         extendedStoreConnection.putBlob(e(bucketPath), bytes);
     }
 
     @Override
     public StorageMetadata getStorageMetadata(BucketPath bucketPath) {
+        if (LOGGER.isTraceEnabled()) {
+            LOGGER.trace("getStorageMetadata(" + bucketPath + ")");
+        }
         return d(extendedStoreConnection.getStorageMetadata(e(bucketPath)));
     }
 
     @Override
     public boolean blobExists(BucketPath bucketPath) {
+        if (LOGGER.isTraceEnabled()) {
+            LOGGER.trace("blobExists(" + bucketPath + ")");
+        }
         return extendedStoreConnection.blobExists(e(bucketPath));
     }
 
     @Override
     public void removeBlob(BucketPath bucketPath) {
+        if (LOGGER.isTraceEnabled()) {
+            LOGGER.trace("removeBlob(" + bucketPath + ")");
+        }
         extendedStoreConnection.removeBlob(e(bucketPath));
     }
 
     @Override
     public void removeBlobFolder(BucketDirectory bucketDirectory) {
+        if (LOGGER.isTraceEnabled()) {
+            LOGGER.trace("removeBlobFolder(" + bucketDirectory + ")");
+        }
         extendedStoreConnection.removeBlobFolder(e(bucketDirectory));
     }
 
     @Override
     public void createContainer(BucketDirectory bucketDirectory) {
+        if (LOGGER.isTraceEnabled()) {
+            LOGGER.trace("createContainer(" + bucketDirectory + ")");
+        }
         extendedStoreConnection.createContainer(e(bucketDirectory));
     }
 
     @Override
     public boolean containerExists(BucketDirectory bucketDirectory) {
+        if (LOGGER.isTraceEnabled()) {
+            LOGGER.trace("containerExists(" + bucketDirectory + ")");
+        }
         return extendedStoreConnection.containerExists(e(bucketDirectory));
     }
 
     @Override
     public void deleteContainer(BucketDirectory bucketDirectory) {
+        if (LOGGER.isTraceEnabled()) {
+            LOGGER.trace("deleteContainer(" + bucketDirectory + ")");
+        }
         extendedStoreConnection.deleteContainer(e(bucketDirectory));
     }
 
     @Override
     public List<StorageMetadata> list(BucketDirectory bucketDirectory, ListRecursiveFlag listRecursiveFlag) {
+        if (LOGGER.isTraceEnabled()) {
+            LOGGER.trace("list(" + bucketDirectory + " ," + listRecursiveFlag + ")");
+        }
         return d(extendedStoreConnection.list(e(bucketDirectory), listRecursiveFlag));
     }
 
     @Override
     public List<BucketDirectory> listAllBuckets() {
+        if (LOGGER.isTraceEnabled()) {
+            LOGGER.trace("listAllBuckets()");
+        }
         return de(extendedStoreConnection.listAllBuckets());
     }
 
@@ -137,15 +191,19 @@ public class BucketPathEncryptingExtendedStoreConnection implements ExtendedStor
 
     private BucketPath e(BucketPath bucketPath) {
         if (!active) {
+            bucketPath.checkLengthRestriction(MAX_LENGTH_FOR_UNENCRYPTED);
             return bucketPath;
         }
+        bucketPath.checkLengthRestriction(MAX_LENGTH_FOR_ENCRYPTED);
         return bucketPathEncryption.encrypt(bucketPathEncryptionPassword, bucketPath);
     }
 
     private BucketDirectory e(BucketDirectory bucketDirectory) {
         if (! active) {
+            bucketDirectory.checkLengthRestriction(MAX_LENGTH_FOR_UNENCRYPTED);
             return bucketDirectory;
         }
+        bucketDirectory.checkLengthRestriction(MAX_LENGTH_FOR_ENCRYPTED);
         return bucketPathEncryption.encrypt(bucketPathEncryptionPassword, bucketDirectory);
     }
 

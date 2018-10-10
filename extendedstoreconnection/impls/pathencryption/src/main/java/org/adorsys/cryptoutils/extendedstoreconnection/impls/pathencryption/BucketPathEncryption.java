@@ -63,7 +63,9 @@ public class BucketPathEncryption {
                 // LOGGER.debug("encrypt: ecnrypted bytes as hex string " + encryptedBytesAsHexString);
                 encryptedPath.append(BucketPath.BUCKET_SEPARATOR + encryptedBytesAsHexString);
             }
-            LOGGER.debug("encrypted (" + fullString + ") -> (" + encryptedPath.toString() + ")");
+            if (LOGGER.isDebugEnabled()) {
+                LOGGER.debug(String.format("%3d -> %3d", fullString.length(), encryptedPath.toString().length()) + " encrypted (" + fullString + ") -> (" + encryptedPath.toString() + ")");
+            }
             return encryptedPath.toString();
         } catch (Exception e) {
             throw new PathEncryptionException(fullString, e);
@@ -92,7 +94,9 @@ public class BucketPathEncryption {
 
                 plainPath.append(BucketPath.BUCKET_SEPARATOR + plainString);
             }
-            LOGGER.debug("decrypted (" + encryptedHexString + ") -> (" + plainPath.toString() + ")");
+            if (LOGGER.isDebugEnabled()) {
+                LOGGER.debug(String.format("%3d -> %3d", encryptedHexString.length(), plainPath.toString().length()) + " decrypted (" + encryptedHexString + ") -> (" + plainPath.toString() + ")");
+            }
             return plainPath.toString();
         } catch (Exception e) {
             throw new PathDecryptionException(encryptedHexString, e);

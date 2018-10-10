@@ -40,7 +40,9 @@ public class BucketDirectory {
         return path.getObjectHandle();
     }
 
-    @Override
+    public void checkLengthRestriction(int max) { path.checkLengthRestriction(max); }
+
+        @Override
     public String toString() {
         return "BucketDirectory{" +
                 "path=" + path +

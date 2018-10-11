@@ -6,6 +6,7 @@ import org.adorsys.encobject.domain.Payload;
 import org.adorsys.encobject.domain.PayloadStream;
 import org.adorsys.encobject.domain.StorageMetadata;
 import org.adorsys.encobject.exceptions.StorageConnectionException;
+import org.adorsys.encobject.types.ExtendedStoreConnectionType;
 import org.adorsys.encobject.types.ListRecursiveFlag;
 
 import java.util.List;
@@ -48,4 +49,5 @@ public interface ExtendedStoreConnection {
 
     List<BucketDirectory> listAllBuckets();
 
+    ExtendedStoreConnectionType getType();
 }

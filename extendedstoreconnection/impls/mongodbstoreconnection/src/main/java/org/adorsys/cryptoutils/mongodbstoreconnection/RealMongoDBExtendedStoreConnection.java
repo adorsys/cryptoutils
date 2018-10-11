@@ -12,6 +12,7 @@ import com.mongodb.client.gridfs.model.GridFSUploadOptions;
 import com.mongodb.client.model.Filters;
 import com.mongodb.gridfs.GridFS;
 import com.mongodb.gridfs.GridFSDBFile;
+import org.adorsys.cryptoutils.exceptions.BaseException;
 import org.adorsys.cryptoutils.exceptions.BaseExceptionHandler;
 import org.adorsys.cryptoutils.utils.Frame;
 import org.adorsys.encobject.complextypes.BucketDirectory;
@@ -29,6 +30,7 @@ import org.adorsys.encobject.service.impl.SimplePayloadImpl;
 import org.adorsys.encobject.service.impl.SimplePayloadStreamImpl;
 import org.adorsys.encobject.service.impl.SimpleStorageMetadataImpl;
 import org.adorsys.encobject.service.impl.StoreConnectionListHelper;
+import org.adorsys.encobject.types.ExtendedStoreConnectionType;
 import org.adorsys.encobject.types.ListRecursiveFlag;
 import org.adorsys.encobject.types.connection.*;
 import org.apache.commons.io.IOUtils;
@@ -57,7 +59,7 @@ class RealMongoDBExtendedStoreConnection implements ExtendedStoreConnection {
 
     private static final String STORAGE_METADATA_KEY = "StorageMetadata";
     private static final String FILENAME_TAG = "filename";
-    private static final String BUCKET_ID_FILENAME = ".bucket.creation.date.";
+    private static final String BUCKET_ID_FILENAME = ".bcd";
 
     private MongoDatabase database;
     private DB databaseDeprecated;
@@ -221,8 +223,8 @@ class RealMongoDBExtendedStoreConnection implements ExtendedStoreConnection {
                 LOGGER.error("Due to the following \"Too many open files exception\"");
                 LOGGER.error("PLEASE READ https://jira.adorsys.de/browse/DOC-22");
                 LOGGER.error("****************************************************");
-                throw BaseExceptionHandler.handle(e);
             }
+            throw new BaseException("exception creating container for " + bucketDirectory, e);
         }
         IOUtils.closeQuietly(is);
     }
@@ -312,6 +314,11 @@ class RealMongoDBExtendedStoreConnection implements ExtendedStoreConnection {
             }
         });
         return list;
+    }
+
+    @Override
+    public ExtendedStoreConnectionType getType() {
+        return ExtendedStoreConnectionType.MONGO;
     }
 
 

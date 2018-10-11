@@ -42,6 +42,23 @@
             <version>1.7.25</version>
         </dependency>
 
+        <!-- logback by purpose, because one test requires reading the logfile
+        simplelogger can not do both, write to a file and to stdout.
+        if stdout is silent, its hard to find bugs.
+        -->
+        <dependency>
+            <groupId>ch.qos.logback</groupId>
+            <artifactId>logback-classic</artifactId>
+            <version>1.1.2</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>ch.qos.logback</groupId>
+            <artifactId>logback-core</artifactId>
+            <version>1.1.2</version>
+            <scope>test</scope>
+        </dependency>
+
         <dependency>
             <groupId>junit</groupId>
             <artifactId>junit</artifactId>

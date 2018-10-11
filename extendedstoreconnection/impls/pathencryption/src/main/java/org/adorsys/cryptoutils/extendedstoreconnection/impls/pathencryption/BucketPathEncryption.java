@@ -13,10 +13,16 @@ import org.slf4j.LoggerFactory;
 
 import javax.crypto.Cipher;
 import javax.crypto.spec.SecretKeySpec;
+import java.io.BufferedReader;
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.InputStreamReader;
 import java.nio.charset.Charset;
 import java.security.MessageDigest;
 import java.util.Arrays;
 import java.util.StringTokenizer;
+import java.util.zip.GZIPInputStream;
+import java.util.zip.GZIPOutputStream;
 
 /**
  * Created by peter on 25.09.18.
@@ -24,7 +30,8 @@ import java.util.StringTokenizer;
  */
 public class BucketPathEncryption {
     private final static Logger LOGGER = LoggerFactory.getLogger(BucketPathEncryption.class);
-    private final static Charset CHARSET = Charset.forName("UTF-8");
+    public static final String UTF_8 = "UTF-8";
+    private final static Charset CHARSET = Charset.forName(UTF_8);
     public final static boolean encryptContainer = true;
 
     public static BucketDirectory encrypt(BucketPathEncryptionPassword bucketPathEncryptionPassword, BucketDirectory bucketDirectory) {
@@ -49,18 +56,18 @@ public class BucketPathEncryption {
 
             StringBuilder encryptedPath = new StringBuilder();
             StringTokenizer st = new StringTokenizer(fullString, BucketPath.BUCKET_SEPARATOR);
-            if (! encryptContainer) {
+            if (!encryptContainer) {
                 encryptedPath.append(BucketPath.BUCKET_SEPARATOR + st.nextToken());
             }
             while (st.hasMoreTokens()) {
 
                 String plainString = st.nextToken();
-                // LOGGER.debug("encrypt: plain string " + plainString);
-                byte[] plainBytes = plainString.getBytes(CHARSET);
-                // LOGGER.debug("encrypt: plain bytes as hex string " + HexUtil.convertBytesToHexString(plainBytes));
-                byte[] encryptedBytes = cipher.doFinal(plainBytes);
+                LOGGER.debug("encrypt: plain string " + plainString);
+                byte[] compressedBytes = compress(plainString);
+                LOGGER.debug("encrypt: plain bytes as hex string " + HexUtil.convertBytesToHexString(compressedBytes));
+                byte[] encryptedBytes = cipher.doFinal(compressedBytes);
                 String encryptedBytesAsHexString = HexUtil.convertBytesToHexString(encryptedBytes).toLowerCase();
-                // LOGGER.debug("encrypt: ecnrypted bytes as hex string " + encryptedBytesAsHexString);
+                LOGGER.debug("encrypt: ecnrypted bytes as hex string " + encryptedBytesAsHexString);
                 encryptedPath.append(BucketPath.BUCKET_SEPARATOR + encryptedBytesAsHexString);
             }
             if (LOGGER.isDebugEnabled()) {
@@ -79,19 +86,18 @@ public class BucketPathEncryption {
 
             StringBuilder plainPath = new StringBuilder();
             StringTokenizer st = new StringTokenizer(encryptedHexString, BucketPath.BUCKET_SEPARATOR);
-            if (! encryptContainer) {
+            if (!encryptContainer) {
                 plainPath.append(BucketPath.BUCKET_SEPARATOR + st.nextToken());
             }
             while (st.hasMoreTokens()) {
                 String encryptedBytesAsHexString = st.nextToken();
-                // LOGGER.debug("decrypt: encrpyted bytes as hex string (orig)       :" + encryptedBytesAsHexString);
+                LOGGER.debug("decrypt: encrpyted bytes as hex string (orig)       :" + encryptedBytesAsHexString);
                 byte[] encryptedBytes = HexUtil.convertHexStringToBytes(encryptedBytesAsHexString.toUpperCase());
-                // LOGGER.debug("decrypt: encrpyted bytes as hex string (reconverted):" + HexUtil.convertBytesToHexString(encryptedBytes));
-                byte[] plainBytes = cipher.doFinal(encryptedBytes);
-                // LOGGER.debug("decrypt: plain bytes as hex string:" + HexUtil.convertBytesToHexString(plainBytes));
-                String plainString = new String(plainBytes, CHARSET);
-                // LOGGER.debug("decrypt: plain string " + plainString);
-
+                LOGGER.debug("decrypt: encrpyted bytes as hex string (reconverted):" + HexUtil.convertBytesToHexString(encryptedBytes));
+                byte[] compressedBytes = cipher.doFinal(encryptedBytes);
+                LOGGER.debug("decrypt: plain bytes as hex string:" + HexUtil.convertBytesToHexString(compressedBytes));
+                String plainString = decompress(compressedBytes);
+                LOGGER.debug("decrypt: plain string " + plainString);
                 plainPath.append(BucketPath.BUCKET_SEPARATOR + plainString);
             }
             if (LOGGER.isDebugEnabled()) {
@@ -105,7 +111,7 @@ public class BucketPathEncryption {
 
     private static Cipher createCipher(BucketPathEncryptionPassword bucketPathEncryptionPassword, int cipherMode) {
         try {
-            byte[] key = bucketPathEncryptionPassword.getValue().getBytes("UTF-8");
+            byte[] key = bucketPathEncryptionPassword.getValue().getBytes(UTF_8);
             MessageDigest sha = MessageDigest.getInstance("SHA-256");
             key = sha.digest(key);
             // nur die ersten 128 bit nutzen
@@ -120,5 +126,13 @@ public class BucketPathEncryption {
             throw BaseExceptionHandler.handle(e);
         }
 
+    }
+
+    private static byte[] compress(String data) {
+        return data.getBytes(CHARSET);
+    }
+
+    private static String decompress(byte[] compressed) {
+        return new String(compressed, CHARSET);
     }
 }

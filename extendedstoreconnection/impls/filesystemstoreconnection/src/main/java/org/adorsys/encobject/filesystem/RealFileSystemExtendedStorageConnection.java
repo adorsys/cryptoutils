@@ -21,6 +21,7 @@ import org.adorsys.encobject.service.impl.SimplePayloadImpl;
 import org.adorsys.encobject.service.impl.SimplePayloadStreamImpl;
 import org.adorsys.encobject.service.impl.SimpleStorageMetadataImpl;
 import org.adorsys.encobject.types.BucketPathEncryptionPassword;
+import org.adorsys.encobject.types.ExtendedStoreConnectionType;
 import org.adorsys.encobject.types.ListRecursiveFlag;
 import org.adorsys.encobject.types.connection.FilesystemBasedirectoryName;
 import org.apache.commons.io.FileUtils;
@@ -161,6 +162,11 @@ class RealFileSystemExtendedStorageConnection implements ExtendedStoreConnection
         } catch (Exception e) {
             throw BaseExceptionHandler.handle(e);
         }
+    }
+
+    @Override
+    public ExtendedStoreConnectionType getType() {
+        return ExtendedStoreConnectionType.FILESYSTEM;
     }
 
     @Override

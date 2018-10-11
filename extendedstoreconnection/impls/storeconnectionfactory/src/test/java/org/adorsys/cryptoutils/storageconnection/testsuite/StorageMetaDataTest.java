@@ -220,7 +220,7 @@ public class StorageMetaDataTest {
      * Achtung, dieser Test möchte sicherstellen, dass in Cryptoutils die Methode zum Lesen der StorageMetadata
      * wirklich nur einmal aufgerufen wird. Um das zu machen, wird einfach eine spezielle Logmeldung gesucht, die
      * nach dem Test genau einmal mehr geschrieben sein muss, als vor dem Test. Daher wird für diesen Test
-     * logback benötigt, denn der Simpple-Logger schreibt nicht in Dateien.
+     * logback benötigt, denn der Simpple-Logger schreibt nicht in Dateien und auf stdout gleichzeitig
      */
     @Test
     public void checkMetaInfoOnlyReadOnceForDocument() {

@@ -26,6 +26,7 @@ import org.adorsys.encobject.service.api.ExtendedStoreConnection;
 import org.adorsys.encobject.service.impl.SimplePayloadImpl;
 import org.adorsys.encobject.service.impl.SimplePayloadStreamImpl;
 import org.adorsys.encobject.service.impl.SimpleStorageMetadataImpl;
+import org.adorsys.encobject.types.ExtendedStoreConnectionType;
 import org.adorsys.encobject.types.ListRecursiveFlag;
 import org.adorsys.encobject.types.connection.AmazonS3AccessKey;
 import org.adorsys.encobject.types.connection.AmazonS3Region;
@@ -302,6 +303,11 @@ class RealAmazonS3ExtendedStoreConnection implements ExtendedStoreConnection {
         ObjectListing ol = connection.listObjects(amazonS3RootContainersBucket.getObjectHandle().getContainer());
         ol.getObjectSummaries().forEach(bucket -> buckets.add(new BucketDirectory(bucket.getKey())));
         return buckets;
+    }
+
+    @Override
+    public ExtendedStoreConnectionType getType() {
+        return ExtendedStoreConnectionType.AMAZONS3;
     }
 
     public void cleanDatabase() {

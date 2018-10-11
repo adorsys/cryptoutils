@@ -13,6 +13,7 @@ import org.adorsys.encobject.service.impl.SimplePayloadImpl;
 import org.adorsys.encobject.service.impl.SimplePayloadStreamImpl;
 import org.adorsys.encobject.service.impl.SimpleStorageMetadataImpl;
 import org.adorsys.encobject.types.BucketPathEncryptionPassword;
+import org.adorsys.encobject.types.ExtendedStoreConnectionType;
 import org.adorsys.encobject.types.ListRecursiveFlag;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -24,11 +25,14 @@ import java.util.List;
  * Created by peter on 26.09.18.
  */
 public class BucketPathEncryptingExtendedStoreConnection implements ExtendedStoreConnection {
-
     // those two limits are not random. For Ceph and Mongo a path part longer than this
     // can break the database
-    private final static int MAX_LENGTH_FOR_UNENCRYPTED = 179;
-    private final static int MAX_LENGTH_FOR_ENCRYPTED = 79;
+
+    // Ceph, Mino, Amazon, Filesystem
+    private final static MaxLengthInfo AMAZONS3_MAX_LENGTH = new MaxLengthInfo(175, 79);
+    // Mongo
+    private final static MaxLengthInfo MONGO__MAX_LENGTH = new MaxLengthInfo(88, 31);
+    private MaxLengthInfo maxLengthInfo;
 
     private final static Logger LOGGER = LoggerFactory.getLogger(BucketPathEncryptingExtendedStoreConnection.class);
     protected ExtendedStoreConnection extendedStoreConnection;
@@ -42,7 +46,16 @@ public class BucketPathEncryptingExtendedStoreConnection implements ExtendedStor
         this.bucketPathEncryption = new BucketPathEncryption();
         this.bucketPathEncryptionPassword = bucketPathEncryptionPassword;
         this.active = bucketPathEncryptionPassword != null;
+        this.maxLengthInfo = getMaxLengthTupel(this.extendedStoreConnection);
         Frame frame = new Frame();
+        if (extendedStoreConnection.getType().equals(ExtendedStoreConnectionType.MONGO)) {
+            if (active) {
+                frame.add("WARNING WARNING WARNING");
+                frame.add("MONGO DB FILE NAMES CAN NOT BE ENCRYPTED DUE TO LENGTH RESTRICTION");
+            }
+            active = false;
+            this.bucketPathEncryptionPassword = null;
+        }
         if (active) {
             frame.add(bucketPathEncryptionPassword.toString());
         } else {
@@ -183,6 +196,15 @@ public class BucketPathEncryptingExtendedStoreConnection implements ExtendedStor
         return de(extendedStoreConnection.listAllBuckets());
     }
 
+    @Override
+    public ExtendedStoreConnectionType getType() {
+        return extendedStoreConnection.getType();
+    }
+
+    public MaxLengthInfo getMaxLengthInfo() {
+        return maxLengthInfo;
+    }
+
     private List<BucketDirectory> de(List<BucketDirectory> bucketDirectories) {
         List<BucketDirectory> newBucketDirectoryList = new ArrayList<>();
         bucketDirectories.forEach(bucketDirectory -> newBucketDirectoryList.add(d(bucketDirectory)));
@@ -191,45 +213,45 @@ public class BucketPathEncryptingExtendedStoreConnection implements ExtendedStor
 
     private BucketPath e(BucketPath bucketPath) {
         if (!active) {
-            bucketPath.checkLengthRestriction(MAX_LENGTH_FOR_UNENCRYPTED);
+            bucketPath.checkLengthRestriction(maxLengthInfo.getUnencryptedMaxLength());
             return bucketPath;
         }
-        bucketPath.checkLengthRestriction(MAX_LENGTH_FOR_ENCRYPTED);
+        bucketPath.checkLengthRestriction(maxLengthInfo.getEncryptedMaxLength());
         return bucketPathEncryption.encrypt(bucketPathEncryptionPassword, bucketPath);
     }
 
     private BucketDirectory e(BucketDirectory bucketDirectory) {
-        if (! active) {
-            bucketDirectory.checkLengthRestriction(MAX_LENGTH_FOR_UNENCRYPTED);
+        if (!active) {
+            bucketDirectory.checkLengthRestriction(maxLengthInfo.getUnencryptedMaxLength());
             return bucketDirectory;
         }
-        bucketDirectory.checkLengthRestriction(MAX_LENGTH_FOR_ENCRYPTED);
+        bucketDirectory.checkLengthRestriction(maxLengthInfo.getEncryptedMaxLength());
         return bucketPathEncryption.encrypt(bucketPathEncryptionPassword, bucketDirectory);
     }
 
     private BucketDirectory d(BucketDirectory bucketDirectory) {
-        if (! active) {
+        if (!active) {
             return bucketDirectory;
         }
         return bucketPathEncryption.decrypt(bucketPathEncryptionPassword, bucketDirectory);
     }
 
     private Payload d(Payload payload) {
-        if (! active) {
+        if (!active) {
             return payload;
         }
         return new SimplePayloadImpl(d(payload.getStorageMetadata()), payload.getData());
     }
 
     private PayloadStream d(PayloadStream payloadStream) {
-        if (! active) {
+        if (!active) {
             return payloadStream;
         }
         return new SimplePayloadStreamImpl(d(payloadStream.getStorageMetadata()), payloadStream.openStream());
     }
 
     private StorageMetadata d(StorageMetadata storageMetadata) {
-        if (! active) {
+        if (!active) {
             return storageMetadata;
         }
         String encryptedName = storageMetadata.getName();
@@ -243,7 +265,7 @@ public class BucketPathEncryptingExtendedStoreConnection implements ExtendedStor
     }
 
     private StorageMetadata e(StorageMetadata storageMetadata) {
-        if (! active) {
+        if (!active) {
             return storageMetadata;
         }
         if (storageMetadata == null) {
@@ -260,12 +282,44 @@ public class BucketPathEncryptingExtendedStoreConnection implements ExtendedStor
     }
 
     private List<StorageMetadata> d(List<StorageMetadata> list) {
-        if (! active) {
+        if (!active) {
             return list;
         }
         List<StorageMetadata> newStorageMetadataList = new ArrayList<>();
         list.forEach(storageMetadata -> newStorageMetadataList.add(d(storageMetadata)));
         return newStorageMetadataList;
+    }
+
+
+    public static class MaxLengthInfo {
+        int unencryptedMaxLength;
+        int encryptedMaxLength;
+
+        public MaxLengthInfo(int unencryptedMaxLength, int encryptedMaxLength) {
+            this.unencryptedMaxLength = unencryptedMaxLength;
+            this.encryptedMaxLength = encryptedMaxLength;
+        }
+
+        public int getUnencryptedMaxLength() {
+            return unencryptedMaxLength;
+        }
+
+        public int getEncryptedMaxLength() {
+            return encryptedMaxLength;
+        }
+    }
+
+    private static MaxLengthInfo getMaxLengthTupel(ExtendedStoreConnection extendedStoreConnection) {
+        switch (extendedStoreConnection.getType()) {
+            case FILESYSTEM:
+            case MINIO:
+            case AMAZONS3:
+                return AMAZONS3_MAX_LENGTH;
+            case MONGO:
+                return MONGO__MAX_LENGTH;
+            default:
+                throw new BaseException("missing switch for " + extendedStoreConnection.getType());
+        }
     }
 
 

@@ -7,6 +7,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.nio.charset.Charset;
+import java.util.List;
 import java.util.Random;
 
 /**
@@ -35,6 +36,27 @@ public class StringCompressionTest {
         test(new LZWCompression());
     }
 
+    // @Test
+    public void lzwr() {
+        LZWCompression lzw = new LZWCompression();
+
+        byte[] bytes = new byte[500];
+        new Random().nextBytes(bytes);
+        String s = HexUtil.convertBytesToHexString(bytes);
+
+        for (int i = 1; i < s.length(); i++) {
+            String testString = s.substring(0, i);
+
+            int bytesBefore = testString.getBytes(CHARSET).length;
+            List<Integer> integers = lzw.realCompress(testString);
+            String decompressedString = lzw.realDecompress(integers);
+            Assert.assertEquals(testString, decompressedString);
+
+            LOGGER.info(String.format("%3d -> %3d -> %3f ", bytesBefore, integers.size(), integers.size() * 1.5));
+        }
+
+    }
+
     public void test(StringCompression stringCompression) {
         byte[] bytes = new byte[50];
         new Random().nextBytes(bytes);
@@ -49,7 +71,7 @@ public class StringCompressionTest {
             Assert.assertEquals(testString, decompressedString);
             int bytesAfter = compressedBytes.length;
 
-            LOGGER.info(String.format("%3d -> %3d", bytesBefore, bytesAfter) + " " + (bytesAfter < bytesBefore ? "OK" : ""));
+            LOGGER.info(String.format("%3d -> %3d = %6d", bytesBefore, bytesAfter, (1.5*bytesAfter) ) + " " + (bytesAfter < bytesBefore ? "OK" : ""));
         }
     }
 

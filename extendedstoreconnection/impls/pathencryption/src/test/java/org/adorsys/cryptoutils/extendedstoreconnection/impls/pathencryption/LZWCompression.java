@@ -30,7 +30,7 @@ public class LZWCompression implements StringCompression {
         return realDecompress(ints);
     }
 
-    private static List<Integer> realCompress(String uncompressed) {
+    public List<Integer> realCompress(String uncompressed) {
         // Build the dictionary.
         int dictSize = 256;
         Map<String,Integer> dictionary = new HashMap<String,Integer>();
@@ -58,7 +58,7 @@ public class LZWCompression implements StringCompression {
     }
 
     /** Decompress a list of output ks to a string. */
-    private static String realDecompress(List<Integer> compressed) {
+    public String realDecompress(List<Integer> compressed) {
         // Build the dictionary.
         int dictSize = 256;
         Map<Integer,String> dictionary = new HashMap<Integer,String>();

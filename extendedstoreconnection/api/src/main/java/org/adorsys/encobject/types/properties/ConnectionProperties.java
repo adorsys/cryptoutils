@@ -7,6 +7,10 @@ import org.adorsys.encobject.types.BucketPathEncryptionPassword;
  */
 public interface ConnectionProperties {
     BucketPathEncryptionPassword defaultEncryptionPassword = new BucketPathEncryptionPassword("2837/(&dfja34j39,yiEsdkfhasDfkljh");
+    BucketPathEncryptionFilenameOnly defaultBucketPathEncryptionFilenameOnly = BucketPathEncryptionFilenameOnly.FAlSE;
+
 
     BucketPathEncryptionPassword getBucketPathEncryptionPassword();
+
+    BucketPathEncryptionFilenameOnly getBucketPathEncryptionFilenameOnly();
 }

@@ -8,6 +8,7 @@ import org.adorsys.encobject.domain.ObjectHandle;
 // Ist extra kein BucketPath, wenngleich es technisch so ist.
 public class BucketDirectory {
     private BucketPath path;
+
     public BucketDirectory(String path) {
         this.path = new BucketPath(path);
     }

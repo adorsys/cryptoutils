@@ -36,11 +36,13 @@
 
     <!-- the loggers above must not be changed or removed -->
 
+    <logger name="org.adorsys.cryptoutils.extendedstoreconnection.impls.pathencryption" level="info">
+        <appender-ref ref="STDOUT" />
+    </logger>
 
     <!-- can be changed or removed -->
-    <logger name="org.adorsys" level="debug" additivity="false">
+    <logger name="org.adorsys" level="info" additivity="false">
         <appender-ref ref="STDOUT" />
-        <appender-ref ref="FILE" />
     </logger>
 
 

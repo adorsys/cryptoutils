@@ -3,6 +3,7 @@ package org.adorsys.cryptoutils.mongodbstoreconnection;
 import org.adorsys.cryptoutils.extendedstoreconnection.impls.pathencryption.BucketPathEncryptingExtendedStoreConnection;
 import org.adorsys.encobject.types.BucketPathEncryptionPassword;
 import org.adorsys.encobject.types.connection.*;
+import org.adorsys.encobject.types.properties.BucketPathEncryptionFilenameOnly;
 import org.adorsys.encobject.types.properties.MongoConnectionProperties;
 
 /**
@@ -16,7 +17,8 @@ public class MongoDBExtendedStoreConnection extends BucketPathEncryptingExtended
                 properties.getMongoDatabaseName(),
                 properties.getMongoUser(),
                 properties.getMongoPassword(),
-                properties.getBucketPathEncryptionPassword());
+                properties.getBucketPathEncryptionPassword(),
+                properties.getBucketPathEncryptionFilenameOnly());
     }
 
     public MongoDBExtendedStoreConnection(
@@ -25,7 +27,8 @@ public class MongoDBExtendedStoreConnection extends BucketPathEncryptingExtended
             MongoDatabaseName databasename,
             MongoUser user,
             MongoPassword password,
-            BucketPathEncryptionPassword bucketPathEncryptionPassword) {
-        super(new RealMongoDBExtendedStoreConnection(host, port, databasename, user, password), bucketPathEncryptionPassword);
+            BucketPathEncryptionPassword bucketPathEncryptionPassword,
+            BucketPathEncryptionFilenameOnly bucketPathEncryptionFilenameOnly) {
+        super(new RealMongoDBExtendedStoreConnection(host, port, databasename, user, password), bucketPathEncryptionPassword, bucketPathEncryptionFilenameOnly);
     }
 }

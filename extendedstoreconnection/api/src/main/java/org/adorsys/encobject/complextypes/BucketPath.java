@@ -2,6 +2,7 @@ package org.adorsys.encobject.complextypes;
 
 import org.adorsys.encobject.domain.ObjectHandle;
 import org.adorsys.encobject.exceptions.BucketException;
+import org.adorsys.encobject.exceptions.BucketRestrictionException;
 import org.adorsys.encobject.types.BucketName;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -30,7 +31,7 @@ public class BucketPath {
      * Wenn path keinen Slash enthält, dann ist alles der Container und der Name leer
      */
     public BucketPath(String path) {
-        List<String> split = split(path);
+        List<String> split = BucketPathUtil.split(path);
         if (!split.isEmpty()) {
             container = split.remove(0);
             if (!split.isEmpty()) {
@@ -52,7 +53,7 @@ public class BucketPath {
             }
             this.container = container;
         }
-        List<String> split = split(path);
+        List<String> split = BucketPathUtil.split(path);
         if (!split.isEmpty()) {
             if (this.container == null) {
                 throw new BucketException("not allowed to create a bucketPath with a path but no container");
@@ -112,30 +113,9 @@ public class BucketPath {
         return new ObjectHandle(container, name);
     }
 
-    /**
-     * Separiert alle Elemente. Doppelte Slashes werden ignoriert.
-     */
-    private static List<String> split(String fullBucketPath) {
-        List<String> list = new ArrayList<>();
-        if (fullBucketPath == null) {
-            return list;
-        }
-        StringTokenizer st = new StringTokenizer(fullBucketPath, BucketName.BUCKET_SEPARATOR);
-        while (st.hasMoreElements()) {
-            String token = st.nextToken();
-            if (notOnlyWhitespace(token)) {
-                list.add(token);
-            }
-        }
-        return list;
+    public static BucketPath fromHandle(ObjectHandle objectHandle) {
+        return new BucketPath(objectHandle.getContainer(), objectHandle.getName());
     }
-    
-    public static BucketPath fromHandle(ObjectHandle objectHandle){
-    	return new BucketPath(objectHandle.getContainer(), objectHandle.getName());
-    }
-
-
-
 
     @Override
     public String toString() {
@@ -157,18 +137,6 @@ public class BucketPath {
         return documentDirectory;
     }
 
-    private static String getDirectoryOf(String value) {
-        int i = value.lastIndexOf(BucketPath.BUCKET_SEPARATOR);
-        if (i == -1) {
-            return null;
-        }
-        return value.substring(0, i);
-    }
-
-    private static boolean notOnlyWhitespace(String value) {
-        return value.replaceAll(" ","").length() > 0;
-    }
-
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
@@ -187,4 +155,19 @@ public class BucketPath {
         result = 31 * result + (name != null ? name.hashCode() : 0);
         return result;
     }
+
+
+    private static String getDirectoryOf(String value) {
+        int i = value.lastIndexOf(BucketPath.BUCKET_SEPARATOR);
+        if (i == -1) {
+            return null;
+        }
+        return value.substring(0, i);
+    }
+
+    private static boolean notOnlyWhitespace(String value) {
+        return value.replaceAll(" ", "").length() > 0;
+    }
+
+
 }

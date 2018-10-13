@@ -5,7 +5,7 @@
     <parent>
         <artifactId>storeconnection-impls</artifactId>
         <groupId>de.adorsys.cryptoutils</groupId>
-        <version>0.22.0</version>
+        <version>0.23.0</version>
     </parent>
     <modelVersion>4.0.0</modelVersion>
 
@@ -25,6 +25,11 @@
         <dependency>
             <groupId>junit</groupId>
             <artifactId>junit</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>commons-io</groupId>
+            <artifactId>commons-io</artifactId>
             <scope>test</scope>
         </dependency>
 

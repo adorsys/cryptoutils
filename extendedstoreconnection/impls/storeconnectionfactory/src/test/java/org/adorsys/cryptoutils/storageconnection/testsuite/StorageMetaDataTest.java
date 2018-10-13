@@ -36,6 +36,8 @@ import java.util.stream.Collectors;
  * Created by peter on 20.02.18 at 16:53.
  */
 public class StorageMetaDataTest {
+    private static String logfilename = "storeconnectionfactory-test-log-file.log";
+
     private final static Logger LOGGER = LoggerFactory.getLogger(StorageMetaDataTest.class);
     private List<BucketDirectory> containers = new ArrayList<>();
     private ExtendedStoreConnection s = ExtendedStoreConnectionFactory.get();
@@ -218,12 +220,11 @@ public class StorageMetaDataTest {
      * Achtung, dieser Test möchte sicherstellen, dass in Cryptoutils die Methode zum Lesen der StorageMetadata
      * wirklich nur einmal aufgerufen wird. Um das zu machen, wird einfach eine spezielle Logmeldung gesucht, die
      * nach dem Test genau einmal mehr geschrieben sein muss, als vor dem Test. Daher wird für diesen Test
-     * logback benötigt, denn der Simpple-Logger schreibt nicht in Dateien.
+     * logback benötigt, denn der Simpple-Logger schreibt nicht in Dateien und auf stdout gleichzeitig
      */
     @Test
     public void checkMetaInfoOnlyReadOnceForDocument() {
         try {
-            String logfilename = "storeconnectionfactory-test-log-file.log";
             LOGGER.debug("START TEST " + new RuntimeException("").getStackTrace()[0].getMethodName());
             String searchname = UUID.randomUUID().toString();
             BucketPath bucketPath = new BucketPath("first/next/" + searchname);
@@ -451,7 +452,7 @@ public class StorageMetaDataTest {
             if (!new File(logfilename).exists()) {
                 throw new BaseException("logfile " + logfilename + " not found. I am in "
                         + new java.io.File(".").getCanonicalPath()
-                        + "This tests requires the logfilefile to succeed.");
+                        + ". This tests requires the logfilefile to succeed.");
             }
             int MAX_WAIT = 10;
             int trials = 0;
@@ -461,7 +462,9 @@ public class StorageMetaDataTest {
             LOGGER.debug(unique);
             do {
                 if (trials > MAX_WAIT) {
-                    throw new BaseException("Did not find unique entry in logfile for " + MAX_WAIT + " seconds.");
+                    throw new BaseException("Did not find unique entry in logfile "
+                            + new java.io.File(".").getCanonicalPath() + "/" + logfilename
+                            + " for " + MAX_WAIT + " seconds.");
                 }
                 Thread.currentThread().sleep(1000);
                 count = Files.lines(Paths.get(logfilename))

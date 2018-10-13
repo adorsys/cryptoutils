@@ -1,6 +1,5 @@
 package org.adorsys.encobject.service.impl.generator;
 
-import lombok.Synchronized;
 import org.adorsys.cryptoutils.exceptions.BaseException;
 import org.adorsys.encobject.domain.ReadKeyPassword;
 import org.adorsys.encobject.service.api.generator.KeyStoreCreationConfig;
@@ -27,8 +26,10 @@ public enum UglyKeyStoreCache {
     private final static String UGLY_KEYSTORE_CACHE = "UGLY_KEYSTORE_CACHE";
 
     UglyKeyStoreCache() {
-        Logger LOGGER = LoggerFactory.getLogger(UglyKeyStoreCache.class);
-        LOGGER.debug("UGLY_KEYSTORE_CACHE CREATION");
+        if (isActive()) {
+            Logger LOGGER = LoggerFactory.getLogger(UglyKeyStoreCache.class);
+            LOGGER.debug("UGLY_KEYSTORE_CACHE CREATION");
+        }
     }
 
     Map<String, KeyStore> map = new HashMap<>();
@@ -38,9 +39,12 @@ public enum UglyKeyStoreCache {
     }
 
     synchronized public KeyStore getCachedKeyStoreFor(KeyStoreType keyStoreType,
-                                         String serverKeyPairAliasPrefix,
-                                         ReadKeyPassword readKeyPassword,
-                                         KeyStoreCreationConfig config) {
+                                                      String serverKeyPairAliasPrefix,
+                                                      ReadKeyPassword readKeyPassword,
+                                                      KeyStoreCreationConfig config) {
+        if (!isActive()) {
+            throw new BaseException("Programming error. Must not be called when not active");
+        }
         String key = getMapKeyFor(keyStoreType, serverKeyPairAliasPrefix, readKeyPassword, config);
         if (map.containsKey(key)) {
             return map.get(key);
@@ -51,10 +55,13 @@ public enum UglyKeyStoreCache {
     }
 
     synchronized public KeyStore cacheKeyStoreFor(KeyStore keyStore,
-                                     KeyStoreType keyStoreType,
-                                     String serverKeyPairAliasPrefix,
-                                     ReadKeyPassword readKeyPassword,
-                                     KeyStoreCreationConfig config) {
+                                                  KeyStoreType keyStoreType,
+                                                  String serverKeyPairAliasPrefix,
+                                                  ReadKeyPassword readKeyPassword,
+                                                  KeyStoreCreationConfig config) {
+        if (!isActive()) {
+            throw new BaseException("Programming error. Must not be called when not active");
+        }
         String key = getMapKeyFor(keyStoreType, serverKeyPairAliasPrefix, readKeyPassword, config);
         if (map.containsKey(key)) {
             throw new BaseException("this key is already known. " + key);

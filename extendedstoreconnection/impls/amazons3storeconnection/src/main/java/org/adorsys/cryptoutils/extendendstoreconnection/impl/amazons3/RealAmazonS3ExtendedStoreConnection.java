@@ -26,6 +26,7 @@ import org.adorsys.encobject.service.api.ExtendedStoreConnection;
 import org.adorsys.encobject.service.impl.SimplePayloadImpl;
 import org.adorsys.encobject.service.impl.SimplePayloadStreamImpl;
 import org.adorsys.encobject.service.impl.SimpleStorageMetadataImpl;
+import org.adorsys.encobject.types.ExtendedStoreConnectionType;
 import org.adorsys.encobject.types.ListRecursiveFlag;
 import org.adorsys.encobject.types.connection.AmazonS3AccessKey;
 import org.adorsys.encobject.types.connection.AmazonS3Region;
@@ -77,9 +78,6 @@ class RealAmazonS3ExtendedStoreConnection implements ExtendedStoreConnection {
         frame.add("region:      " + amazonS3Region);
         frame.add("root bucket: " + amazonS3RootBucket);
         LOGGER.info(frame.toString());
-        if (LOGGER.isDebugEnabled()) {
-            new BaseException("JUST A STACK, TO SEE WHERE THE CONNECTION IS CREATED");
-        }
 
         AWSCredentialsProvider credentialsProvider = new AWSCredentialsProvider() {
             @Override
@@ -221,13 +219,14 @@ class RealAmazonS3ExtendedStoreConnection implements ExtendedStoreConnection {
 
     @Override
     public boolean containerExists(BucketDirectory bucketDirectory) {
-        LOGGER.debug("containerExists " + bucketDirectory);
         BucketPath bucketPath = amazonS3RootContainersBucket.appendName(bucketDirectory.getObjectHandle().getContainer());
         try {
             // Nicht schön hier mit Exceptions zu arbeiten, aber schneller als mit list
             connection.getObjectMetadata(bucketPath.getObjectHandle().getContainer(), bucketPath.getObjectHandle().getName());
+            LOGGER.debug("containerExists " + bucketDirectory + " TRUE");
             return true;
         } catch (Exception e) {
+            LOGGER.debug("containerExists " + bucketDirectory + " FALSE (EXCEPTION)");
             return false;
         }
     }
@@ -304,6 +303,11 @@ class RealAmazonS3ExtendedStoreConnection implements ExtendedStoreConnection {
         ObjectListing ol = connection.listObjects(amazonS3RootContainersBucket.getObjectHandle().getContainer());
         ol.getObjectSummaries().forEach(bucket -> buckets.add(new BucketDirectory(bucket.getKey())));
         return buckets;
+    }
+
+    @Override
+    public ExtendedStoreConnectionType getType() {
+        return ExtendedStoreConnectionType.AMAZONS3;
     }
 
     public void cleanDatabase() {
@@ -488,6 +492,7 @@ class RealAmazonS3ExtendedStoreConnection implements ExtendedStoreConnection {
         if (prefix == null) {
             prefix = "";
         }
+        LOGGER.debug("listObjects(" + container + "," + prefix + ")");
         ObjectListing ol = connection.listObjects(container, prefix);
         if (ol.getObjectSummaries().isEmpty()) {
             LOGGER.debug("no files found in " + container + " with prefix " + prefix);

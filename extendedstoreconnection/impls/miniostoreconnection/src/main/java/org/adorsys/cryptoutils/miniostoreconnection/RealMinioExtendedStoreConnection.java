@@ -24,6 +24,7 @@ import org.adorsys.encobject.service.impl.SimplePayloadImpl;
 import org.adorsys.encobject.service.impl.SimplePayloadStreamImpl;
 import org.adorsys.encobject.service.impl.SimpleStorageMetadataImpl;
 import org.adorsys.encobject.service.impl.StoreConnectionListHelper;
+import org.adorsys.encobject.types.ExtendedStoreConnectionType;
 import org.adorsys.encobject.types.ListRecursiveFlag;
 import org.adorsys.encobject.types.connection.MinioAccessKey;
 import org.adorsys.encobject.types.connection.MinioRootBucketName;
@@ -406,6 +407,11 @@ class RealMinioExtendedStoreConnection implements ExtendedStoreConnection {
         } catch (Exception e) {
             throw BaseExceptionHandler.handle(e);
         }
+    }
+
+    @Override
+    public ExtendedStoreConnectionType getType() {
+        return ExtendedStoreConnectionType.MINIO;
     }
 
     public void cleanDatabase() {

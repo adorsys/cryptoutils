@@ -7,6 +7,7 @@ import org.adorsys.encobject.types.BucketPathEncryptionPassword;
  */
 public class ConnectionPropertiesImpl implements ConnectionProperties {
     private BucketPathEncryptionPassword bucketPathEncryptionPassword = defaultEncryptionPassword;
+    private BucketPathEncryptionFilenameOnly bucketPathEncryptionFilenameOnly = defaultBucketPathEncryptionFilenameOnly;
 
     @Override
     public BucketPathEncryptionPassword getBucketPathEncryptionPassword() {
@@ -15,5 +16,13 @@ public class ConnectionPropertiesImpl implements ConnectionProperties {
 
     public void setBucketPathEncryptionPassword(BucketPathEncryptionPassword bucketPathEncryptionPassword) {
         this.bucketPathEncryptionPassword = bucketPathEncryptionPassword;
+    }
+
+    public BucketPathEncryptionFilenameOnly getBucketPathEncryptionFilenameOnly() {
+        return bucketPathEncryptionFilenameOnly;
+    }
+
+    public void setBucketPathEncryptionFilenameOnly(BucketPathEncryptionFilenameOnly bucketPathEncryptionFilenameOnly) {
+        this.bucketPathEncryptionFilenameOnly = bucketPathEncryptionFilenameOnly;
     }
 }

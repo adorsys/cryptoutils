@@ -5,6 +5,7 @@ import org.adorsys.encobject.types.BucketPathEncryptionPassword;
 import org.adorsys.encobject.types.connection.MinioAccessKey;
 import org.adorsys.encobject.types.connection.MinioRootBucketName;
 import org.adorsys.encobject.types.connection.MinioSecretKey;
+import org.adorsys.encobject.types.properties.BucketPathEncryptionFilenameOnly;
 import org.adorsys.encobject.types.properties.MinioConnectionProperties;
 
 import java.net.URL;
@@ -18,7 +19,9 @@ public class MinioExtendedStoreConnection extends BucketPathEncryptingExtendedSt
                 properties.getUrl(),
                 properties.getMinioAccessKey(),
                 properties.getMinioSecretKey(),
-                properties.getMinioRootBucketName(), properties.getBucketPathEncryptionPassword());
+                properties.getMinioRootBucketName(),
+                properties.getBucketPathEncryptionPassword(),
+                properties.getBucketPathEncryptionFilenameOnly());
     }
 
     public MinioExtendedStoreConnection(
@@ -26,8 +29,9 @@ public class MinioExtendedStoreConnection extends BucketPathEncryptingExtendedSt
             MinioAccessKey minioAccessKey,
             MinioSecretKey minioSecretKey,
             MinioRootBucketName rootBucketName,
-            BucketPathEncryptionPassword bucketPathEncryptionPassword) {
-        super(new RealMinioExtendedStoreConnection(url, minioAccessKey, minioSecretKey, rootBucketName), bucketPathEncryptionPassword);
+            BucketPathEncryptionPassword bucketPathEncryptionPassword,
+            BucketPathEncryptionFilenameOnly bucketPathEncryptionFilenameOnly) {
+        super(new RealMinioExtendedStoreConnection(url, minioAccessKey, minioSecretKey, rootBucketName), bucketPathEncryptionPassword, bucketPathEncryptionFilenameOnly);
 
     }
 

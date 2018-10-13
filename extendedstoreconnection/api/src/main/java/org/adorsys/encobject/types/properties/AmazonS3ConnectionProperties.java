@@ -12,7 +12,7 @@ import java.net.URL;
  */
 public interface AmazonS3ConnectionProperties extends ConnectionProperties {
     AmazonS3Region defaultRegion = new AmazonS3Region("us-east-1");
-    AmazonS3RootBucketName defaultRootBucketName = new AmazonS3RootBucketName("amazons3rootbucketforadorsys");
+    AmazonS3RootBucketName defaultRootBucketName = new AmazonS3RootBucketName("adorsys");
 
     URL getUrl();
     AmazonS3AccessKey getAmazonS3AccessKey();

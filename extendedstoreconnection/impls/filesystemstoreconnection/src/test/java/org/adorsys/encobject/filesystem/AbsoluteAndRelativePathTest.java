@@ -6,6 +6,7 @@ import org.adorsys.encobject.complextypes.BucketPath;
 import org.adorsys.encobject.service.impl.SimplePayloadImpl;
 import org.adorsys.encobject.service.impl.SimpleStorageMetadataImpl;
 import org.adorsys.encobject.types.connection.FilesystemBasedirectoryName;
+import org.adorsys.encobject.types.properties.BucketPathEncryptionFilenameOnly;
 import org.adorsys.encobject.types.properties.ConnectionProperties;
 import org.junit.Assert;
 import org.junit.Test;
@@ -29,7 +30,7 @@ public class AbsoluteAndRelativePathTest {
             String relativeDirAsAbsoluteDir = currentDir + BucketPath.BUCKET_SEPARATOR + mydir;
             LOGGER.debug("relative Dir to be created is (absoute):" + relativeDirAsAbsoluteDir);
             Assert.assertFalse(new File(relativeDirAsAbsoluteDir).exists());
-            FileSystemExtendedStorageConnection con = new FileSystemExtendedStorageConnection(new FilesystemBasedirectoryName(mydir), ConnectionProperties.defaultEncryptionPassword);
+            FileSystemExtendedStorageConnection con = new FileSystemExtendedStorageConnection(new FilesystemBasedirectoryName(mydir), ConnectionProperties.defaultEncryptionPassword, BucketPathEncryptionFilenameOnly.FAlSE);
             con.createContainer(new BucketDirectory("home"));
             con.putBlob(new BucketPath("/home/file1.txt"), new SimplePayloadImpl(new SimpleStorageMetadataImpl(), "affe".getBytes()));
             Assert.assertTrue(new File(relativeDirAsAbsoluteDir).exists());
@@ -53,7 +54,7 @@ public class AbsoluteAndRelativePathTest {
             String absoluteDir = tmpdir + "target" + BucketPath.BUCKET_SEPARATOR + UUID.randomUUID().toString();
             LOGGER.debug("my absolute path " + absoluteDir);
             Assert.assertFalse(new File(absoluteDir).exists());
-            FileSystemExtendedStorageConnection con = new FileSystemExtendedStorageConnection(new FilesystemBasedirectoryName(absoluteDir), ConnectionProperties.defaultEncryptionPassword);
+            FileSystemExtendedStorageConnection con = new FileSystemExtendedStorageConnection(new FilesystemBasedirectoryName(absoluteDir), ConnectionProperties.defaultEncryptionPassword, BucketPathEncryptionFilenameOnly.FAlSE);
             con.createContainer(new BucketDirectory("home"));
             con.putBlob(new BucketPath("/home/file1.txt"), new SimplePayloadImpl(new SimpleStorageMetadataImpl(), "affe".getBytes()));
             LOGGER.debug(absoluteDir);

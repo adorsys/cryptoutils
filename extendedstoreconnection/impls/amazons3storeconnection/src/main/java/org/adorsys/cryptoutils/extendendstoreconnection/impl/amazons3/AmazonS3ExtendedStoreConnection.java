@@ -7,6 +7,7 @@ import org.adorsys.encobject.types.connection.AmazonS3Region;
 import org.adorsys.encobject.types.connection.AmazonS3RootBucketName;
 import org.adorsys.encobject.types.connection.AmazonS3SecretKey;
 import org.adorsys.encobject.types.properties.AmazonS3ConnectionProperties;
+import org.adorsys.encobject.types.properties.BucketPathEncryptionFilenameOnly;
 
 import java.net.URL;
 
@@ -21,7 +22,8 @@ public class AmazonS3ExtendedStoreConnection extends BucketPathEncryptingExtende
                 properties.getAmazonS3SecretKey(),
                 properties.getAmazonS3Region(),
                 properties.getAmazonS3RootBucketName(),
-                properties.getBucketPathEncryptionPassword()
+                properties.getBucketPathEncryptionPassword(),
+                properties.getBucketPathEncryptionFilenameOnly()
         );
     }
 
@@ -31,8 +33,9 @@ public class AmazonS3ExtendedStoreConnection extends BucketPathEncryptingExtende
             AmazonS3SecretKey secretKey,
             AmazonS3Region anAmazonS3Region,
             AmazonS3RootBucketName anAmazonS3RootBucketName,
-            BucketPathEncryptionPassword bucketPathEncryptionPassword) {
-        super(new RealAmazonS3ExtendedStoreConnection(url, accessKey, secretKey, anAmazonS3Region, anAmazonS3RootBucketName), bucketPathEncryptionPassword);
+            BucketPathEncryptionPassword bucketPathEncryptionPassword,
+            BucketPathEncryptionFilenameOnly bucketPathEncryptionFilenameOnly) {
+        super(new RealAmazonS3ExtendedStoreConnection(url, accessKey, secretKey, anAmazonS3Region, anAmazonS3RootBucketName), bucketPathEncryptionPassword, bucketPathEncryptionFilenameOnly);
     }
 
 

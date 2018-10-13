@@ -8,6 +8,8 @@ import org.adorsys.encobject.complextypes.BucketPathUtil;
 import org.adorsys.encobject.domain.Payload;
 import org.adorsys.encobject.domain.PayloadStream;
 import org.adorsys.encobject.domain.StorageMetadata;
+import org.adorsys.encobject.domain.StorageType;
+import org.adorsys.encobject.exceptions.BucketRestrictionException;
 import org.adorsys.encobject.service.api.ExtendedStoreConnection;
 import org.adorsys.encobject.service.impl.SimplePayloadImpl;
 import org.adorsys.encobject.service.impl.SimplePayloadStreamImpl;
@@ -15,6 +17,7 @@ import org.adorsys.encobject.service.impl.SimpleStorageMetadataImpl;
 import org.adorsys.encobject.types.BucketPathEncryptionPassword;
 import org.adorsys.encobject.types.ExtendedStoreConnectionType;
 import org.adorsys.encobject.types.ListRecursiveFlag;
+import org.adorsys.encobject.types.properties.BucketPathEncryptionFilenameOnly;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -28,25 +31,29 @@ public class BucketPathEncryptingExtendedStoreConnection implements ExtendedStor
     // those two limits are not random. For Ceph and Mongo a path part longer than this
     // can break the database
 
+    // for ceph nano total length must not exceed 212
     // Ceph, Mino, Amazon, Filesystem
-    private final static MaxLengthInfo AMAZONS3_MAX_LENGTH = new MaxLengthInfo(175, 79);
+    private final static MaxLengthInfo AMAZONS3_MAX_LENGTH = new MaxLengthInfo(175, -1);
     // Mongo
-    private final static MaxLengthInfo MONGO__MAX_LENGTH = new MaxLengthInfo(88, 31);
+    private final static MaxLengthInfo MONGO__MAX_LENGTH = new MaxLengthInfo(88, -1);
     private MaxLengthInfo maxLengthInfo;
 
     private final static Logger LOGGER = LoggerFactory.getLogger(BucketPathEncryptingExtendedStoreConnection.class);
     protected ExtendedStoreConnection extendedStoreConnection;
     BucketPathEncryption bucketPathEncryption;
     BucketPathEncryptionPassword bucketPathEncryptionPassword;
+    BucketPathEncryptionFilenameOnly bucketPathEncryptionFilenameOnly;
     boolean active = bucketPathEncryptionPassword != null;
 
     public BucketPathEncryptingExtendedStoreConnection(ExtendedStoreConnection extendedStoreConnection,
-                                                       BucketPathEncryptionPassword bucketPathEncryptionPassword) {
+                                                       BucketPathEncryptionPassword bucketPathEncryptionPassword,
+                                                       BucketPathEncryptionFilenameOnly bucketPathEncryptionFilenameOnly) {
         this.extendedStoreConnection = extendedStoreConnection;
         this.bucketPathEncryption = new BucketPathEncryption();
         this.bucketPathEncryptionPassword = bucketPathEncryptionPassword;
         this.active = bucketPathEncryptionPassword != null;
         this.maxLengthInfo = getMaxLengthTupel(this.extendedStoreConnection);
+        this.bucketPathEncryptionFilenameOnly = bucketPathEncryptionFilenameOnly;
         Frame frame = new Frame();
         if (extendedStoreConnection.getType().equals(ExtendedStoreConnectionType.MONGO)) {
             if (active) {
@@ -58,6 +65,7 @@ public class BucketPathEncryptingExtendedStoreConnection implements ExtendedStor
         }
         if (active) {
             frame.add(bucketPathEncryptionPassword.toString());
+            frame.add("BucketPathEncryptionFilenameOnly:" + bucketPathEncryptionFilenameOnly.toString());
         } else {
             frame.add("Filenames will not be encrypted");
         }
@@ -213,27 +221,23 @@ public class BucketPathEncryptingExtendedStoreConnection implements ExtendedStor
 
     private BucketPath e(BucketPath bucketPath) {
         if (!active) {
-            bucketPath.checkLengthRestriction(maxLengthInfo.getUnencryptedMaxLength());
-            return bucketPath;
+            return checkLength(maxLengthInfo, bucketPath, null);
         }
-        bucketPath.checkLengthRestriction(maxLengthInfo.getEncryptedMaxLength());
-        return bucketPathEncryption.encrypt(bucketPathEncryptionPassword, bucketPath);
+        return checkLength(maxLengthInfo, bucketPathEncryption.encrypt(bucketPathEncryptionPassword, bucketPathEncryptionFilenameOnly, bucketPath), bucketPath);
     }
 
     private BucketDirectory e(BucketDirectory bucketDirectory) {
         if (!active) {
-            bucketDirectory.checkLengthRestriction(maxLengthInfo.getUnencryptedMaxLength());
-            return bucketDirectory;
+            return checkLength(maxLengthInfo, bucketDirectory, null);
         }
-        bucketDirectory.checkLengthRestriction(maxLengthInfo.getEncryptedMaxLength());
-        return bucketPathEncryption.encrypt(bucketPathEncryptionPassword, bucketDirectory);
+        return checkLength(maxLengthInfo, bucketPathEncryption.encrypt(bucketPathEncryptionPassword, bucketPathEncryptionFilenameOnly, bucketDirectory), bucketDirectory);
     }
 
     private BucketDirectory d(BucketDirectory bucketDirectory) {
         if (!active) {
             return bucketDirectory;
         }
-        return bucketPathEncryption.decrypt(bucketPathEncryptionPassword, bucketDirectory);
+        return bucketPathEncryption.decrypt(bucketPathEncryptionPassword, bucketPathEncryptionFilenameOnly, bucketDirectory);
     }
 
     private Payload d(Payload payload) {
@@ -255,10 +259,21 @@ public class BucketPathEncryptingExtendedStoreConnection implements ExtendedStor
             return storageMetadata;
         }
         String encryptedName = storageMetadata.getName();
-        BucketPath encryptedBucketPath = new BucketPath(encryptedName);
-        BucketPath decryptedBucketPath = BucketPathEncryption.decrypt(bucketPathEncryptionPassword, encryptedBucketPath);
-        String decryptedName = BucketPathUtil.getAsString(decryptedBucketPath);
-
+        String decryptedName = null;
+        if (storageMetadata.getType().equals(StorageType.BLOB)) {
+            BucketPath encryptedBucketPath = new BucketPath(encryptedName);
+            BucketPath decryptedBucketPath = BucketPathEncryption.decrypt(bucketPathEncryptionPassword,
+                    bucketPathEncryptionFilenameOnly,
+                    encryptedBucketPath);
+            decryptedName = BucketPathUtil.getAsString(decryptedBucketPath);
+        }
+        if (storageMetadata.getType().equals(StorageType.FOLDER)) {
+            BucketDirectory encryptedBucketDirectory = new BucketDirectory(encryptedName);
+            BucketDirectory decryptedBucketDirectory = BucketPathEncryption.decrypt(bucketPathEncryptionPassword,
+                    bucketPathEncryptionFilenameOnly,
+                    encryptedBucketDirectory);
+            decryptedName = BucketPathUtil.getAsString(decryptedBucketDirectory);
+        }
         SimpleStorageMetadataImpl newStorageMetadata = new SimpleStorageMetadataImpl(storageMetadata);
         newStorageMetadata.setName(decryptedName);
         return newStorageMetadata;
@@ -273,7 +288,9 @@ public class BucketPathEncryptingExtendedStoreConnection implements ExtendedStor
         }
         String plainName = storageMetadata.getName();
         BucketPath plainBucketPath = new BucketPath(plainName);
-        BucketPath encryptedBucketPath = BucketPathEncryption.encrypt(bucketPathEncryptionPassword, plainBucketPath);
+        BucketPath encryptedBucketPath = BucketPathEncryption.encrypt(bucketPathEncryptionPassword,
+                bucketPathEncryptionFilenameOnly,
+                plainBucketPath);
         String encryptedName = BucketPathUtil.getAsString(encryptedBucketPath);
 
         SimpleStorageMetadataImpl newStorageMetadata = new SimpleStorageMetadataImpl(storageMetadata);
@@ -292,20 +309,20 @@ public class BucketPathEncryptingExtendedStoreConnection implements ExtendedStor
 
 
     public static class MaxLengthInfo {
-        int unencryptedMaxLength;
-        int encryptedMaxLength;
+        int partMaxLength;
+        int totalMaxLength;
 
-        public MaxLengthInfo(int unencryptedMaxLength, int encryptedMaxLength) {
-            this.unencryptedMaxLength = unencryptedMaxLength;
-            this.encryptedMaxLength = encryptedMaxLength;
+        public MaxLengthInfo(int partMaxLength, int totalMaxLength) {
+            this.partMaxLength = partMaxLength;
+            this.totalMaxLength = totalMaxLength;
         }
 
-        public int getUnencryptedMaxLength() {
-            return unencryptedMaxLength;
+        public int getPartMaxLength() {
+            return partMaxLength;
         }
 
-        public int getEncryptedMaxLength() {
-            return encryptedMaxLength;
+        public int getTotalMaxLength() {
+            return totalMaxLength;
         }
     }
 
@@ -320,6 +337,54 @@ public class BucketPathEncryptingExtendedStoreConnection implements ExtendedStor
             default:
                 throw new BaseException("missing switch for " + extendedStoreConnection.getType());
         }
+    }
+
+    private BucketDirectory checkLength(MaxLengthInfo maxLengthInfo, BucketDirectory realPath, BucketDirectory plainPath) {
+        String realPathAsString = BucketPathUtil.getAsString(realPath);
+
+        for (String s : BucketPathUtil.split(realPathAsString)) {
+            if (s.length() > maxLengthInfo.getPartMaxLength()) {
+                if (plainPath == null) {
+                    throw new BucketRestrictionException(realPathAsString + " has part " + s + " with length " + s.length() + " must not exceed part length " + maxLengthInfo.getPartMaxLength());
+                }
+
+                throw new BucketRestrictionException(BucketPathUtil.getAsString(plainPath) + " -> " + realPathAsString + " has part " + s + " with length " + s.length() + " must not exceed part length " + maxLengthInfo.getPartMaxLength());
+            }
+        }
+        if (maxLengthInfo.getTotalMaxLength() > -1) {
+            if (realPathAsString.length() > maxLengthInfo.getTotalMaxLength()) {
+                if (plainPath == null) {
+                    throw new BucketRestrictionException(realPathAsString + " with length " + realPathAsString.length() + " must not exceed part length " + maxLengthInfo.getTotalMaxLength());
+                }
+
+                throw new BucketRestrictionException(BucketPathUtil.getAsString(plainPath) + " -> " + realPathAsString + " with length " + realPathAsString.length() + " must not exceed part length " + maxLengthInfo.getTotalMaxLength());
+            }
+        }
+        return realPath;
+    }
+
+    private BucketPath checkLength(MaxLengthInfo maxLengthInfo, BucketPath realPath, BucketPath plainPath) {
+        String realPathAsString = BucketPathUtil.getAsString(realPath);
+
+        for (String s : BucketPathUtil.split(realPathAsString)) {
+            if (s.length() > maxLengthInfo.getPartMaxLength()) {
+                if (plainPath == null) {
+                    throw new BucketRestrictionException(realPathAsString + " has part " + s + " with length " + s.length() + " must not exceed part length " + maxLengthInfo.getPartMaxLength());
+                }
+
+                throw new BucketRestrictionException(BucketPathUtil.getAsString(plainPath) + " -> " + realPathAsString + " has part " + s + " with length " + s.length() + " must not exceed part length " + maxLengthInfo.getPartMaxLength());
+            }
+        }
+        if (maxLengthInfo.getTotalMaxLength() > -1) {
+            if (realPathAsString.length() > maxLengthInfo.getTotalMaxLength()) {
+                if (plainPath == null) {
+                    throw new BucketRestrictionException(realPathAsString + " with length " + realPathAsString.length() + " must not exceed part length " + maxLengthInfo.getTotalMaxLength());
+                }
+
+                throw new BucketRestrictionException(BucketPathUtil.getAsString(plainPath) + " -> " + realPathAsString + " with length " + realPathAsString.length() + " must not exceed part length " + maxLengthInfo.getTotalMaxLength());
+            }
+        }
+        return realPath;
     }
 
 

@@ -6,6 +6,7 @@ import org.adorsys.cryptoutils.miniostoreconnection.MinioParamParser;
 import org.adorsys.cryptoutils.mongodbstoreconnection.MongoParamParser;
 import org.adorsys.encobject.filesystem.FileSystemParamParser;
 import org.adorsys.encobject.types.BucketPathEncryptionPassword;
+import org.adorsys.encobject.types.properties.BucketPathEncryptionFilenameOnly;
 import org.adorsys.encobject.types.properties.ConnectionProperties;
 import org.adorsys.encobject.types.properties.ConnectionPropertiesImpl;
 import org.slf4j.Logger;
@@ -27,6 +28,7 @@ public class ReadArguments {
     public static final String FILESYSTEM = "SC-FILESYSTEM";
     public static final String ENCRYPTION_PASSWORD = "SC-ENCRYPTION-PASSWORD";
     public static final String NO_ENCRYPTION_PASSWORD = "SC-NO-ENCRYPTION-PASSWORD";
+    public static final String ENCRYPTION_FILENAME_ONLY = "SC-ENCRYPTION-FILENAME-ONLY";
 
     public static final String MONGO_ARG = SYSTEM_PROPERTY_PREFIX + MONGO + "=";
     public static final String MINIO_ARG = SYSTEM_PROPERTY_PREFIX + MINIO + "=";
@@ -34,6 +36,7 @@ public class ReadArguments {
     public static final String FILESYSTEM_ARG = SYSTEM_PROPERTY_PREFIX + FILESYSTEM + "=";
     public static final String ENCRYPTION_PASSWORD_ARG = SYSTEM_PROPERTY_PREFIX + ENCRYPTION_PASSWORD + "=";
     public static final String NO_ENCRYPTION_PASSWORD_ARG = SYSTEM_PROPERTY_PREFIX + NO_ENCRYPTION_PASSWORD;
+    public static final String ENCRYPTION_FILENAME_ONLY_ARG = SYSTEM_PROPERTY_PREFIX + ENCRYPTION_FILENAME_ONLY;
 
     public ArgsAndProperties readArguments(String[] args) {
         Arrays.stream(args).forEach(arg -> LOGGER.debug("readArguments arg:" + arg));
@@ -41,6 +44,7 @@ public class ReadArguments {
         List<String> remainingArgs = new ArrayList<>();
         ConnectionProperties properties = null;
         BucketPathEncryptionPassword bucketPathEncryptionPassword = ConnectionProperties.defaultEncryptionPassword;
+        BucketPathEncryptionFilenameOnly bucketPathEncryptionFilenameOnly = ConnectionProperties.defaultBucketPathEncryptionFilenameOnly;
 
         for (String arg : args) {
             if (arg.startsWith(MONGO_ARG)) {
@@ -55,6 +59,8 @@ public class ReadArguments {
                 bucketPathEncryptionPassword = new BucketPathEncryptionPassword(arg.substring(ENCRYPTION_PASSWORD_ARG.length()));
             } else if (arg.startsWith(NO_ENCRYPTION_PASSWORD_ARG)) {
                 bucketPathEncryptionPassword = null;
+            } else if (arg.startsWith(ENCRYPTION_FILENAME_ONLY_ARG)) {
+                bucketPathEncryptionFilenameOnly = BucketPathEncryptionFilenameOnly.TRUE;
             } else {
                 remainingArgs.add(arg);
             }
@@ -65,6 +71,7 @@ public class ReadArguments {
         }
 
         ((ConnectionPropertiesImpl) properties).setBucketPathEncryptionPassword(bucketPathEncryptionPassword);
+        ((ConnectionPropertiesImpl) properties).setBucketPathEncryptionFilenameOnly(bucketPathEncryptionFilenameOnly);
 
         String[] remainingArgArray = new String[remainingArgs.size()];
         remainingArgArray = remainingArgs.toArray(remainingArgArray);
@@ -75,6 +82,7 @@ public class ReadArguments {
         try {
             LOGGER.debug("readEnvironment");
             BucketPathEncryptionPassword bucketPathEncryptionPassword = ConnectionProperties.defaultEncryptionPassword;
+            BucketPathEncryptionFilenameOnly bucketPathEncryptionFilenameOnly = ConnectionProperties.defaultBucketPathEncryptionFilenameOnly;
             ConnectionProperties properties = null;
 
             if (System.getProperty(ENCRYPTION_PASSWORD) != null) {
@@ -82,6 +90,9 @@ public class ReadArguments {
             }
             if (System.getProperty(NO_ENCRYPTION_PASSWORD) != null) {
                 bucketPathEncryptionPassword = null;
+            }
+            if (System.getProperty(ENCRYPTION_FILENAME_ONLY) != null) {
+                bucketPathEncryptionFilenameOnly = BucketPathEncryptionFilenameOnly.TRUE;
             }
             if (System.getProperty(MONGO) != null) {
                 properties = MongoParamParser.getProperties(System.getProperty(MONGO));
@@ -100,6 +111,8 @@ public class ReadArguments {
             }
 
             ((ConnectionPropertiesImpl) properties).setBucketPathEncryptionPassword(bucketPathEncryptionPassword);
+            ((ConnectionPropertiesImpl) properties).setBucketPathEncryptionFilenameOnly(bucketPathEncryptionFilenameOnly);
+
 
             return properties;
         } catch (Exception e) {

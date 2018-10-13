@@ -69,12 +69,12 @@ public class GeneralMinoTest {
 
     // @Test
     public void b() {
-        new MinioExtendedStoreConnection(url, accessKey, secretKey, MinioConnectionProperties.defaultBucketname, null).showDatabase();
+        new MinioExtendedStoreConnection(url, accessKey, secretKey, MinioConnectionProperties.defaultBucketname, null, null).showDatabase();
     }
 
     // @Test
     public void c() {
-        new MinioExtendedStoreConnection(url, accessKey, secretKey, MinioConnectionProperties.defaultBucketname, null).cleanDatabase();
+        new MinioExtendedStoreConnection(url, accessKey, secretKey, MinioConnectionProperties.defaultBucketname, null, null).cleanDatabase();
     }
 
 }

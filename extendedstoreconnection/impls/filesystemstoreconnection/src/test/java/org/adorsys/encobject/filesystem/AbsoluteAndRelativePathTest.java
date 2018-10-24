@@ -1,5 +1,8 @@
 package org.adorsys.encobject.filesystem;
 
+import java.io.File;
+import java.util.UUID;
+
 import org.adorsys.cryptoutils.exceptions.BaseExceptionHandler;
 import org.adorsys.encobject.complextypes.BucketDirectory;
 import org.adorsys.encobject.complextypes.BucketPath;
@@ -12,9 +15,6 @@ import org.junit.Assert;
 import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import java.io.File;
-import java.util.UUID;
 
 /**
  * Created by peter on 26.06.18 at 15:23.
@@ -46,7 +46,13 @@ public class AbsoluteAndRelativePathTest {
         try {
             String tmpdir = System.getProperty("java.io.tmpdir");
             LOGGER.debug("tempdir " + tmpdir);
-            Assert.assertTrue(tmpdir.startsWith(BucketPath.BUCKET_SEPARATOR));
+            if (File.separatorChar == '/') {
+            	Assert.assertTrue(tmpdir.startsWith(BucketPath.BUCKET_SEPARATOR));
+            } else {
+            	// Prevents "Bucket must not contain uppercase letters: C:\Users\XXX\AppData\Local\Temp\ on Windows
+            	tmpdir = tmpdir.toLowerCase();
+            }
+            
             if (!tmpdir.endsWith(BucketPath.BUCKET_SEPARATOR)) {
                 tmpdir = tmpdir + BucketPath.BUCKET_SEPARATOR;
             }

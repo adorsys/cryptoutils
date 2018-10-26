@@ -1,6 +1,5 @@
 package org.adorsys.encobject.service;
 
-import junit.framework.Assert;
 import org.adorsys.cryptoutils.exceptions.BaseExceptionHandler;
 import org.adorsys.cryptoutils.storeconnectionfactory.ExtendedStoreConnectionFactory;
 import org.adorsys.encobject.complextypes.BucketDirectory;
@@ -18,6 +17,7 @@ import org.adorsys.encobject.service.impl.SimpleStorageMetadataImpl;
 import org.adorsys.encobject.types.KeyID;
 import org.apache.commons.io.IOUtils;
 import org.junit.After;
+import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.slf4j.Logger;
@@ -67,21 +67,35 @@ public class EncryptedPersistenceServiceTest {
             byte[] encrypted = IOUtils.toByteArray(encryptionService.getEncryptedInputStream(userMetaData, inputStream, null, null, null));
             byte[] decrypted = IOUtils.toByteArray(encryptionService.getDecryptedInputStream(userMetaData, new ByteArrayInputStream(encrypted), null, null));
             Assert.assertFalse(Arrays.equals(content, encrypted));
-            Assert.assertTrue(Arrays.equals(content, decrypted));
+            Assert.assertArrayEquals(content, decrypted);
         } catch (Exception e) {
             throw BaseExceptionHandler.handle(e);
         }
     }
 
 
+    /**
+     * every byte apperars AND a few times the -1 byte appears, this has the meaning of stream end.
+     */
     byte[] getTrickyContent() {
-        int size = 100;
-        byte[] result = new byte[size];
-        for (int i = 0; i < size; i++) {
-            result[i] = (byte) i;
+        int RESULT_SIZE=2000;
+        int BYTE_MIN=-128;
+        int BYTE_MAX=127;
+
+        byte[] result = new byte[RESULT_SIZE];
+        byte byteValue = (byte) BYTE_MIN;
+        for (int i = 0; i < RESULT_SIZE; i++) {
+            result[i] = byteValue;
             if (i % 10 == 0) {
                 result[i] = -1;
+            } else {
+                if (byteValue == BYTE_MAX) {
+                    byteValue = (byte) BYTE_MIN;
+                } else {
+                    byteValue = (byte) (byteValue + 1);
+                }
             }
+            // LOGGER.info("i " + i + " byteValue " + result[i]);
         }
         return result;
     }
@@ -102,12 +116,18 @@ public class EncryptedPersistenceServiceTest {
             InputStream inputStream = new ByteArrayInputStream(content);
             PayloadStream payLoadStream = new SimplePayloadStreamImpl(new SimpleStorageMetadataImpl(), inputStream);
             service.encryptAndPersistStream(bucketPath, payLoadStream, null, keyID);
-            Payload returnedPayload = service.loadAndDecrypt(bucketPath, null);
-            byte[] readPayoad = returnedPayload.getData();
-            Assert.assertTrue(Arrays.equals(content, readPayoad));
-            PayloadStream returnedPayloadStream = service.loadAndDecryptStream(bucketPath, null);
-            byte[] readPayloadStream = IOUtils.toByteArray(returnedPayloadStream.openStream());
-            Assert.assertTrue(Arrays.equals(content, readPayloadStream));
+            {
+                Payload returnedPayload = service.loadAndDecrypt(bucketPath, null);
+                byte[] readPayoad = returnedPayload.getData();
+                Assert.assertTrue(Arrays.equals(content, readPayoad));
+            }
+            {
+                PayloadStream returnedPayloadStream = service.loadAndDecryptStream(bucketPath, null);
+                try (InputStream is = returnedPayloadStream.openStream()) {
+                    byte[] readPayloadStream = IOUtils.toByteArray(is);
+                    Assert.assertTrue(Arrays.equals(content, readPayloadStream));
+                }
+            }
         } catch (Exception e) {
             throw BaseExceptionHandler.handle(e);
         }

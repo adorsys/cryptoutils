@@ -70,16 +70,16 @@ public class ZipFileHelper {
 
             try (ZipOutputStream zos = new ZipOutputStream(new BufferedOutputStream(new FileOutputStream(tempFile)))) {
 
-	            zos.putNextEntry(new ZipEntry(ZIP_STORAGE_METADATA_JSON));
-	            String jsonString = gsonHelper.toJson(payload.getStorageMetadata());
-	            LOGGER.debug("WRITE metadata " + jsonString + " with charset " + CHARSET_NAME);
-	            byte[] storageMetadata = jsonString.getBytes(CHARSET_NAME);
-	            zos.write(storageMetadata, 0, storageMetadata.length);
-	            zos.closeEntry();
-	
-	            zos.putNextEntry(new ZipEntry(ZIP_CONTENT_BINARY));
-	            zos.write(content, 0, content.length);
-	            zos.closeEntry();
+                zos.putNextEntry(new ZipEntry(ZIP_STORAGE_METADATA_JSON));
+                String jsonString = gsonHelper.toJson(payload.getStorageMetadata());
+                LOGGER.debug("WRITE metadata " + jsonString + " with charset " + CHARSET_NAME);
+                byte[] storageMetadata = jsonString.getBytes(CHARSET_NAME);
+                zos.write(storageMetadata, 0, storageMetadata.length);
+                zos.closeEntry();
+
+                zos.putNextEntry(new ZipEntry(ZIP_CONTENT_BINARY));
+                zos.write(content, 0, content.length);
+                zos.closeEntry();
             }
 
             File origFile = BucketPathFileHelper.getAsFile(baseDir.append(bucketPath.add(ZIP_SUFFIX)), absolutePath);
@@ -114,14 +114,14 @@ public class ZipFileHelper {
             LOGGER.debug("write temporary zip file to " + tempFile);
 
             try (ZipOutputStream zos = new ZipOutputStream(new BufferedOutputStream(new FileOutputStream(tempFile)))) {
-            	zos.putNextEntry(new ZipEntry(ZIP_STORAGE_METADATA_JSON));
+                zos.putNextEntry(new ZipEntry(ZIP_STORAGE_METADATA_JSON));
                 zos.write(storageMetadata, 0, storageMetadata.length);
                 zos.closeEntry();
 
                 try (InputStream is = payloadStream.openStream()) {
-                	zos.putNextEntry(new ZipEntry(ZIP_CONTENT_BINARY));
+                    zos.putNextEntry(new ZipEntry(ZIP_CONTENT_BINARY));
                     IOUtils.copy(is, zos);
-                }    
+                }
             }
 
             File origFile = BucketPathFileHelper.getAsFile(baseDir.append(bucketPath.add(ZIP_SUFFIX)), absolutePath);
@@ -144,7 +144,7 @@ public class ZipFileHelper {
 
             File file = BucketPathFileHelper.getAsFile(baseDir.append(bucketPath.add(ZIP_SUFFIX)), absolutePath);
             try (ZipInputStream zis = new ZipInputStream(new BufferedInputStream(new FileInputStream(file)))) {
-            	ZipEntry entry;
+                ZipEntry entry;
                 byte[] data = null;
                 while ((entry = zis.getNextEntry()) != null) {
                     if (entry.getName().equals(ZIP_CONTENT_BINARY)) {
@@ -157,7 +157,7 @@ public class ZipFileHelper {
                 }
                 Payload payload = new SimplePayloadImpl(storageMetadata, data);
                 return payload;
-            }          
+            }
         } catch (Exception e) {
             throw BaseExceptionHandler.handle(e);
         }
@@ -170,16 +170,17 @@ public class ZipFileHelper {
             }
 
             File file = BucketPathFileHelper.getAsFile(baseDir.append(bucketPath.add(ZIP_SUFFIX)), absolutePath);
-            try (ZipInputStream zis = new ZipInputStream(new BufferedInputStream(new FileInputStream(file)))) {
-	            ZipEntry entry;
-	            while ((entry = zis.getNextEntry()) != null) {
-	                if (entry.getName().equals(ZIP_CONTENT_BINARY)) {
-	                    return new SimplePayloadStreamImpl(storageMetadata, zis);
-	                }
-	                zis.closeEntry();
-	            }
-	            throw new StorageConnectionException("Zipfile " + bucketPath + " does not have entry for " + ZIP_CONTENT_BINARY);
+            ZipInputStream zis = new ZipInputStream(new BufferedInputStream(new FileInputStream(file)));
+
+            ZipEntry entry;
+            while ((entry = zis.getNextEntry()) != null) {
+                if (entry.getName().equals(ZIP_CONTENT_BINARY)) {
+                    return new SimplePayloadStreamImpl(storageMetadata, zis);
+                }
+                zis.closeEntry();
             }
+            throw new StorageConnectionException("Zipfile " + bucketPath + " does not have entry for " + ZIP_CONTENT_BINARY);
+
         } catch (Exception e) {
             throw BaseExceptionHandler.handle(e);
         }
@@ -194,23 +195,23 @@ public class ZipFileHelper {
             }
 
             try (ZipInputStream zis = new ZipInputStream(new BufferedInputStream(new FileInputStream(file)))) {
-            	 ZipEntry entry;
-                 String jsonString = null;
-                 while ((entry = zis.getNextEntry()) != null) {
-                     if (entry.getName().equals(ZIP_STORAGE_METADATA_JSON)) {
-                         jsonString = new String(IOUtils.toByteArray(zis), CHARSET_NAME);
-                         LOGGER.debug("READ metadata string " + jsonString + "with " + CHARSET_NAME);
-                     }
-                     zis.closeEntry();
-                 }
-                 if (jsonString == null) {
-                     throw new StorageConnectionException("Zipfile " + bucketPath + " does not have entry for " + ZIP_STORAGE_METADATA_JSON);
-                 }
+                ZipEntry entry;
+                String jsonString = null;
+                while ((entry = zis.getNextEntry()) != null) {
+                    if (entry.getName().equals(ZIP_STORAGE_METADATA_JSON)) {
+                        jsonString = new String(IOUtils.toByteArray(zis), CHARSET_NAME);
+                        LOGGER.debug("READ metadata string " + jsonString + "with " + CHARSET_NAME);
+                    }
+                    zis.closeEntry();
+                }
+                if (jsonString == null) {
+                    throw new StorageConnectionException("Zipfile " + bucketPath + " does not have entry for " + ZIP_STORAGE_METADATA_JSON);
+                }
 
-                 StorageMetadata storageMetadata = gsonHelper.fromJson(jsonString);
-                 return storageMetadata;
+                StorageMetadata storageMetadata = gsonHelper.fromJson(jsonString);
+                return storageMetadata;
             }
-           
+
         } catch (Exception e) {
             throw new RuntimeException(e);
         }

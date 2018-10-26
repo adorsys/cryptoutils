@@ -46,7 +46,7 @@ public class AbsoluteAndRelativePathTest {
         try {
             String tmpdir = System.getProperty("java.io.tmpdir");
             LOGGER.debug("tempdir " + tmpdir);
-            if (File.separatorChar == '/') {
+            if (File.separatorChar == '/')     {
             	Assert.assertTrue(tmpdir.startsWith(BucketPath.BUCKET_SEPARATOR));
             } else {
             	// Prevents "Bucket must not contain uppercase letters: C:\Users\XXX\AppData\Local\Temp\ on Windows

@@ -45,7 +45,7 @@ import junit.framework.Assert;
  * Created by peter on 20.02.18 at 16:53.
  */
 public class StorageMetaDataTest {
-    private static String logfilename = "storeconnectionfactory-test-log-file.log";
+    private static String logfilename = "target/storeconnectionfactory-test-log-file.log";
 
     private final static Logger LOGGER = LoggerFactory.getLogger(StorageMetaDataTest.class);
     private List<BucketDirectory> containers = new ArrayList<>();
@@ -477,8 +477,8 @@ public class StorageMetaDataTest {
                 }
                 Thread.currentThread().sleep(1000);
                 
-                // Without the Charset, we get "java.nio.charset.MalformedInputException: Input length = 1" on Windows
-                count = Files.lines(Paths.get(logfilename), SystemUtils.IS_OS_WINDOWS ? Charset.forName("Cp1252") : Charset.defaultCharset())
+                // Charset defined in logback.xml
+                count = Files.lines(Paths.get(logfilename), Charset.forName("UTF-8"))
                         .filter(line -> line.indexOf(unique) != -1)
                         .collect(Collectors.toSet())
                         .size();
@@ -498,8 +498,8 @@ public class StorageMetaDataTest {
                         + new java.io.File(".").getCanonicalPath()
                         + "This tests requires the logfilefile to succeed.");
             }
-            // Without the Charset, we get "java.nio.charset.MalformedInputException: Input length = 1" on Windows
-            return Files.lines(Paths.get(logfilename), SystemUtils.IS_OS_WINDOWS ? Charset.forName("Cp1252") : Charset.defaultCharset())
+            // Charset defined in logback.xml
+            return Files.lines(Paths.get(logfilename), Charset.forName("UTF-8"))
                     .filter(line -> line.indexOf("SPECIAL_LOGGER") != -1)
                     .filter(line -> line.indexOf("readmetadata ") != -1)
              //       .filter(line -> line.indexOf(searchname) != -1)

@@ -5,6 +5,8 @@ jdk:
 
 script:
   - mvn --settings .travis/settings.xml verify -B -V
+  - mvn clean install -DSC-AMAZONS3=http://minio-psp-docusafe-performancetest.cloud.adorsys.de/minio,simpleAccessKey,simpleSecretKey
+
 
 before_deploy:
   - echo $GPG_SECRET_KEY | base64 --decode | $GPG_EXECUTABLE --import

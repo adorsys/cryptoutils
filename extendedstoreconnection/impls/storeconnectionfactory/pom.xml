@@ -64,10 +64,6 @@
             <artifactId>junit</artifactId>
             <scope>test</scope>
         </dependency>
-        <dependency>
-            <groupId>de.adorsys.cryptoutils</groupId>
-            <artifactId>amazons3storeconnection</artifactId>
-        </dependency>
 
     </dependencies>
 

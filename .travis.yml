@@ -5,7 +5,7 @@ jdk:
 
 script:
   - mvn --settings .travis/settings.xml verify -B -V
-  - mvn clean install -DSC-AMAZONS3=http://minio-psp-docusafe-performancetest.cloud.adorsys.de/minio,simpleAccessKey,simpleSecretKey
+  - mvn clean install -DSC-MINIO=http://minio-psp-docusafe-performancetest.cloud.adorsys.de/minio,simpleAccessKey,simpleSecretKey
 
 
 before_deploy:

@@ -81,10 +81,9 @@ public class HexUtil {
     }
 
     /**
-     * Returns a byte array wherein non-printable ASCII characters are converted
-     * to the '.' (0x2e) character.
      * @param b
-     * @return
+     * @return a byte array wherein non-printable ASCII characters are converted
+     * to the '.' (0x2e) character.
      */
     private static byte[] fixNonPrintableAscii(byte[] b) {
         byte[] buf = new byte[b.length];
@@ -101,15 +100,13 @@ public class HexUtil {
     }
 
     /**
-     * Returns a string of hexadecimal digits from a byte array. Each byte is
-     * converted to 2 hex symbols.
-     * <p>
-     * If offset and length are omitted, the entire array is used.
-     *
      * @param ba
      * @param offset
      * @param length
-     * @return
+     * @return a string of hexadecimal digits from a byte array. Each byte is
+     * converted to 2 hex symbols.
+     * <p>
+     * If offset and length are omitted, the entire array is used.
      */
     public static String toString(byte[] ba, int offset, int length) {
         char[] buf = new char[length * 2];
@@ -139,10 +136,8 @@ public class HexUtil {
     }
 
     /**
-     * Returns a byte array from a string of hexadecimal digits.
-     *
      * @param hex the string to convert to a byte array.
-     * @return
+     * @return a byte array from a string of hexadecimal digits.
      */
     public static byte[] convertHexStringToBytes(String hex) {
         int len = hex.length();
@@ -161,10 +156,8 @@ public class HexUtil {
     }
 
     /**
-     * Returns the hex digit corresponding to a number <i>n</i>, from 0 to 15.
-     *
      * @param n
-     * @return
+     * @return the hex digit corresponding to a number <i>n</i>, from 0 to 15.
      */
     public static char toDigit(int n) {
         try {
@@ -176,10 +169,8 @@ public class HexUtil {
     }
 
     /**
-     * Returns the number from 0 to 15 corresponding to the hex digit <i>ch</i>.
-     *
      * @param ch
-     * @return
+     * @return the number from 0 to 15 corresponding to the hex digit <i>ch</i>.
      */
     public static int fromDigit(char ch) {
         if ((ch >= '0') && (ch <= '9'))
@@ -193,10 +184,8 @@ public class HexUtil {
     }
 
     /**
-     * Returns a copy of the input array stripped of any leading zero bytes.
-     *
      * @param a
-     * @return
+     * @return a copy of the input array stripped of any leading zero bytes.
      */
     public static byte[] stripLeadingZeroBytes(byte[] a) {
         int keep;

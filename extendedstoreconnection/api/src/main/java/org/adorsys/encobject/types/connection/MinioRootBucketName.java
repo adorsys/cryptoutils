@@ -7,6 +7,6 @@ import org.adorsys.cryptoutils.basetypes.BaseTypeString;
  */
 public class MinioRootBucketName extends BaseTypeString {
     public MinioRootBucketName(String s) {
-        super (s);
+        super (s.toLowerCase());
     }
 }

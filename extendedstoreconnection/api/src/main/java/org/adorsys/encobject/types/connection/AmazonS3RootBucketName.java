@@ -9,6 +9,6 @@ import org.adorsys.cryptoutils.basetypes.BaseTypeString;
  */
 public class AmazonS3RootBucketName extends BaseTypeString {
     public AmazonS3RootBucketName(String s) {
-        super (s);
+        super (s.toLowerCase());
     }
 }

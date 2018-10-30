@@ -4,8 +4,7 @@ jdk:
   - oraclejdk8
 
 script:
-  - mvn --settings .travis/settings.xml verify -B -V
-  - mvn clean install -DSC-MINIO=http://minio-psp-docusafe-performancetest.cloud.adorsys.de/minio,simpleAccessKey,simpleSecretKey
+  - mvn clean install -DSC-AMAZONS3=http://minio-psp-docusafe-performancetest.cloud.adorsys.de,simpleAccessKey,simpleSecretKey,us-east-1,travis.${TRAVIS_BRANCH}
 
 
 before_deploy:
@@ -20,3 +19,6 @@ deploy:
     on:
       tags: true
       condition: "$TRAVIS_TAG =~ ^v([[:digit:]]+\\.)+[[:digit:]]+(-[[:digit:]]+)?(-SNAPSHOT)?$"
+
+not-used-script:
+  - mvn --settings .travis/settings.xml verify -B -V

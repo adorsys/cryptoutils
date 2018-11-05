@@ -15,6 +15,8 @@ import org.junit.Assume;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import javax.crypto.SecretKey;
 import javax.security.auth.callback.CallbackHandler;
@@ -33,6 +35,8 @@ import java.util.List;
 import java.util.Map;
 
 public class KeyStoreServiceTest {
+    private final static Logger LOGGER = LoggerFactory.getLogger(KeyStoreServiceTest.class);
+
     private static final String KEY_STORE_NAME = "FrancisKeyStore";
     private static final char[] storePass = "FrancisKeystorePass".toCharArray();
 
@@ -55,7 +59,7 @@ public class KeyStoreServiceTest {
             field.setAccessible(true);
             field.set(null, java.lang.Boolean.FALSE);
         } catch (ClassNotFoundException | NoSuchFieldException | SecurityException | IllegalArgumentException | IllegalAccessException ex) {
-            ex.printStackTrace(System.err);
+            LOGGER.debug("ignore Exception: " + ex.getClass().getName() + " during turnOffEncPolicy");
         }
     }
 

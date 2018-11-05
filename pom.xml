@@ -216,6 +216,13 @@
             <version>${catch.exception.version}</version>
             <scope>test</scope>
         </dependency>
+        <dependency>
+            <groupId>de.electronicpeter</groupId>
+            <artifactId>aspectj.test.timelogger</artifactId>
+            <version>1.3</version>
+            <scope>test</scope>
+        </dependency>
+
     </dependencies>
 
     <build>

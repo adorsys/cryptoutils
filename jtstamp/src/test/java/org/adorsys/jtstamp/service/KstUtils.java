@@ -7,6 +7,7 @@ import java.security.KeyStore;
 
 import javax.security.auth.callback.CallbackHandler;
 
+import org.adorsys.cryptoutils.exceptions.BaseException;
 import org.adorsys.jkeygen.keypair.KeyPairBuilder;
 import org.adorsys.jkeygen.keypair.SelfSignedCertBuilder;
 import org.adorsys.jkeygen.keypair.SelfSignedKeyPairData;
@@ -19,14 +20,19 @@ import org.adorsys.jkeygen.pwd.PasswordMapCallbackHandler;
 import org.bouncycastle.asn1.x500.X500Name;
 import org.bouncycastle.asn1.x500.X500NameBuilder;
 import org.bouncycastle.asn1.x500.style.BCStyle;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class KstUtils {
+	private final static Logger LOGGER = LoggerFactory.getLogger(KstUtils.class);
+
 	public static final String KEY_STORE_NAME = "FrancisKeyStore";
 	public static final char[] storePass = "FrancisKeystorePass".toCharArray();
 	public static final char[] keyPairPass = "FrancisKeyPairPass".toCharArray();
 	public static final String keyPairAlias = "FrancisKeyPairAlias";
 	
 	public static void turnOffEncPolicy(){
+
 		// Warning: do not do this for productive code. Download and install the jce unlimited strength policy file
 		// see http://www.oracle.com/technetwork/java/javase/downloads/jce8-download-2133166.html
 		try {
@@ -34,7 +40,7 @@ public class KstUtils {
 	        field.setAccessible(true);
 	        field.set(null, java.lang.Boolean.FALSE);
 	    } catch (ClassNotFoundException | NoSuchFieldException | SecurityException | IllegalArgumentException | IllegalAccessException ex) {
-	        ex.printStackTrace(System.err);
+			LOGGER.debug("ignore Exception: " + ex.getClass().getName() + " during turnOffEncPolicy");
 	    }		
 	}
 

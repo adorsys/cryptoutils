@@ -5,7 +5,7 @@
     <parent>
         <groupId>de.adorsys.cryptoutils</groupId>
         <artifactId>storeconnection-impls</artifactId>
-        <version>0.23.3</version>
+        <version>0.23.4</version>
     </parent>
 
     <artifactId>filesystemstoreconnection</artifactId>
@@ -59,8 +59,31 @@
                 </configuration>
             </plugin>
 
-        </plugins>
+            <plugin>
+                <groupId>org.codehaus.mojo</groupId>
+                <artifactId>aspectj-maven-plugin</artifactId>
+                <version>1.11</version>
+                <configuration>
+                    <source>1.8</source>
+                    <target>1.8</target>
+                    <complianceLevel>1.8</complianceLevel>
 
+                    <aspectLibraries>
+                        <aspectLibrary>
+                            <groupId>de.electronicpeter</groupId>
+                            <artifactId>aspectj.test.timelogger</artifactId>
+                        </aspectLibrary>
+                    </aspectLibraries>
+                </configuration>
+                <executions>
+                    <execution>
+                        <goals>
+                            <goal>test-compile</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
+        </plugins>
     </build>
 
     <dependencies>
@@ -94,4 +117,6 @@
 
 
     </dependencies>
+
+
 </project>

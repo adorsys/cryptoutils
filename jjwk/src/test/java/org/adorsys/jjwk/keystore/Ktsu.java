@@ -18,8 +18,11 @@ import org.adorsys.jkeygen.secretkey.SecretKeyBuilder;
 import org.bouncycastle.asn1.x500.X500Name;
 import org.bouncycastle.asn1.x500.X500NameBuilder;
 import org.bouncycastle.asn1.x500.style.BCStyle;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class Ktsu {
+	private final static Logger LOGGER = LoggerFactory.getLogger(Ktsu.class);
 	public static final String KEY_STORE_NAME = "FrancisKeyStore";
 	public static final char[] storePass = "FrancisKeystorePass".toCharArray();
 	public static final char[] keyPairPass = "FrancisKeyPairPass".toCharArray();
@@ -35,7 +38,7 @@ public class Ktsu {
 	        field.setAccessible(true);
 	        field.set(null, java.lang.Boolean.FALSE);
 	    } catch (ClassNotFoundException | NoSuchFieldException | SecurityException | IllegalArgumentException | IllegalAccessException ex) {
-	        ex.printStackTrace(System.err);
+			LOGGER.debug("ignore Exception: " + ex.getClass().getName() + " during turnOffEncPolicy");
 	    }		
 	}
 

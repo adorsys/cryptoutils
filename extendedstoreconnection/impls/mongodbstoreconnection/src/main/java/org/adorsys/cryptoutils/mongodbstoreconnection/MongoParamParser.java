@@ -15,7 +15,7 @@ import java.util.StringTokenizer;
 public class MongoParamParser {
     private final static Logger LOGGER = LoggerFactory.getLogger(MongoParamParser.class);
     private final static String DELIMITER = ",";
-    private final static String EXPECTED_PARAMS = "<host>,<port>,<databasename>[,<user>,<password>]";
+    public final static String EXPECTED_PARAMS = "<mongoClientUri> (mongodb://[username:password@]host1[:port1][,host2[:port2],...[,hostN[:portN]]][/[database.collection][?options]]) - see http://mongodb.github.io/mongo-java-driver/3.6/javadoc/com/mongodb/MongoClientURI.html";
 
     public static MongoConnectionProperties getProperties(String params) {
         LOGGER.debug("parse:" + params);
@@ -23,15 +23,7 @@ public class MongoParamParser {
             MongoConnectionPropertiesImpl props = new MongoConnectionPropertiesImpl();
 
             if (params.length() > 0) {
-                StringTokenizer st = new StringTokenizer(params, DELIMITER);
-                props.setMongoHost(new MongoHost(st.nextToken()));
-                String portString = st.nextToken();
-                props.setMongoPort(new MongoPort(Long.parseLong(portString)));
-                props.setMongoDatabaseName(new MongoDatabaseName(st.nextToken()));
-                if (st.hasMoreTokens()) {
-                    props.setMongoUser(new MongoUser(st.nextToken()));
-                    props.setMongoPassword(new MongoPassword(st.nextToken()));
-                }
+                props.setMongoURI(new MongoURI(params));
             }
             return props;
         } catch (Exception e) {

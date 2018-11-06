@@ -10,6 +10,8 @@ import org.adorsys.jkeygen.keystore.SecretKeyEntry;
 import org.adorsys.jkeygen.pwd.PasswordCallbackHandler;
 import org.adorsys.jkeygen.pwd.PasswordMapCallbackHandler;
 import org.adorsys.jkeygen.secretkey.SecretKeyBuilder;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import javax.crypto.SecretKey;
 import javax.security.auth.callback.CallbackHandler;
@@ -18,6 +20,7 @@ import java.lang.reflect.Field;
 import java.security.KeyStore;
 
 public class TestKeyUtils {
+	private final static Logger LOGGER = LoggerFactory.getLogger(TestKeyUtils.class);
 	
 	public static void turnOffEncPolicy(){
 		// Warning: do not do this for productive code. Download and install the jce unlimited strength policy file
@@ -27,7 +30,7 @@ public class TestKeyUtils {
 	        field.setAccessible(true);
 	        field.set(null, Boolean.FALSE);
 	    } catch (ClassNotFoundException | NoSuchFieldException | SecurityException | IllegalArgumentException | IllegalAccessException ex) {
-//	        ex.printStackTrace(System.err);
+			LOGGER.debug("ignore Exception: " + ex.getClass().getName() + " during turnOffEncPolicy");
 	    }		
 	}
 

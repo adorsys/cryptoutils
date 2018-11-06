@@ -11,24 +11,15 @@ import org.adorsys.encobject.types.properties.MongoConnectionProperties;
  */
 public class MongoDBExtendedStoreConnection extends BucketPathEncryptingExtendedStoreConnection {
     public MongoDBExtendedStoreConnection(MongoConnectionProperties properties) {
-        this(
-                properties.getMongoHost(),
-                properties.getMongoPort(),
-                properties.getMongoDatabaseName(),
-                properties.getMongoUser(),
-                properties.getMongoPassword(),
+        this(properties.getMongoURI(),
                 properties.getBucketPathEncryptionPassword(),
                 properties.getBucketPathEncryptionFilenameOnly());
     }
 
     public MongoDBExtendedStoreConnection(
-            MongoHost host,
-            MongoPort port,
-            MongoDatabaseName databasename,
-            MongoUser user,
-            MongoPassword password,
+            MongoURI mongoURI,
             BucketPathEncryptionPassword bucketPathEncryptionPassword,
             BucketPathEncryptionFilenameOnly bucketPathEncryptionFilenameOnly) {
-        super(new RealMongoDBExtendedStoreConnection(host, port, databasename, user, password), bucketPathEncryptionPassword, bucketPathEncryptionFilenameOnly);
+        super(new RealMongoDBExtendedStoreConnection(mongoURI), bucketPathEncryptionPassword, bucketPathEncryptionFilenameOnly);
     }
 }

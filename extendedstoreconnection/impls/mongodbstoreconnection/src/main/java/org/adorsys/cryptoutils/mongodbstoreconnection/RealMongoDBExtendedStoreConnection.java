@@ -33,6 +33,7 @@ import org.adorsys.encobject.service.impl.StoreConnectionListHelper;
 import org.adorsys.encobject.types.ExtendedStoreConnectionType;
 import org.adorsys.encobject.types.ListRecursiveFlag;
 import org.adorsys.encobject.types.connection.*;
+import org.adorsys.encobject.types.connection.MongoURI;
 import org.apache.commons.io.IOUtils;
 import org.bson.Document;
 import org.bson.types.ObjectId;
@@ -41,6 +42,7 @@ import org.slf4j.LoggerFactory;
 
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;
+import java.net.URL;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashSet;
@@ -65,27 +67,32 @@ class RealMongoDBExtendedStoreConnection implements ExtendedStoreConnection {
     private DB databaseDeprecated;
     protected StorageMetadataFlattenerGSON gsonHelper = new StorageMetadataFlattenerGSON();
 
-    public RealMongoDBExtendedStoreConnection(MongoHost host, MongoPort port, MongoDatabaseName databasename, MongoUser user, MongoPassword password) {
+    public RealMongoDBExtendedStoreConnection(MongoURI mongoURI) {
+        MongoClientURI mongoClientUri = null;
+
+        try {
+            mongoClientUri = new MongoClientURI(mongoURI.getValue());
+        }
+        catch (Exception e) {
+            throw new BaseException("can not parse:\"" + mongoURI.getValue() + "\" " + MongoParamParser.EXPECTED_PARAMS, e);
+        }
+
         Frame frame = new Frame();
         frame.add("USE MONGO DB");
         frame.add("mongo db has be up and running");
-        frame.add("host: " + host);
-        frame.add("port: " + port);
-        frame.add("database: " + databasename);
-        frame.add("user: " + user);
-        frame.add("password: " + password);
+        frame.add("uri: " + mongoURI.getValue());
+        frame.add(" -> database:" + mongoClientUri.getDatabase());
+        frame.add(" -> user:" + mongoClientUri.getUsername());
+        mongoClientUri.getHosts().forEach(host -> {
+                    frame.add(" -> host:" + host);
+                }
+        );
+        frame.add(" -> ssl:" + mongoClientUri.getOptions().isSslEnabled());
         LOGGER.info(frame.toString());
 
-        MongoClient mongoClient = null;
-        if (user == null && password == null) {
-            mongoClient = new MongoClient(host.getValue(), port.getValue().intValue());
-        } else {
-            MongoCredential mongoCredential = MongoCredential.createCredential(user.getValue(), databasename.getValue(), password.getValue().toCharArray());
-            ServerAddress serverAddress = new ServerAddress(host.getValue(), port.getValue().intValue());
-            mongoClient = new MongoClient(serverAddress, mongoCredential, MongoClientOptions.builder().build());
-        }
-        database = mongoClient.getDatabase(databasename.getValue());
-        databaseDeprecated = mongoClient.getDB(databasename.getValue());
+        MongoClient mongoClient = new MongoClient(mongoClientUri);
+        database = mongoClient.getDatabase(mongoClientUri.getDatabase());
+        databaseDeprecated = mongoClient.getDB(mongoClientUri.getDatabase());
     }
 
     @Override

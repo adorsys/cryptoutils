@@ -28,7 +28,7 @@ public enum UglyKeyStoreCache {
     UglyKeyStoreCache() {
         if (isActive()) {
             Logger LOGGER = LoggerFactory.getLogger(UglyKeyStoreCache.class);
-            LOGGER.debug("UGLY_KEYSTORE_CACHE CREATION");
+            LOGGER.warn("UGLY_KEYSTORE_CACHE CREATION");
         }
     }
 

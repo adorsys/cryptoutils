@@ -2,7 +2,11 @@ package org.adorsys.cryptoutils.storageconnection.testsuite;
 
 import org.adorsys.cryptoutils.exceptions.BaseException;
 import org.adorsys.cryptoutils.storeconnectionfactory.ReadArguments;
-import org.adorsys.encobject.types.properties.*;
+import org.adorsys.encobject.types.properties.AmazonS3ConnectionProperties;
+import org.adorsys.encobject.types.properties.ConnectionProperties;
+import org.adorsys.encobject.types.properties.FilesystemConnectionProperties;
+import org.adorsys.encobject.types.properties.MinioConnectionProperties;
+import org.adorsys.encobject.types.properties.MongoConnectionProperties;
 import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
@@ -61,29 +65,12 @@ public class ReadArgumentsTest {
 
     @Test
     public void testEnvMongo1() {
-        System.setProperty(ReadArguments.MONGO, "localhost,123,mongdb");
+        System.setProperty(ReadArguments.MONGO, "localhost:27017/mongdb");
         ConnectionProperties properties = new ReadArguments().readEnvironment();
         Assert.assertTrue(properties instanceof  MongoConnectionProperties);
         Assert.assertTrue(properties.getBucketPathEncryptionPassword() != null);
         MongoConnectionProperties m = (MongoConnectionProperties) properties;
-        Assert.assertTrue(m.getMongoUser() == null);
-        Assert.assertTrue(m.getMongoPassword() == null);
-    }
-    @Test
-    public void testEnvMongoWithAuth() {
-        System.setProperty(ReadArguments.MONGO, "localhost,123,mongdb,user,password");
-        ConnectionProperties properties = new ReadArguments().readEnvironment();
-        Assert.assertTrue(properties instanceof  MongoConnectionProperties);
-        Assert.assertTrue(properties.getBucketPathEncryptionPassword() != null);
-        MongoConnectionProperties m = (MongoConnectionProperties) properties;
-        Assert.assertTrue(m.getMongoUser() != null);
-        Assert.assertTrue(m.getMongoPassword() != null);
-    }
-
-    @Test(expected = BaseException.class)
-    public void testEnvMongoWrong() {
-        System.setProperty(ReadArguments.MONGO, "localhost,123|mongdb");
-        ConnectionProperties properties = new ReadArguments().readEnvironment();
+        Assert.assertTrue(m.getMongoURI() != null);
     }
 
     @Test

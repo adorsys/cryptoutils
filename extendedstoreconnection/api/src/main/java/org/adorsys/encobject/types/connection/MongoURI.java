@@ -3,10 +3,10 @@ package org.adorsys.encobject.types.connection;
 import org.adorsys.cryptoutils.basetypes.BaseTypeString;
 
 /**
- * Created by peter on 04.10.18.
+ * Created by peter on 06.11.18 13:23.
  */
-public class MongoHost extends BaseTypeString {
-    public MongoHost(String s) {
+public class MongoURI extends BaseTypeString {
+    public MongoURI(String s) {
         super(s);
     }
 }

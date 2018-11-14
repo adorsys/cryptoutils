@@ -1,6 +1,6 @@
 package org.adorsys.encobject.filesystem;
 
-import org.adorsys.encobject.types.connection.FilesystemBasedirectoryName;
+import org.adorsys.encobject.types.connection.FilesystemRootBucketName;
 import org.adorsys.encobject.types.properties.FilesystemConnectionProperties;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -15,7 +15,7 @@ public class FileSystemParamParser {
         LOGGER.debug("parse:" + params);
         FilesystemConnectionPropertiesImpl properties = new FilesystemConnectionPropertiesImpl();
         if (params.length() > 0) {
-            properties.setFilesystemBasedirectoryName(new FilesystemBasedirectoryName(params));
+            properties.setFilesystemRootBucketName(new FilesystemRootBucketName(params));
         }
         return properties;
     }

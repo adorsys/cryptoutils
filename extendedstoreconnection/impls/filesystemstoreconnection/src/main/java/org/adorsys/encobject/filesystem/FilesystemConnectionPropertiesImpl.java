@@ -1,6 +1,6 @@
 package org.adorsys.encobject.filesystem;
 
-import org.adorsys.encobject.types.connection.FilesystemBasedirectoryName;
+import org.adorsys.encobject.types.connection.FilesystemRootBucketName;
 import org.adorsys.encobject.types.properties.ConnectionPropertiesImpl;
 import org.adorsys.encobject.types.properties.FilesystemConnectionProperties;
 
@@ -8,21 +8,20 @@ import org.adorsys.encobject.types.properties.FilesystemConnectionProperties;
  * Created by peter on 04.10.18.
  */
 public class FilesystemConnectionPropertiesImpl extends ConnectionPropertiesImpl implements FilesystemConnectionProperties {
-    private FilesystemBasedirectoryName filesystemBasedirectoryName = defaultBasedirectory;
+    private FilesystemRootBucketName filesystemRootBucketName = defaultBasedirectory;
 
     public FilesystemConnectionPropertiesImpl() {}
 
     public FilesystemConnectionPropertiesImpl(FilesystemConnectionProperties source) {
         super(source);
-        filesystemBasedirectoryName = source.getFilesystemBasedirectoryName();
+        filesystemRootBucketName = source.getFilesystemRootBucketName();
     }
 
-    @Override
-    public FilesystemBasedirectoryName getFilesystemBasedirectoryName() {
-        return filesystemBasedirectoryName;
+    public FilesystemRootBucketName getFilesystemRootBucketName() {
+        return filesystemRootBucketName;
     }
 
-    public void setFilesystemBasedirectoryName(FilesystemBasedirectoryName filesystemBasedirectoryName) {
-        this.filesystemBasedirectoryName = filesystemBasedirectoryName;
+    public void setFilesystemRootBucketName(FilesystemRootBucketName filesystemRootBucketName) {
+        this.filesystemRootBucketName = filesystemRootBucketName;
     }
 }

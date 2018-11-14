@@ -19,6 +19,17 @@ public class AmazonS3ConnectionProperitesImpl extends ConnectionPropertiesImpl i
     private AmazonS3RootBucketName amazonS3RootBucketName = defaultRootBucketName;
     private URL url;
 
+    public AmazonS3ConnectionProperitesImpl() {}
+
+    public AmazonS3ConnectionProperitesImpl(AmazonS3ConnectionProperties source) {
+        super(source);
+        amazonS3AccessKey = source.getAmazonS3AccessKey();
+        amazonS3Region = source.getAmazonS3Region();
+        amazonS3SecretKey = source.getAmazonS3SecretKey();
+        amazonS3RootBucketName = source.getAmazonS3RootBucketName();
+        url = source.getUrl();
+    }
+
     @Override
     public URL getUrl() {
         return url;

@@ -17,6 +17,15 @@ public class MinioConnectionPropertiesImpl extends ConnectionPropertiesImpl impl
     private MinioAccessKey minioAccessKey;
     private MinioSecretKey minioSecretKey;
 
+    public MinioConnectionPropertiesImpl() {}
+
+    public MinioConnectionPropertiesImpl(MinioConnectionProperties source) {
+        super(source);
+        url = source.getUrl();
+        minioRootBucketName = source.getMinioRootBucketName();
+        minioAccessKey = source.getMinioAccessKey();
+        minioSecretKey = source.getMinioSecretKey();
+    }
     @Override
     public URL getUrl() {
         return url;

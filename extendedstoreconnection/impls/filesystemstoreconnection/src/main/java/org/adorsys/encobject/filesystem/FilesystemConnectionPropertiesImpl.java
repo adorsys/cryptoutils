@@ -9,6 +9,14 @@ import org.adorsys.encobject.types.properties.FilesystemConnectionProperties;
  */
 public class FilesystemConnectionPropertiesImpl extends ConnectionPropertiesImpl implements FilesystemConnectionProperties {
     private FilesystemBasedirectoryName filesystemBasedirectoryName = defaultBasedirectory;
+
+    public FilesystemConnectionPropertiesImpl() {}
+
+    public FilesystemConnectionPropertiesImpl(FilesystemConnectionProperties source) {
+        super(source);
+        filesystemBasedirectoryName = source.getFilesystemBasedirectoryName();
+    }
+
     @Override
     public FilesystemBasedirectoryName getFilesystemBasedirectoryName() {
         return filesystemBasedirectoryName;

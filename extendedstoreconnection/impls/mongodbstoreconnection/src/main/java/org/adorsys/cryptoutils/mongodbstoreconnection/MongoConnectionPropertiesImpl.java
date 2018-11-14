@@ -10,6 +10,13 @@ import org.adorsys.encobject.types.properties.MongoConnectionProperties;
 public class MongoConnectionPropertiesImpl extends ConnectionPropertiesImpl implements MongoConnectionProperties {
     private MongoURI mongoURI = null;
 
+    public MongoConnectionPropertiesImpl() {}
+
+    public MongoConnectionPropertiesImpl(MongoConnectionProperties source) {
+        super(source);
+        mongoURI = source.getMongoURI();
+    }
+
     @Override
     public MongoURI getMongoURI() {
         return mongoURI;

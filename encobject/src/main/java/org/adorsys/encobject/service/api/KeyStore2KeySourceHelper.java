@@ -16,6 +16,7 @@ import org.adorsys.encobject.service.impl.KeyStoreBasedPrivateKeySourceImpl;
 import org.adorsys.encobject.service.impl.KeyStoreBasedPublicKeySourceImpl;
 import org.adorsys.encobject.service.impl.KeyStoreBasedSecretKeySourceImpl;
 import org.adorsys.encobject.types.KeyID;
+import org.adorsys.encobject.types.PublicKeyJWK;
 import org.adorsys.jjwk.keystore.JwkExport;
 import org.adorsys.jjwk.serverkey.KeyAndJwk;
 import org.adorsys.jjwk.serverkey.ServerKeyMap;
@@ -59,7 +60,7 @@ public class KeyStore2KeySourceHelper {
         return new KeySourceAndKeyID(keySource, keyID);
     }
     
-    public static JWK getForPublicKeyJWK(KeystorePersistence keystorePersistence, KeyStoreAccess keyStoreAccess){
+    public static PublicKeyJWK getPublicKeyJWK(KeystorePersistence keystorePersistence, KeyStoreAccess keyStoreAccess){
         LOGGER.debug("get keysource for public key of " + keyStoreAccess.getKeyStorePath());
         KeyStore userKeystore = keystorePersistence.loadKeystore(keyStoreAccess.getKeyStorePath().getObjectHandle(), keyStoreAccess.getKeyStoreAuth().getReadStoreHandler());
 
@@ -69,7 +70,7 @@ public class KeyStore2KeySourceHelper {
         if (encKeys.isEmpty()) {
             throw new AsymmetricEncryptionException("did not find any public keys in keystore " + keyStoreAccess.getKeyStorePath());
         }
-        return JwkExport.randomKey(encKeys);
+        return new PublicKeyJWK(JwkExport.randomKey(encKeys));
     }
 
     /**

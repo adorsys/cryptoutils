@@ -23,10 +23,6 @@
         </dependency>
         <dependency>
             <groupId>de.adorsys.cryptoutils</groupId>
-            <artifactId>miniostoreconnection</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>de.adorsys.cryptoutils</groupId>
             <artifactId>amazons3storeconnection</artifactId>
         </dependency>
 

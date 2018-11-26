@@ -5,7 +5,7 @@
     <parent>
         <groupId>de.adorsys.cryptoutils</groupId>
         <artifactId>storeconnection-impls</artifactId>
-        <version>0.23.6</version>
+        <version>0.23.7</version>
     </parent>
 
     <modelVersion>4.0.0</modelVersion>
@@ -20,10 +20,6 @@
         <dependency>
             <groupId>de.adorsys.cryptoutils</groupId>
             <artifactId>mongodbstoreconnection</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>de.adorsys.cryptoutils</groupId>
-            <artifactId>miniostoreconnection</artifactId>
         </dependency>
         <dependency>
             <groupId>de.adorsys.cryptoutils</groupId>

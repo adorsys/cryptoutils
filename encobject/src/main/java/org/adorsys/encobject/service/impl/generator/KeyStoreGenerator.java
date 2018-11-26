@@ -21,7 +21,6 @@ import java.util.UUID;
 
 public class KeyStoreGenerator {
     private final static Logger LOGGER = LoggerFactory.getLogger(KeyStoreGenerator.class);
-    public static final String UGLY_KEY_STORE_CACHE = "UGLY_KEY_STORE_CACHE";
     private final KeyStoreType keyStoreType;
     private final String serverKeyPairAliasPrefix;
     private final KeyStoreCreationConfig config;

@@ -30,7 +30,7 @@ public class AbsoluteAndRelativePathTest {
             String relativeDirAsAbsoluteDir = currentDir + BucketPath.BUCKET_SEPARATOR + mydir;
             LOGGER.debug("relative Dir to be created is (absoute):" + relativeDirAsAbsoluteDir);
             Assert.assertFalse(new File(relativeDirAsAbsoluteDir).exists());
-            FileSystemExtendedStorageConnection con = new FileSystemExtendedStorageConnection(new FilesystemRootBucketName(mydir), ConnectionProperties.defaultEncryptionPassword, BucketPathEncryptionFilenameOnly.FAlSE);
+            FileSystemExtendedStorageConnection con = new FileSystemExtendedStorageConnection(new FilesystemRootBucketName(mydir), ConnectionProperties.defaultEncryptionPassword, BucketPathEncryptionFilenameOnly.FALSE);
             con.createContainer(new BucketDirectory("home"));
             con.putBlob(new BucketPath("/home/file1.txt"), new SimplePayloadImpl(new SimpleStorageMetadataImpl(), "affe".getBytes()));
             Assert.assertTrue(new File(relativeDirAsAbsoluteDir).exists());
@@ -60,7 +60,7 @@ public class AbsoluteAndRelativePathTest {
             String absoluteDir = tmpdir + "target" + BucketPath.BUCKET_SEPARATOR + UUID.randomUUID().toString();
             LOGGER.debug("my absolute path " + absoluteDir);
             Assert.assertFalse(new File(absoluteDir).exists());
-            FileSystemExtendedStorageConnection con = new FileSystemExtendedStorageConnection(new FilesystemRootBucketName(absoluteDir), ConnectionProperties.defaultEncryptionPassword, BucketPathEncryptionFilenameOnly.FAlSE);
+            FileSystemExtendedStorageConnection con = new FileSystemExtendedStorageConnection(new FilesystemRootBucketName(absoluteDir), ConnectionProperties.defaultEncryptionPassword, BucketPathEncryptionFilenameOnly.FALSE);
             con.createContainer(new BucketDirectory("home"));
             con.putBlob(new BucketPath("/home/file1.txt"), new SimplePayloadImpl(new SimpleStorageMetadataImpl(), "affe".getBytes()));
             LOGGER.debug(absoluteDir);

@@ -17,19 +17,19 @@ public class BucketPathEncryptionPassword extends BaseTypePasswordString {
             throw new BaseException("Password must not be \"null\". Null should set the password to NULL");
         }
         if (s.length() < 10) {
-            throw new BaseException("Password is not compless enough. At least 9 characters long");
+            throw new BaseException("Password is not complex enough. At least 10 characters long");
         }
         if (s.toLowerCase().equals(s)) {
-            throw new BaseException("Password is not compless enough. At least one uppercase char");
+            throw new BaseException("Password is not complex enough. At least one uppercase char");
         }
         if (s.toUpperCase().equals(s)) {
-            throw new BaseException("Password is not compless enough. At least one lowercase char");
+            throw new BaseException("Password is not complex enough. At least one lowercase char");
         }
         if (!s.matches(".*[01234567890].*")) {
-            throw new BaseException("Password is not compless enough. At least one digit");
+            throw new BaseException("Password is not complex enough. At least one digit");
         }
         if (!s.matches(".*["+specialChars+"]{1}.*")) {
-            throw new BaseException("Password is not compless enough. At least one special char of \""+specialChars+"\"");
+            throw new BaseException("Password is not complex enough. At least one special char of \""+specialChars+"\"");
         }
 
     }

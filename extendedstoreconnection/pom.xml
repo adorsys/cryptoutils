@@ -5,7 +5,7 @@
     <parent>
         <artifactId>cryptoutils</artifactId>
         <groupId>de.adorsys.cryptoutils</groupId>
-        <version>0.23.6</version>
+        <version>0.23.7</version>
     </parent>
     <modelVersion>4.0.0</modelVersion>
 

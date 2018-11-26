@@ -3,7 +3,7 @@
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>de.adorsys.cryptoutils</groupId>
 	<artifactId>cryptoutils</artifactId>
-	<version>0.23.6</version>
+	<version>0.23.7</version>
     <name>Cryptographic helpers for Secure Banking</name>
     <description>Utility Components for the development of secure banking modules. Components developed under this tree
         are released as jar.
@@ -83,11 +83,6 @@
             <dependency>
                 <groupId>de.adorsys.cryptoutils</groupId>
                 <artifactId>filesystemstoreconnection</artifactId>
-                <version>${project.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>de.adorsys.cryptoutils</groupId>
-                <artifactId>miniostoreconnection</artifactId>
                 <version>${project.version}</version>
             </dependency>
             <dependency>

@@ -1,11 +1,9 @@
 package org.adorsys.cryptoutils.storageconnection.testsuite;
 
-import org.adorsys.cryptoutils.exceptions.BaseException;
 import org.adorsys.cryptoutils.storeconnectionfactory.ReadArguments;
 import org.adorsys.encobject.types.properties.AmazonS3ConnectionProperties;
 import org.adorsys.encobject.types.properties.ConnectionProperties;
 import org.adorsys.encobject.types.properties.FilesystemConnectionProperties;
-import org.adorsys.encobject.types.properties.MinioConnectionProperties;
 import org.adorsys.encobject.types.properties.MongoConnectionProperties;
 import org.junit.After;
 import org.junit.Assert;
@@ -27,11 +25,9 @@ public class ReadArgumentsTest {
     @Before
     public void before() {
         minio = System.getProperty(ReadArguments.AMAZONS3);
-        minio = System.getProperty(ReadArguments.MINIO);
         mongo = System.getProperty(ReadArguments.MONGO);
         filesys = System.getProperty(ReadArguments.FILESYSTEM);
         System.clearProperty(ReadArguments.AMAZONS3);
-        System.clearProperty(ReadArguments.MINIO);
         System.clearProperty(ReadArguments.MONGO);
         System.clearProperty(ReadArguments.FILESYSTEM);
         System.clearProperty(ReadArguments.NO_ENCRYPTION_PASSWORD);
@@ -42,25 +38,10 @@ public class ReadArgumentsTest {
     public void after() {
         LOGGER.debug("----------------");
         System.clearProperty(ReadArguments.AMAZONS3);
-        System.clearProperty(ReadArguments.MINIO);
         System.clearProperty(ReadArguments.MONGO);
         System.clearProperty(ReadArguments.FILESYSTEM);
         System.clearProperty(ReadArguments.NO_ENCRYPTION_PASSWORD);
         System.clearProperty(ReadArguments.ENCRYPTION_PASSWORD);
-    }
-
-    @Test
-    public void testEnvMinio1() {
-        System.setProperty(ReadArguments.MINIO, "http://localhost,accesskey,secretkey");
-        ConnectionProperties properties = new ReadArguments().readEnvironment();
-        Assert.assertTrue(properties instanceof  MinioConnectionProperties);
-        Assert.assertTrue(properties.getBucketPathEncryptionPassword() != null);
-    }
-
-    @Test(expected = BaseException.class)
-    public void testEnvMinioWrong() {
-        System.setProperty(ReadArguments.MINIO, "http://localhost accesskey,secretkey");
-        ConnectionProperties properties = new ReadArguments().readEnvironment();
     }
 
     @Test
@@ -95,15 +76,6 @@ public class ReadArgumentsTest {
         ConnectionProperties properties = new ReadArguments().readEnvironment();
         Assert.assertTrue(properties instanceof  FilesystemConnectionProperties);
         Assert.assertTrue(properties.getBucketPathEncryptionPassword() != null);
-    }
-
-    @Test
-    public void testArgMinio1() {
-        String[] args = new String[1];
-        args[0] = ReadArguments.MINIO_ARG+ "http://localhost,accesskey,secretkey";
-        ReadArguments.ArgsAndProperties argsAndProperties = new ReadArguments().readArguments(args);
-        Assert.assertEquals(0, argsAndProperties.remainingArgs.length);
-        Assert.assertTrue(argsAndProperties.properties.getBucketPathEncryptionPassword() != null);
     }
 
     @Test

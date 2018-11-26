@@ -2,11 +2,13 @@ package org.adorsys.cryptoutils.storeconnectionfactory;
 
 import org.adorsys.cryptoutils.exceptions.BaseException;
 import org.adorsys.cryptoutils.extendendstoreconnection.impl.amazons3.AmazonS3ExtendedStoreConnection;
-import org.adorsys.cryptoutils.miniostoreconnection.MinioExtendedStoreConnection;
 import org.adorsys.cryptoutils.mongodbstoreconnection.MongoDBExtendedStoreConnection;
 import org.adorsys.encobject.filesystem.FileSystemExtendedStorageConnection;
 import org.adorsys.encobject.service.api.ExtendedStoreConnection;
-import org.adorsys.encobject.types.properties.*;
+import org.adorsys.encobject.types.properties.AmazonS3ConnectionProperties;
+import org.adorsys.encobject.types.properties.ConnectionProperties;
+import org.adorsys.encobject.types.properties.FilesystemConnectionProperties;
+import org.adorsys.encobject.types.properties.MongoConnectionProperties;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -20,9 +22,6 @@ public class ExtendedStoreConnectionFactory {
     public static ExtendedStoreConnection get(ConnectionProperties properties) {
         if (properties instanceof MongoConnectionProperties) {
             return new MongoDBExtendedStoreConnection((MongoConnectionProperties) properties);
-        }
-        if (properties instanceof MinioConnectionProperties) {
-            return new MinioExtendedStoreConnection((MinioConnectionProperties) properties);
         }
         if (properties instanceof AmazonS3ConnectionProperties) {
             return new AmazonS3ExtendedStoreConnection((AmazonS3ConnectionProperties) properties);

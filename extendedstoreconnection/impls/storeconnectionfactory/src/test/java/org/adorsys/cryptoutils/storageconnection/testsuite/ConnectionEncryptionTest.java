@@ -1,10 +1,8 @@
 package org.adorsys.cryptoutils.storageconnection.testsuite;
 
 import org.adorsys.cryptoutils.exceptions.BaseException;
-import org.adorsys.cryptoutils.extendedstoreconnection.impls.pathencryption.BucketPathEncryptingExtendedStoreConnection;
 import org.adorsys.cryptoutils.extendedstoreconnection.impls.pathencryption.BucketPathEncryption;
 import org.adorsys.cryptoutils.extendendstoreconnection.impl.amazons3.AmazonS3ExtendedStoreConnection;
-import org.adorsys.cryptoutils.mongodbstoreconnection.MongoDBExtendedStoreConnection;
 import org.adorsys.cryptoutils.storeconnectionfactory.ExtendedStoreConnectionFactory;
 import org.adorsys.cryptoutils.storeconnectionfactory.ReadArguments;
 import org.adorsys.encobject.complextypes.BucketDirectory;
@@ -114,8 +112,8 @@ public class ConnectionEncryptionTest {
             }
         }
         LOGGER.info("the directory name length is " + lastValidFilePath.getObjectHandle().getContainer().length() + " " + lastValidFilePath);
-        LOGGER.info("the encrypted name length is " + BucketPathEncryption.encrypt(ConnectionProperties.defaultEncryptionPassword, BucketPathEncryptionFilenameOnly.FAlSE, lastValidFilePath).getObjectHandle().getContainer().length() + " " +
-                BucketPathEncryption.encrypt(ConnectionProperties.defaultEncryptionPassword, BucketPathEncryptionFilenameOnly.FAlSE, lastValidFilePath));
+        LOGGER.info("the encrypted name length is " + BucketPathEncryption.encrypt(ConnectionProperties.defaultEncryptionPassword, BucketPathEncryptionFilenameOnly.FALSE, lastValidFilePath).getObjectHandle().getContainer().length() + " " +
+                BucketPathEncryption.encrypt(ConnectionProperties.defaultEncryptionPassword, BucketPathEncryptionFilenameOnly.FALSE, lastValidFilePath));
         Assert.assertTrue(bucketRestrictionExceptionCaught);
     }
 
@@ -190,19 +188,19 @@ public class ConnectionEncryptionTest {
                 extendedStoreConnection.deleteContainer(filePath.getBucketDirectory());
                 encryptedbuckets.remove(bd);
                 lastValidFilePath = filePath;
-                LOGGER.info("the last successfull encrypted name length is " + BucketPathUtil.getAsString(BucketPathEncryption.encrypt(ConnectionProperties.defaultEncryptionPassword, BucketPathEncryptionFilenameOnly.FAlSE, lastValidFilePath)).length());
+                LOGGER.info("the last successfull encrypted name length is " + BucketPathUtil.getAsString(BucketPathEncryption.encrypt(ConnectionProperties.defaultEncryptionPassword, BucketPathEncryptionFilenameOnly.FALSE, lastValidFilePath)).length());
                 repeats++;
                 if (repeats == maxrepeats) {
                     exceptionCaught = true;
                 }
             } catch (Exception e) {
-                LOGGER.info("the failed encrypted name length is " + BucketPathUtil.getAsString(BucketPathEncryption.encrypt(ConnectionProperties.defaultEncryptionPassword, BucketPathEncryptionFilenameOnly.FAlSE, filePath)).length());
+                LOGGER.info("the failed encrypted name length is " + BucketPathUtil.getAsString(BucketPathEncryption.encrypt(ConnectionProperties.defaultEncryptionPassword, BucketPathEncryptionFilenameOnly.FALSE, filePath)).length());
                 new BaseException("see stack that finished search:", e);
                 exceptionCaught = true;
             }
         }
         LOGGER.info("absolute name length is      " + BucketPathUtil.getAsString(lastValidFilePath).length());
-        LOGGER.info("the encrypted name length is " + BucketPathUtil.getAsString(BucketPathEncryption.encrypt(ConnectionProperties.defaultEncryptionPassword, BucketPathEncryptionFilenameOnly.FAlSE, lastValidFilePath)).length());
+        LOGGER.info("the encrypted name length is " + BucketPathUtil.getAsString(BucketPathEncryption.encrypt(ConnectionProperties.defaultEncryptionPassword, BucketPathEncryptionFilenameOnly.FALSE, lastValidFilePath)).length());
     }
 
     // @Test
@@ -237,13 +235,13 @@ public class ConnectionEncryptionTest {
                 extendedStoreConnection.deleteContainer(filePath.getBucketDirectory());
                 encryptedbuckets.remove(bd);
                 lastValidFilePath = filePath;
-                LOGGER.info("the last successfull encrypted name length is " + BucketPathUtil.getAsString(BucketPathEncryption.encrypt(ConnectionProperties.defaultEncryptionPassword, BucketPathEncryptionFilenameOnly.FAlSE, lastValidFilePath)).length());
+                LOGGER.info("the last successfull encrypted name length is " + BucketPathUtil.getAsString(BucketPathEncryption.encrypt(ConnectionProperties.defaultEncryptionPassword, BucketPathEncryptionFilenameOnly.FALSE, lastValidFilePath)).length());
                 length++;
                 if (length == maxlength) {
                     exceptionCaught = true;
                 }
             } catch (Exception e) {
-                LOGGER.info("the failed encrypted name length is " + BucketPathUtil.getAsString(BucketPathEncryption.encrypt(ConnectionProperties.defaultEncryptionPassword, BucketPathEncryptionFilenameOnly.FAlSE, filePath)).length());
+                LOGGER.info("the failed encrypted name length is " + BucketPathUtil.getAsString(BucketPathEncryption.encrypt(ConnectionProperties.defaultEncryptionPassword, BucketPathEncryptionFilenameOnly.FALSE, filePath)).length());
                 new BaseException("see stack that finished search:", e);
                 exceptionCaught = true;
             }

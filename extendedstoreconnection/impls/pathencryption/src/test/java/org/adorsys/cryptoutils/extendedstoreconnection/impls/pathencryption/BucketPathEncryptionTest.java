@@ -50,8 +50,8 @@ public class BucketPathEncryptionTest {
         BucketPath bucketPath = new BucketPath("peter/folder1/1/2/3");
         BucketPathEncryptionPassword bucketPathEncryptionPassword1 = new BucketPathEncryptionPassword("affeAFFE1!");
         BucketPathEncryptionPassword bucketPathEncryptionPassword2 = new BucketPathEncryptionPassword("affeAFFE2!");
-        BucketPath encryptedBucketPath = BucketPathEncryption.encrypt(bucketPathEncryptionPassword1, BucketPathEncryptionFilenameOnly.FAlSE, bucketPath);
-        BucketPath decryptedBucketPath = BucketPathEncryption.decrypt(bucketPathEncryptionPassword2, BucketPathEncryptionFilenameOnly.FAlSE, encryptedBucketPath);
+        BucketPath encryptedBucketPath = BucketPathEncryption.encrypt(bucketPathEncryptionPassword1, BucketPathEncryptionFilenameOnly.FALSE, bucketPath);
+        BucketPath decryptedBucketPath = BucketPathEncryption.decrypt(bucketPathEncryptionPassword2, BucketPathEncryptionFilenameOnly.FALSE, encryptedBucketPath);
     }
 
     @Test
@@ -62,8 +62,8 @@ public class BucketPathEncryptionTest {
         StopWatch stopWatch = new StopWatch();
         stopWatch.start();
         for (int i = 0; i < NUMBER; i++) {
-            BucketPath encryptedBucketPath = BucketPathEncryption.encrypt(bucketPathEncryptionPassword, BucketPathEncryptionFilenameOnly.FAlSE, bucketPath);
-            BucketPath decryptedBucketPath = BucketPathEncryption.decrypt(bucketPathEncryptionPassword, BucketPathEncryptionFilenameOnly.FAlSE, encryptedBucketPath);
+            BucketPath encryptedBucketPath = BucketPathEncryption.encrypt(bucketPathEncryptionPassword, BucketPathEncryptionFilenameOnly.FALSE, bucketPath);
+            BucketPath decryptedBucketPath = BucketPathEncryption.decrypt(bucketPathEncryptionPassword, BucketPathEncryptionFilenameOnly.FALSE, encryptedBucketPath);
         }
         stopWatch.stop();
         LOGGER.info("time for " + NUMBER + " en- and decryptions took " + stopWatch.toString());
@@ -72,8 +72,8 @@ public class BucketPathEncryptionTest {
 
     private void doTest(BucketPath bucketPath, BucketPathEncryptionPassword bucketPathEncryptionPassword) {
         {
-            BucketPath encryptedBucketPath = BucketPathEncryption.encrypt(bucketPathEncryptionPassword, BucketPathEncryptionFilenameOnly.FAlSE, bucketPath);
-            BucketPath decryptedBucketPath = BucketPathEncryption.decrypt(bucketPathEncryptionPassword, BucketPathEncryptionFilenameOnly.FAlSE, encryptedBucketPath);
+            BucketPath encryptedBucketPath = BucketPathEncryption.encrypt(bucketPathEncryptionPassword, BucketPathEncryptionFilenameOnly.FALSE, bucketPath);
+            BucketPath decryptedBucketPath = BucketPathEncryption.decrypt(bucketPathEncryptionPassword, BucketPathEncryptionFilenameOnly.FALSE, encryptedBucketPath);
             LOGGER.debug("    plain bucket path:" + bucketPath);
             LOGGER.debug("encrypted bucket path:" + encryptedBucketPath);
             LOGGER.debug("decrypted bucket path:" + decryptedBucketPath);
@@ -122,13 +122,13 @@ public class BucketPathEncryptionTest {
         BucketDirectory BucketDirectory = new BucketDirectory("peter/folder1/1/2/3");
         BucketPathEncryptionPassword bucketPathEncryptionPassword1 = new BucketPathEncryptionPassword("affeAFFE1!");
         BucketPathEncryptionPassword bucketPathEncryptionPassword2 = new BucketPathEncryptionPassword("affeAFFE2!");
-        org.adorsys.encobject.complextypes.BucketDirectory encryptedBucketDirectory = BucketPathEncryption.encrypt(bucketPathEncryptionPassword1, BucketPathEncryptionFilenameOnly.FAlSE, BucketDirectory);
-        org.adorsys.encobject.complextypes.BucketDirectory decryptedBucketDirectory = BucketPathEncryption.decrypt(bucketPathEncryptionPassword2, BucketPathEncryptionFilenameOnly.FAlSE, encryptedBucketDirectory);
+        org.adorsys.encobject.complextypes.BucketDirectory encryptedBucketDirectory = BucketPathEncryption.encrypt(bucketPathEncryptionPassword1, BucketPathEncryptionFilenameOnly.FALSE, BucketDirectory);
+        org.adorsys.encobject.complextypes.BucketDirectory decryptedBucketDirectory = BucketPathEncryption.decrypt(bucketPathEncryptionPassword2, BucketPathEncryptionFilenameOnly.FALSE, encryptedBucketDirectory);
     }
 
     private void doTest(BucketDirectory bucketDirectory, BucketPathEncryptionPassword bucketPathEncryptionPassword) {
-        BucketDirectory encryptedBucketDirectory = BucketPathEncryption.encrypt(bucketPathEncryptionPassword, BucketPathEncryptionFilenameOnly.FAlSE, bucketDirectory);
-        BucketDirectory decryptedBucketDirectory = BucketPathEncryption.decrypt(bucketPathEncryptionPassword, BucketPathEncryptionFilenameOnly.FAlSE, encryptedBucketDirectory);
+        BucketDirectory encryptedBucketDirectory = BucketPathEncryption.encrypt(bucketPathEncryptionPassword, BucketPathEncryptionFilenameOnly.FALSE, bucketDirectory);
+        BucketDirectory decryptedBucketDirectory = BucketPathEncryption.decrypt(bucketPathEncryptionPassword, BucketPathEncryptionFilenameOnly.FALSE, encryptedBucketDirectory);
         LOGGER.debug("    plain bucket path:" + bucketDirectory);
         LOGGER.debug("encrypted bucket path:" + encryptedBucketDirectory);
         LOGGER.debug("decrypted bucket path:" + decryptedBucketDirectory);
@@ -156,7 +156,7 @@ public class BucketPathEncryptionTest {
             int pwl = bucketPathEncryptionPassword.getValue().length();
             for (int i = 3; i < lang.length(); i++) {
                 BucketDirectory bd = new BucketDirectory(lang.substring(0, i));
-                BucketDirectory ebf = BucketPathEncryption.encrypt(bucketPathEncryptionPassword, BucketPathEncryptionFilenameOnly.FAlSE, bd);
+                BucketDirectory ebf = BucketPathEncryption.encrypt(bucketPathEncryptionPassword, BucketPathEncryptionFilenameOnly.FALSE, bd);
 
                 int vorher = bd.getObjectHandle().getContainer().length();
                 int nachher = ebf.getObjectHandle().getContainer().length();

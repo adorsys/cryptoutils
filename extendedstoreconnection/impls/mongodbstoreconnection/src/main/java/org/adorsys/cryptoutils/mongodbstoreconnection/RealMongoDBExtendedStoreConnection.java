@@ -279,15 +279,15 @@ class RealMongoDBExtendedStoreConnection implements ExtendedStoreConnection {
             GridFSFindIterable gridFSFiles = bucket.find(regex(FILENAME_TAG, pattern, "i"));
             gridFSFiles.forEach((Consumer<GridFSFile>) file -> bucketPaths.add(
                     new BucketPath(bucketDirectory.getObjectHandle().getContainer(), file.getFilename())));
-            LOGGER.debug("found recursive " + bucketPaths.size());
-            dirs.addAll(StoreConnectionListHelper.findAllSubDirs(bucketPaths));
+            // bucketPaths.forEach(el -> LOGGER.info("found recursive:" + el));
+            dirs.addAll(StoreConnectionListHelper.findAllSubDirs(bucketDirectory, bucketPaths));
         } else {
             // files only
             String pattern = "^" + directoryname + "[^/]*$";
             GridFSFindIterable gridFSFiles = bucket.find(regex(FILENAME_TAG, pattern, "i"));
             gridFSFiles.forEach((Consumer<GridFSFile>) file -> bucketPaths.add(
                     new BucketPath(bucketDirectory.getObjectHandle().getContainer(), file.getFilename())));
-            LOGGER.debug("found non-recursive " + bucketPaths.size());
+            // bucketPaths.forEach(el -> LOGGER.info("found non-recursive:" + el));
 
             dirs.addAll(findSubdirs(bucket, bucketDirectory));
         }

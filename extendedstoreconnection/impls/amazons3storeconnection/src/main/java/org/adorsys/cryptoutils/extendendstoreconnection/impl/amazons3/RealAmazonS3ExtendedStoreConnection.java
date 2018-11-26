@@ -337,6 +337,7 @@ class RealAmazonS3ExtendedStoreConnection implements ExtendedStoreConnection {
         List<StorageMetadata> result = new ArrayList<>();
         Set<String> dirs = new HashSet<>();
 
+        // showKeys(keys);
         int numberOfDelimitersOfPrefix = StringUtils.countMatches(prefix, BucketPath.BUCKET_SEPARATOR);
         if (prefix.length() > BucketPath.BUCKET_SEPARATOR.length()) {
             numberOfDelimitersOfPrefix++;
@@ -354,18 +355,30 @@ class RealAmazonS3ExtendedStoreConnection implements ExtendedStoreConnection {
             }
 
             if (recursive.equals(ListRecursiveFlag.TRUE)) {
-                int lastDelimiter = key.lastIndexOf(BucketPath.BUCKET_SEPARATOR);
-                String dir = key.substring(0, lastDelimiter);
-                if (dir.length() == 0) {
-                    dir = BucketPath.BUCKET_SEPARATOR;
+                int fromIndex = prefix.length();
+                while (fromIndex != -1) {
+                    fromIndex = key.indexOf(BucketPath.BUCKET_SEPARATOR, fromIndex+1);
+                    if (fromIndex != -1) {
+                        String dir = key.substring(0, fromIndex);
+                        if (dir.length() == 0) {
+                            dir = BucketPath.BUCKET_SEPARATOR;
+                        }
+                        dirs.add(dir);
+                    }
                 }
-                dirs.add(dir);
             } else {
-                int numberOfDelimitersOfKey = StringUtils.countMatches(key, BucketPath.BUCKET_SEPARATOR);
-                if (numberOfDelimitersOfKey == numberOfDelimitersExpected + 1) {
-                    int lastDelimiter = key.lastIndexOf(BucketPath.BUCKET_SEPARATOR);
-                    String dir = key.substring(0, lastDelimiter);
-                    dirs.add(dir);
+                int fromIndex = prefix.length();
+                int counter = 0;
+                while (fromIndex != -1 && counter < 1) {
+                    fromIndex = key.indexOf(BucketPath.BUCKET_SEPARATOR, fromIndex+1);
+                    if (fromIndex != -1) {
+                        counter ++;
+                        String dir = key.substring(0, fromIndex);
+                        if (dir.length() == 0) {
+                            dir = BucketPath.BUCKET_SEPARATOR;
+                        }
+                        dirs.add(dir);
+                    }
                 }
             }
 
@@ -381,8 +394,10 @@ class RealAmazonS3ExtendedStoreConnection implements ExtendedStoreConnection {
             storageMetadata.setName(BucketPathUtil.getAsString(new BucketDirectory(new BucketPath(dir))));
             result.add(storageMetadata);
         }
+        // showResult(result);
         return result;
     }
+
 
     private void putBlobStreamWithMemory(BucketPath abucketPath, PayloadStream payloadStream, int size) {
         try {
@@ -411,16 +426,16 @@ class RealAmazonS3ExtendedStoreConnection implements ExtendedStoreConnection {
         try {
             LOGGER.debug("putBlobStreamWithTempFile " + abucketPath + " to tmpfile with unknown size");
             File targetFile = File.createTempFile(AMAZONS3_TMP_FILE_PREFIX, AMAZONS3_TMP_FILE_SUFFIX);
-            try (InputStream is = payloadStream.openStream()) {          	
+            try (InputStream is = payloadStream.openStream()) {
                 Files.copy(
                         is,
                         targetFile.toPath(),
                         StandardCopyOption.REPLACE_EXISTING);
             }
-            
+
             LOGGER.debug(abucketPath + " with tmpfile " + targetFile.getAbsolutePath() + " written with " + targetFile.length() + " bytes -> will now be copied to ceph");
             try (FileInputStream fis = new FileInputStream(targetFile)) {
-            	SimpleStorageMetadataImpl storageMetadata = new SimpleStorageMetadataImpl(payloadStream.getStorageMetadata());
+                SimpleStorageMetadataImpl storageMetadata = new SimpleStorageMetadataImpl(payloadStream.getStorageMetadata());
                 storageMetadata.setName(BucketPathUtil.getAsString(abucketPath));
                 storageMetadata.setType(StorageType.BLOB);
                 ObjectMetadata objectMetadata = geteObjectMetadataFromStorageMetadata(storageMetadata);
@@ -528,4 +543,19 @@ class RealAmazonS3ExtendedStoreConnection implements ExtendedStoreConnection {
             connection.deleteObject(containerFile.getObjectHandle().getContainer(), containerFile.getObjectHandle().getName());
         }
     }
+
+    private void showResult(List<StorageMetadata> result) {
+        LOGGER.info("nachher:");
+        result.forEach(el -> {
+            LOGGER.info(el.getName() + " (" + el.getType() + ")");
+        });
+    }
+
+    private void showKeys(List<String> keys) {
+        LOGGER.info("vorher");
+        keys.forEach(el -> {
+            LOGGER.info(el);
+        });
+    }
+
 }

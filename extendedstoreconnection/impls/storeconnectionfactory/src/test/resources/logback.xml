@@ -35,7 +35,11 @@
         <appender-ref ref="FILE" />
     </logger>
 
+
     <!-- the loggers above must not be changed or removed -->
+    <logger name="org.adorsys.cryptoutils.mongodbstoreconnection" level="info">
+        <appender-ref ref="STDOUT" />
+    </logger>
 
     <logger name="org.adorsys.cryptoutils.extendedstoreconnection.impls.pathencryption" level="info">
         <appender-ref ref="STDOUT" />

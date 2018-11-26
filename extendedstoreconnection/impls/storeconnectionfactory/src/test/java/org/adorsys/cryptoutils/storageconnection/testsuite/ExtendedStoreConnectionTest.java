@@ -1,8 +1,6 @@
 package org.adorsys.cryptoutils.storageconnection.testsuite;
 
-import junit.framework.Assert;
 import org.adorsys.cryptoutils.extendendstoreconnection.impl.amazons3.AmazonS3ExtendedStoreConnection;
-import org.adorsys.cryptoutils.miniostoreconnection.MinioExtendedStoreConnection;
 import org.adorsys.cryptoutils.storeconnectionfactory.ExtendedStoreConnectionFactory;
 import org.adorsys.encobject.complextypes.BucketDirectory;
 import org.adorsys.encobject.complextypes.BucketPath;
@@ -15,6 +13,7 @@ import org.adorsys.encobject.service.impl.SimplePayloadImpl;
 import org.adorsys.encobject.service.impl.SimpleStorageMetadataImpl;
 import org.adorsys.encobject.types.ListRecursiveFlag;
 import org.junit.After;
+import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.slf4j.Logger;
@@ -55,6 +54,87 @@ public class ExtendedStoreConnectionTest {
         c.listAllBuckets().forEach(el -> c.deleteContainer(el));
     }
 
+    @Test
+    public void testListSubfolderRecursive() {
+        BucketDirectory bd = new BucketDirectory("test_list_subfolder");
+        s.createContainer(bd);
+        containers.add(bd);
+
+        BucketPath file = bd.appendName("/empty1/empty2/file.txt");
+
+        byte[] filecontent = "Inhalt".getBytes();
+        s.putBlob(file, new SimplePayloadImpl(filecontent));
+
+        {
+            List<StorageMetadata> content = s.list(bd, ListRecursiveFlag.TRUE);
+            LOGGER.debug(show(content));
+            List<BucketPath> files = getFilesOnly(content);
+            Assert.assertEquals(1, files.size());
+            List<BucketDirectory> dirs = getDirectoresOnly(content);
+            Assert.assertEquals(3, dirs.size());
+            Assert.assertTrue(s.blobExists(file));
+        }
+
+        {
+            List<StorageMetadata> content = s.list(bd.appendDirectory("empty1"), ListRecursiveFlag.TRUE);
+            LOGGER.debug(show(content));
+            List<BucketPath> files = getFilesOnly(content);
+            Assert.assertEquals(1, files.size());
+            List<BucketDirectory> dirs = getDirectoresOnly(content);
+            Assert.assertEquals(2, dirs.size());
+            Assert.assertTrue(s.blobExists(file));
+        }
+
+        {
+            List<StorageMetadata> content = s.list(bd.appendDirectory("empty1/empty2"), ListRecursiveFlag.TRUE);
+            LOGGER.debug(show(content));
+            List<BucketPath> files = getFilesOnly(content);
+            Assert.assertEquals(1, files.size());
+            List<BucketDirectory> dirs = getDirectoresOnly(content);
+            Assert.assertEquals(1, dirs.size());
+            Assert.assertTrue(s.blobExists(file));
+        }
+    }
+    @Test
+    public void testListSubfolderNonRecursive() {
+        BucketDirectory bd = new BucketDirectory("test_list_subfolder");
+        s.createContainer(bd);
+        containers.add(bd);
+
+        BucketPath file = bd.appendName("/empty1/empty2/file.txt");
+
+        byte[] filecontent = "Inhalt".getBytes();
+        s.putBlob(file, new SimplePayloadImpl(filecontent));
+
+        {
+            List<StorageMetadata> content = s.list(bd, ListRecursiveFlag.FALSE);
+            LOGGER.debug(show(content));
+            List<BucketPath> files = getFilesOnly(content);
+            Assert.assertEquals(0, files.size());
+            List<BucketDirectory> dirs = getDirectoresOnly(content);
+            Assert.assertEquals(2, dirs.size());
+            Assert.assertTrue(s.blobExists(file));
+        }
+        {
+            List<StorageMetadata> content = s.list(bd.appendDirectory("empty1"), ListRecursiveFlag.FALSE);
+            LOGGER.debug(show(content));
+            List<BucketPath> files = getFilesOnly(content);
+            Assert.assertEquals(0, files.size());
+            List<BucketDirectory> dirs = getDirectoresOnly(content);
+            Assert.assertEquals(2, dirs.size());
+            Assert.assertTrue(s.blobExists(file));
+        }
+        {
+            List<StorageMetadata> content = s.list(bd.appendDirectory("empty1/empty2"), ListRecursiveFlag.FALSE);
+            LOGGER.debug(show(content));
+            List<BucketPath> files = getFilesOnly(content);
+            Assert.assertEquals(1, files.size());
+            List<BucketDirectory> dirs = getDirectoresOnly(content);
+            Assert.assertEquals(1, dirs.size());
+            Assert.assertTrue(s.blobExists(file));
+        }
+    }
+
     /**
      * Suche in einem nicht vorhandenem Bucket sollte einfach eine leere Liste zurückgeben
      */
@@ -72,17 +152,9 @@ public class ExtendedStoreConnectionTest {
      */
     @Test
     public void testList2() {
-        if (s instanceof MinioExtendedStoreConnection) {
-            ((MinioExtendedStoreConnection) s).cleanDatabase();
-        }
-
         BucketDirectory bd = new BucketDirectory("affe2");
         s.createContainer(bd);
         containers.add(bd);
-
-        if (s instanceof MinioExtendedStoreConnection) {
-            ((MinioExtendedStoreConnection) s).showDatabase();
-        }
 
         List<StorageMetadata> content = s.list(bd, ListRecursiveFlag.FALSE);
         LOGGER.debug(show(content));
@@ -98,7 +170,7 @@ public class ExtendedStoreConnectionTest {
      */
     @Test
     public void testList3() {
-        int REPEATS=10;
+        int REPEATS = 10;
         int i = 0;
 
         while (i > 0) {
@@ -112,7 +184,7 @@ public class ExtendedStoreConnectionTest {
         BucketDirectory bd = new BucketDirectory("affe3");
         s.createContainer(bd);
         containers.add(bd);
-        for (int j=0; j<REPEATS; j++) {
+        for (int j = 0; j < REPEATS; j++) {
             BucketPath file = bd.appendName("file1");
             if (s.blobExists(file)) {
                 s.removeBlob(file);
@@ -237,11 +309,9 @@ public class ExtendedStoreConnectionTest {
         Assert.assertEquals(0, files.size());
     }
 
+
     @Test
     public void deleteDatabase() {
-        if (s instanceof MinioExtendedStoreConnection) {
-            ((MinioExtendedStoreConnection) s).cleanDatabase();
-        }
         if (s instanceof AmazonS3ExtendedStoreConnection) {
             ((AmazonS3ExtendedStoreConnection) s).cleanDatabase();
         }
@@ -257,11 +327,8 @@ public class ExtendedStoreConnectionTest {
         /**
          * Anlegen einer tieferen Verzeichnisstruktur
          */
-        createFilesAndFoldersRecursivly(bd, 2,2,5, s);
+        createFilesAndFoldersRecursivly(bd, 2, 2, 5, s);
 
-        if (s instanceof MinioExtendedStoreConnection) {
-            ((MinioExtendedStoreConnection) s).showDatabase();
-        }
         if (s instanceof AmazonS3ExtendedStoreConnection) {
             ((AmazonS3ExtendedStoreConnection) s).showDatabase();
         }
@@ -283,34 +350,23 @@ public class ExtendedStoreConnectionTest {
 
         Assert.assertEquals(filesOnlyAllNew.size() + filesOnly00.size(), filesOnlyAll.size());
 
-        if (s instanceof MinioExtendedStoreConnection) {
-            ((MinioExtendedStoreConnection) s).cleanDatabase();
-        }
         if (s instanceof AmazonS3ExtendedStoreConnection) {
             ((AmazonS3ExtendedStoreConnection) s).cleanDatabase();
         }
     }
 
-        /**
-         * Anlegen einer tieferen Verzeichnisstruktur
-         */
+    /**
+     * Anlegen einer tieferen Verzeichnisstruktur
+     */
     @Test
     public void testList8() {
         LOGGER.debug("START TEST " + new RuntimeException("").getStackTrace()[0].getMethodName());
-
-        if (s instanceof MinioExtendedStoreConnection) {
-            ((MinioExtendedStoreConnection) s).cleanDatabase();
-        }
 
         BucketDirectory bd = new BucketDirectory("bucket8");
         s.createContainer(bd);
         containers.add(bd);
 
         createFiles(s, bd, 3, 2);
-        if (s instanceof MinioExtendedStoreConnection) {
-            ((MinioExtendedStoreConnection) s).showDatabase();
-        }
-
         {
             LOGGER.debug("test8 start subtest 1");
             List<StorageMetadata> list = s.list(bd, ListRecursiveFlag.FALSE);

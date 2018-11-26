@@ -5,5 +5,5 @@ package org.adorsys.encobject.types.properties;
  */
 public enum BucketPathEncryptionFilenameOnly {
     TRUE,
-    FAlSE
+    FALSE
 }

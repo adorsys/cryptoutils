@@ -15,7 +15,6 @@
         <module>amazons3storeconnection</module>
         <module>filesystemstoreconnection</module>
         <module>mongodbstoreconnection</module>
-        <module>miniostoreconnection</module>
         <module>storeconnectionfactory</module>
         <module>pathencryption</module>
     </modules>

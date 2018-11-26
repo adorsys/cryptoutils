@@ -2,7 +2,6 @@ package org.adorsys.cryptoutils.storeconnectionfactory;
 
 import org.adorsys.cryptoutils.exceptions.BaseExceptionHandler;
 import org.adorsys.cryptoutils.extendendstoreconnection.impl.amazons3.AmazonS3ParamParser;
-import org.adorsys.cryptoutils.miniostoreconnection.MinioParamParser;
 import org.adorsys.cryptoutils.mongodbstoreconnection.MongoParamParser;
 import org.adorsys.encobject.filesystem.FileSystemParamParser;
 import org.adorsys.encobject.types.BucketPathEncryptionPassword;
@@ -23,7 +22,6 @@ public class ReadArguments {
     private final static Logger LOGGER = LoggerFactory.getLogger(ReadArguments.class);
     private static final String SYSTEM_PROPERTY_PREFIX = "-D";
     public static final String MONGO = "SC-MONGO";
-    public static final String MINIO = "SC-MINIO";
     public static final String AMAZONS3 = "SC-AMAZONS3";
     public static final String FILESYSTEM = "SC-FILESYSTEM";
     public static final String ENCRYPTION_PASSWORD = "SC-ENCRYPTION-PASSWORD";
@@ -31,7 +29,6 @@ public class ReadArguments {
     public static final String ENCRYPTION_FILENAME_ONLY = "SC-ENCRYPTION-FILENAME-ONLY";
 
     public static final String MONGO_ARG = SYSTEM_PROPERTY_PREFIX + MONGO + "=";
-    public static final String MINIO_ARG = SYSTEM_PROPERTY_PREFIX + MINIO + "=";
     public static final String AMAZONS3_ARG = SYSTEM_PROPERTY_PREFIX + AMAZONS3 + "=";
     public static final String FILESYSTEM_ARG = SYSTEM_PROPERTY_PREFIX + FILESYSTEM + "=";
     public static final String ENCRYPTION_PASSWORD_ARG = SYSTEM_PROPERTY_PREFIX + ENCRYPTION_PASSWORD + "=";
@@ -49,8 +46,6 @@ public class ReadArguments {
         for (String arg : args) {
             if (arg.startsWith(MONGO_ARG)) {
                 properties = MongoParamParser.getProperties(arg.substring(MONGO_ARG.length()));
-            } else if (arg.startsWith(MINIO_ARG)) {
-                properties = MinioParamParser.getProperties(arg.substring(MINIO_ARG.length()));
             } else if (arg.startsWith(AMAZONS3_ARG)) {
                 properties = AmazonS3ParamParser.getProperties(arg.substring(AMAZONS3_ARG.length()));
             } else if (arg.startsWith(FILESYSTEM_ARG)) {
@@ -96,9 +91,6 @@ public class ReadArguments {
             }
             if (System.getProperty(MONGO) != null) {
                 properties = MongoParamParser.getProperties(System.getProperty(MONGO));
-            }
-            if (System.getProperty(MINIO) != null) {
-                properties = MinioParamParser.getProperties(System.getProperty(MINIO));
             }
             if (System.getProperty(AMAZONS3) != null) {
                 properties = AmazonS3ParamParser.getProperties(System.getProperty(AMAZONS3));

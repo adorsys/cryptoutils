@@ -1,5 +1,7 @@
 package org.adorsys.cryptoutils.storageconnection.testsuite;
 
+import com.amazonaws.services.s3.model.AmazonS3Exception;
+import org.adorsys.cryptoutils.exceptions.BaseExceptionHandler;
 import org.adorsys.cryptoutils.extendendstoreconnection.impl.amazons3.AmazonS3ExtendedStoreConnection;
 import org.adorsys.cryptoutils.storeconnectionfactory.ExtendedStoreConnectionFactory;
 import org.adorsys.encobject.complextypes.BucketDirectory;
@@ -19,6 +21,8 @@ import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.io.BufferedReader;
+import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -52,6 +56,46 @@ public class ExtendedStoreConnectionTest {
     public void cleanDB() {
         ExtendedStoreConnection c = ExtendedStoreConnectionFactory.get();
         c.listAllBuckets().forEach(el -> c.deleteContainer(el));
+    }
+
+    /*
+    This test requrires manual access
+     */
+    // @Test
+    public void testConnectionAvaiable() {
+        cleanDB();
+        BucketDirectory bd = new BucketDirectory("test-container-exists");
+        containers.add(bd);
+
+        Assert.assertFalse(s.containerExists(bd));
+        s.createContainer(bd);
+        try {
+            LOGGER.info("you have 10 secs to kill the connection");
+            Thread.currentThread().sleep(10000);
+            LOGGER.info("continue");
+        } catch (Exception e) {
+            throw BaseExceptionHandler.handle(e);
+        }
+
+        Assert.assertTrue(s.containerExists(bd));
+        containers.add(bd);
+
+        BucketPath file = bd.appendName("file.txt");
+        Assert.assertFalse(s.blobExists(file));
+
+        byte[] filecontent = "Inhalt".getBytes();
+        s.putBlob(file, new SimplePayloadImpl(filecontent));
+
+        try {
+            LOGGER.info("you have 10 secs to kill the connection");
+            Thread.currentThread().sleep(10000);
+            LOGGER.info("continue");
+        } catch (Exception e) {
+            throw BaseExceptionHandler.handle(e);
+        }
+
+        Assert.assertTrue(s.blobExists(file));
+
     }
 
     @Test
@@ -95,6 +139,7 @@ public class ExtendedStoreConnectionTest {
             Assert.assertTrue(s.blobExists(file));
         }
     }
+
     @Test
     public void testListSubfolderNonRecursive() {
         BucketDirectory bd = new BucketDirectory("test_list_subfolder");

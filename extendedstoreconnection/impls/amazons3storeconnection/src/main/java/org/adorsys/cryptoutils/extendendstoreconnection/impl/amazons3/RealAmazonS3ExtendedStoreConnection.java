@@ -9,6 +9,7 @@ import com.amazonaws.client.builder.AwsClientBuilder;
 import com.amazonaws.services.s3.AmazonS3;
 import com.amazonaws.services.s3.AmazonS3ClientBuilder;
 import com.amazonaws.services.s3.model.*;
+import com.sun.corba.se.impl.presentation.rmi.ExceptionHandler;
 import org.adorsys.cryptoutils.exceptions.BaseException;
 import org.adorsys.cryptoutils.exceptions.BaseExceptionHandler;
 import org.adorsys.cryptoutils.utils.Frame;
@@ -195,9 +196,14 @@ class RealAmazonS3ExtendedStoreConnection implements ExtendedStoreConnection {
             connection.getObjectMetadata(bucketPath.getObjectHandle().getContainer(), bucketPath.getObjectHandle().getName());
             LOGGER.debug("blob exists " + abucketPath + " TRUE");
             return true;
+        } catch (AmazonS3Exception e) {
+            if (e.getMessage().contains("404 Not Found")) {
+                LOGGER.debug("blob exists " + abucketPath + " FALSE");
+                return false;
+            }
+            throw BaseExceptionHandler.handle(e);
         } catch (Exception e) {
-            LOGGER.debug("blob exists " + abucketPath + " FALSE");
-            return false;
+            throw BaseExceptionHandler.handle(e);
         }
     }
 
@@ -226,9 +232,14 @@ class RealAmazonS3ExtendedStoreConnection implements ExtendedStoreConnection {
             connection.getObjectMetadata(bucketPath.getObjectHandle().getContainer(), bucketPath.getObjectHandle().getName());
             LOGGER.debug("containerExists " + bucketDirectory + " TRUE");
             return true;
+        } catch (AmazonS3Exception e) {
+            if (e.getMessage().contains("404 Not Found")) {
+                LOGGER.debug("containerExists " + bucketDirectory + " FALSE (EXCEPTION)");
+                return false;
+            }
+            throw BaseExceptionHandler.handle(e);
         } catch (Exception e) {
-            LOGGER.debug("containerExists " + bucketDirectory + " FALSE (EXCEPTION)");
-            return false;
+            throw BaseExceptionHandler.handle(e);
         }
     }
 
@@ -357,7 +368,7 @@ class RealAmazonS3ExtendedStoreConnection implements ExtendedStoreConnection {
             if (recursive.equals(ListRecursiveFlag.TRUE)) {
                 int fromIndex = prefix.length();
                 while (fromIndex != -1) {
-                    fromIndex = key.indexOf(BucketPath.BUCKET_SEPARATOR, fromIndex+1);
+                    fromIndex = key.indexOf(BucketPath.BUCKET_SEPARATOR, fromIndex + 1);
                     if (fromIndex != -1) {
                         String dir = key.substring(0, fromIndex);
                         if (dir.length() == 0) {
@@ -370,9 +381,9 @@ class RealAmazonS3ExtendedStoreConnection implements ExtendedStoreConnection {
                 int fromIndex = prefix.length();
                 int counter = 0;
                 while (fromIndex != -1 && counter < 1) {
-                    fromIndex = key.indexOf(BucketPath.BUCKET_SEPARATOR, fromIndex+1);
+                    fromIndex = key.indexOf(BucketPath.BUCKET_SEPARATOR, fromIndex + 1);
                     if (fromIndex != -1) {
-                        counter ++;
+                        counter++;
                         String dir = key.substring(0, fromIndex);
                         if (dir.length() == 0) {
                             dir = BucketPath.BUCKET_SEPARATOR;

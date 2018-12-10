@@ -86,6 +86,11 @@ public class StorageMetaDataTest {
 
         LOGGER.debug("Es werden drei Fehler erwartet für Name, StorageType");
         Assert.assertEquals("number of fehlers", 2, fehler);
+
+        ((SimpleStorageMetadataImpl) storageMetadata).setName(loadedStorageMetadata.getName());
+        Assert.assertFalse(storageMetadata.equals(loadedStorageMetadata));
+        ((SimpleStorageMetadataImpl) storageMetadata).setType(loadedStorageMetadata.getType());
+        Assert.assertTrue(storageMetadata.equals(loadedStorageMetadata));
     }
 
 
@@ -441,6 +446,14 @@ public class StorageMetaDataTest {
             fehler += compareStrings(m1.getSize().toString(), m2.getSize().toString(), "1111", "Size");
             fehler += compareStrings(m1.getShouldBeCompressed().toString(), m2.getShouldBeCompressed().toString(), SHOULD_BE_COMPRESSED, "should be compressed");
             fehler += compareStrings(m1.getContentType(), m2.getContentType(), CONTENT_TYPE, "content type");
+
+            if (fehler > 0) {
+                Assert.assertTrue(!m1.equals(m2));
+            } else {
+                Assert.assertTrue(m1.equals(m2));
+            }
+
+
             return fehler;
         } catch (
                 Exception e) {

@@ -19,5 +19,6 @@ public interface StorageMetadata extends ResourceMetadata<StorageType> {
 
     public abstract String getContentType();
 
+
 }
 

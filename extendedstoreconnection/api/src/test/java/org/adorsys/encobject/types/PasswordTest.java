@@ -7,6 +7,8 @@ import org.junit.Test;
  * Created by peter on 05.10.18.
  */
 public class PasswordTest {
+    /*
+    DOC-76
     @Test (expected= BaseException.class)
     public void length() {
         new BucketPathEncryptionPassword("1");
@@ -27,6 +29,7 @@ public class PasswordTest {
     public void noSpecials() {
         new BucketPathEncryptionPassword("sldkfjLJLKJ1");
     }
+     */
     @Test
     public void specials() {
         String basestring = "lsdjfsldfjLJLJLJ12";

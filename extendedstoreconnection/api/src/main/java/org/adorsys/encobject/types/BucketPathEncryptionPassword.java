@@ -16,6 +16,8 @@ public class BucketPathEncryptionPassword extends BaseTypePasswordString {
         if (s.equalsIgnoreCase("null")) {
             throw new BaseException("Password must not be \"null\". Null should set the password to NULL");
         }
+        /*
+        DOC-76
         if (s.length() < 10) {
             throw new BaseException("Password is not complex enough. At least 10 characters long");
         }
@@ -31,6 +33,7 @@ public class BucketPathEncryptionPassword extends BaseTypePasswordString {
         if (!s.matches(".*["+specialChars+"]{1}.*")) {
             throw new BaseException("Password is not complex enough. At least one special char of \""+specialChars+"\"");
         }
+        */
 
     }
 }

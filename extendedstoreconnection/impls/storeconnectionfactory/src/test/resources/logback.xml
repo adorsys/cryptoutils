@@ -37,11 +37,16 @@
 
 
     <!-- the loggers above must not be changed or removed -->
-    <logger name="org.adorsys.cryptoutils.mongodbstoreconnection" level="info">
+
+    <logger name="org.adorsys.encobject.service.impl.SimpleStorageMetadataImpl" level="debug" additivity="false">
         <appender-ref ref="STDOUT" />
     </logger>
 
-    <logger name="org.adorsys.cryptoutils.extendedstoreconnection.impls.pathencryption" level="info">
+    <logger name="org.adorsys.cryptoutils.mongodbstoreconnection" level="info" additivity="false">
+        <appender-ref ref="STDOUT" />
+    </logger>
+
+    <logger name="org.adorsys.cryptoutils.extendedstoreconnection.impls.pathencryption" level="info" additivity="false">
         <appender-ref ref="STDOUT" />
     </logger>
 

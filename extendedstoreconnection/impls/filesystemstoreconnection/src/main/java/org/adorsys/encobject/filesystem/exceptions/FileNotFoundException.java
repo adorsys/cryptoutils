@@ -9,4 +9,7 @@ public class FileNotFoundException extends StorageConnectionException {
     public FileNotFoundException(String message, Throwable cause) {
         super(message, cause);
     }
+    public FileNotFoundException(String message) {
+        super(message);
+    }
 }

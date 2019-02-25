@@ -329,7 +329,6 @@ public class BucketPathEncryptingExtendedStoreConnection implements ExtendedStor
     private static MaxLengthInfo getMaxLengthTupel(ExtendedStoreConnection extendedStoreConnection) {
         switch (extendedStoreConnection.getType()) {
             case FILESYSTEM:
-            case MINIO:
             case AMAZONS3:
                 return AMAZONS3_MAX_LENGTH;
             case MONGO:

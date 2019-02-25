@@ -70,6 +70,7 @@ class RealFileSystemExtendedStorageConnection implements ExtendedStoreConnection
 
     @Override
     public void createContainer(BucketDirectory bucketDirectory) {
+        LOGGER.debug("createContainer " + bucketDirectory);
         String containerOnly = bucketDirectory.getObjectHandle().getContainer();
 
         File file = BucketPathFileHelper.getAsFile(baseDir.appendDirectory(containerOnly), absolutePath);
@@ -101,6 +102,7 @@ class RealFileSystemExtendedStorageConnection implements ExtendedStoreConnection
 
     @Override
     public void deleteContainer(BucketDirectory container) {
+        LOGGER.debug("deleteContainer " + container);
         File file = BucketPathFileHelper.getAsFile(baseDir.appendDirectory(container.getObjectHandle().getContainer()), absolutePath);
         if (!containerExists(container)) {
             LOGGER.debug("directory does not exist. so nothing to delete:" + file);
@@ -115,12 +117,14 @@ class RealFileSystemExtendedStorageConnection implements ExtendedStoreConnection
 
     @Override
     public void putBlob(BucketPath bucketPath, byte[] bytes) {
+        LOGGER.debug("putBlob " + bucketPath);
         Payload payload = new SimplePayloadImpl(bytes);
         putBlob(bucketPath, payload);
     }
 
     @Override
     public boolean blobExists(BucketPath bucketPath) {
+        LOGGER.debug("blobExists " + bucketPath);
         File file = BucketPathFileHelper.getAsFile(baseDir.append(bucketPath.add(ZipFileHelper.ZIP_SUFFIX)), absolutePath);
         if (file.isDirectory()) {
             throw new FileIsFolderException("file " + file);
@@ -135,6 +139,7 @@ class RealFileSystemExtendedStorageConnection implements ExtendedStoreConnection
 
     @Override
     public List<StorageMetadata> list(BucketDirectory bucketDirectory, ListRecursiveFlag listRecursiveFlag) {
+        LOGGER.debug("list " + bucketDirectory);
         List<StorageMetadata> result = new ArrayList<>();
         File file = BucketPathFileHelper.getAsFile(baseDir.append(bucketDirectory), absolutePath);
         if (!file.exists()) {
@@ -150,6 +155,7 @@ class RealFileSystemExtendedStorageConnection implements ExtendedStoreConnection
 
     @Override
     public List<BucketDirectory> listAllBuckets() {
+        LOGGER.debug("listAllbuckeets");
         try {
             List<BucketDirectory> list = new ArrayList<>();
             String[] dirs = BucketPathFileHelper.getAsFile(baseDir, absolutePath).list(new DirectoryFilenameFilter());
@@ -170,24 +176,28 @@ class RealFileSystemExtendedStorageConnection implements ExtendedStoreConnection
 
     @Override
     public void putBlob(BucketPath bucketPath, Payload payload) {
+        LOGGER.debug("putBlob " + bucketPath);
         checkContainerExists(bucketPath);
         zipFileHelper.writeZip(bucketPath, new SimplePayloadImpl(payload));
     }
 
     @Override
     public Payload getBlob(BucketPath bucketPath) {
+        LOGGER.debug("getBlob " + bucketPath);
         checkContainerExists(bucketPath);
         return zipFileHelper.readZip(bucketPath, null);
     }
 
     @Override
     public Payload getBlob(BucketPath bucketPath, StorageMetadata storageMetadata) {
+        LOGGER.debug("getBlob with Metadata " + bucketPath);
         checkContainerExists(bucketPath);
         return zipFileHelper.readZip(bucketPath, storageMetadata);
     }
 
     @Override
     public void putBlobStream(BucketPath bucketPath, PayloadStream payloadStream) {
+        LOGGER.debug("putBlobStream " + bucketPath);
         checkContainerExists(bucketPath);
         zipFileHelper.writeZipStream(bucketPath, new SimplePayloadStreamImpl(payloadStream));
 
@@ -195,24 +205,28 @@ class RealFileSystemExtendedStorageConnection implements ExtendedStoreConnection
 
     @Override
     public PayloadStream getBlobStream(BucketPath bucketPath) {
+        LOGGER.debug("getBlobStrea " + bucketPath);
         checkContainerExists(bucketPath);
         return zipFileHelper.readZipStream(bucketPath, null);
     }
 
     @Override
     public PayloadStream getBlobStream(BucketPath bucketPath, StorageMetadata storageMetadata) {
+        LOGGER.debug("getBlobStream " + bucketPath);
         checkContainerExists(bucketPath);
         return zipFileHelper.readZipStream(bucketPath, storageMetadata);
     }
 
     @Override
     public StorageMetadata getStorageMetadata(BucketPath bucketPath) {
+        LOGGER.debug("getStorageMetadata " + bucketPath);
         checkContainerExists(bucketPath);
         return zipFileHelper.readZipMetadataOnly(bucketPath);
     }
 
     @Override
     public void removeBlob(BucketPath bucketPath) {
+        LOGGER.debug("removeBlob " + bucketPath);
         checkContainerExists(bucketPath);
         File file = BucketPathFileHelper.getAsFile(baseDir.append(bucketPath).add(ZipFileHelper.ZIP_SUFFIX), absolutePath);
         if (!file.exists()) {
@@ -227,6 +241,7 @@ class RealFileSystemExtendedStorageConnection implements ExtendedStoreConnection
 
     @Override
     public void removeBlobFolder(BucketDirectory bucketDirectory) {
+        LOGGER.debug("removeBlobFolder " + bucketDirectory);
         checkContainerExists(bucketDirectory);
         if (bucketDirectory.getObjectHandle().getName() == null) {
             throw new StorageConnectionException("not a valid bucket directory " + bucketDirectory);

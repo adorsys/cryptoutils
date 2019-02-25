@@ -5,7 +5,6 @@ package org.adorsys.encobject.types;
  */
 public enum ExtendedStoreConnectionType {
     FILESYSTEM,
-    MINIO,
     MONGO,
     AMAZONS3
 }

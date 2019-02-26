@@ -38,7 +38,7 @@
 
     <!-- the loggers above must not be changed or removed -->
 
-    <logger name="org.adorsys.encobject.service.impl.SimpleStorageMetadataImpl" level="debug" additivity="false">
+    <logger name="org.adorsys.encobject.service.impl.SimpleStorageMetadataImpl" level="info" additivity="false">
         <appender-ref ref="STDOUT" />
     </logger>
 

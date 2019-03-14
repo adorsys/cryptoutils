@@ -119,7 +119,7 @@ public class KeyStore2KeySourceHelper {
         ServerKeyMap serverKeyMap = new ServerKeyMap(jwkSet);
         KeyAndJwk randomSecretKey = serverKeyMap.randomSecretKey();
         KeyID keyID = new KeyID(randomSecretKey.jwk.getKeyID());
-        return new SecretKeyIDWithKey(new KeyID(keyID.getValue()), (SecretKey) randomSecretKey.jwk);
+        return new SecretKeyIDWithKey(new KeyID(keyID.getValue()), (SecretKey) randomSecretKey.key);
     }
 
 

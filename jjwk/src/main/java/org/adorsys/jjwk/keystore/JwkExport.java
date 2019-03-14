@@ -12,6 +12,7 @@ import javax.security.auth.callback.CallbackHandler;
 import javax.security.auth.callback.PasswordCallback;
 import javax.security.auth.callback.UnsupportedCallbackException;
 
+import org.adorsys.jkeygen.keystore.PasswordCallbackUtils;
 import org.apache.commons.lang3.RandomUtils;
 
 import com.nimbusds.jose.jwk.JWK;
@@ -62,15 +63,7 @@ public class JwkExport {
 		PasswordLookup pwLookup = new PasswordLookup() {
 			@Override
 			public char[] lookupPassword(String name) {
-				PasswordCallback passwordCallback = new PasswordCallback(name, false);
-				try {
-					callbackHandler.handle(new Callback[]{passwordCallback});
-				} catch (IOException | UnsupportedCallbackException e) {
-					throw new IllegalStateException(e);
-				}
-				char[] password = passwordCallback.getPassword();
-				passwordCallback.clearPassword();
-				return password;
+				return PasswordCallbackUtils.getPassword(callbackHandler, name);
 			}
 		};
 		try {

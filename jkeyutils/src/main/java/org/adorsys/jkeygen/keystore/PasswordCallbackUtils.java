@@ -8,14 +8,14 @@ import java.io.IOException;
 
 public class PasswordCallbackUtils {
 	public static char[] getPassword(CallbackHandler callbackHandler, String name) {
-		PasswordCallback callback = new PasswordCallback(name, false);
+		PasswordCallback passwordCallback = new PasswordCallback(name, false);
 		try {
-			callbackHandler.handle(new Callback[]{callback});
+			callbackHandler.handle(new Callback[]{passwordCallback});
 		} catch (IOException | UnsupportedCallbackException e) {
 			throw new IllegalStateException(e);
 		}
-		char[] password = callback.getPassword();
-		callback.clearPassword();
+		char[] password = passwordCallback.getPassword();
+		passwordCallback.clearPassword();
 		return password;
 	}
 }

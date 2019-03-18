@@ -41,10 +41,10 @@ import java.util.List;
  */
 public class KeyStore2KeySourceHelper {
     private final static Logger LOGGER = LoggerFactory.getLogger(KeyStore2KeySourceHelper.class);
+
     /**
-     *
      * @param keystorePersistence
-     * @param keyStoreAccess Muss nur das ReadStorePassword enthalten. ReadKeyPassword darf null sein
+     * @param keyStoreAccess      Muss nur das ReadStorePassword enthalten. ReadKeyPassword darf null sein
      * @return
      */
     public static KeySourceAndKeyID getForPublicKey(KeystorePersistence keystorePersistence, KeyStoreAccess keyStoreAccess) {
@@ -59,7 +59,7 @@ public class KeyStore2KeySourceHelper {
         return new KeySourceAndKeyID(keySource, keyID);
     }
 
-    public static PublicKeyJWK getPublicKeyJWK(KeystorePersistence keystorePersistence, KeyStoreAccess keyStoreAccess){
+    public static PublicKeyJWK getPublicKeyJWK(KeystorePersistence keystorePersistence, KeyStoreAccess keyStoreAccess) {
         LOGGER.debug("getPublicKeyJWK " + keyStoreAccess.getKeyStorePath());
         KeyStore userKeystore = keystorePersistence.loadKeystore(keyStoreAccess.getKeyStorePath().getObjectHandle(), keyStoreAccess.getKeyStoreAuth().getReadStoreHandler());
 
@@ -69,9 +69,8 @@ public class KeyStore2KeySourceHelper {
     }
 
     /**
-     *
      * @param keystorePersistence
-     * @param keyStoreAccess bei Passworte muessen gesetzt sein
+     * @param keyStoreAccess      bei Passworte muessen gesetzt sein
      * @return
      */
     public static KeySource getForPrivateKey(KeystorePersistence keystorePersistence, KeyStoreAccess keyStoreAccess) {
@@ -82,9 +81,8 @@ public class KeyStore2KeySourceHelper {
     }
 
     /**
-     *
      * @param keystorePersistence
-     * @param keyStoreAccess bei Passworte muessen gesetzt sein
+     * @param keyStoreAccess      bei Passworte muessen gesetzt sein
      * @return
      */
     public static KeySourceAndKeyID getForSecretKey(KeystorePersistence keystorePersistence, KeyStoreAccess keyStoreAccess) {
@@ -96,28 +94,19 @@ public class KeyStore2KeySourceHelper {
 
     }
 
-    /**
-     *
-     * @param keystorePersistence
-     * @param keyStoreAccess bei Passworte muessen gesetzt sein
-     * @return
-     */
-    public static SecretKeyIDWithKey getSecretKeyIDWithKey(KeystorePersistence keystorePersistence, KeyStoreAccess keyStoreAccess) {
-        LOGGER.debug("getSecretKeyIDWithKey " + keyStoreAccess.getKeyStorePath());
-        // KeyStore laden
-        KeyStore userKeystore = keystorePersistence.loadKeystore(keyStoreAccess.getKeyStorePath().getObjectHandle(), keyStoreAccess.getKeyStoreAuth().getReadStoreHandler());
-        return getRandomSecretKeyIDWithKey(keyStoreAccess, userKeystore);
-
-    }
-
-    private static SecretKeyIDWithKey getRandomSecretKeyIDWithKey(KeyStoreAccess keyStoreAccess, KeyStore userKeystore) {
-        // Willkürlich einen SecretKey aus dem KeyStore nehmen für die Verschlüsselung des Guards
+    public static SecretKeyIDWithKey getRandomSecretKeyIDWithKey(KeyStoreAccess keyStoreAccess, KeyStore userKeystore) {
+        // Choose a random secret key with its id
         JWKSet jwkSet = JwkExport.exportKeys(userKeystore, keyStoreAccess.getKeyStoreAuth().getReadKeyHandler());
         if (jwkSet.getKeys().isEmpty()) {
-            throw new SymmetricEncryptionException("did not find any secret keys in keystore with id: " + keyStoreAccess.getKeyStorePath());
+            throw new SymmetricEncryptionException("did not find any keys in keystore with id: " + keyStoreAccess.getKeyStorePath());
         }
         ServerKeyMap serverKeyMap = new ServerKeyMap(jwkSet);
-        KeyAndJwk randomSecretKey = serverKeyMap.randomSecretKey();
+        KeyAndJwk randomSecretKey;
+        try {
+            randomSecretKey = serverKeyMap.randomSecretKey();
+        } catch (IndexOutOfBoundsException b) {
+            throw new SymmetricEncryptionException("did not find any secret keys in keystore with id: " + keyStoreAccess.getKeyStorePath());
+        }
         KeyID keyID = new KeyID(randomSecretKey.jwk.getKeyID());
         return new SecretKeyIDWithKey(new KeyID(keyID.getValue()), (SecretKey) randomSecretKey.key);
     }

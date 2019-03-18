@@ -25,7 +25,7 @@ import java.io.InputStream;
 public class EncryptedPersistenceServiceImpl implements EncryptedPersistenceService {
     private final static Logger LOGGER = LoggerFactory.getLogger(EncryptedPersistenceServiceImpl.class);
     private static final String ENCRYPTION_SERVICE = "EncryptedPersistenceServiceImpl.ENCRYPTION_SERVICE";
-    private static final String ENCRYPTION_KEY_ID = "EncryptedPersistenceServiceImpl.ENCRYPTION_KEY_ID";
+    public static final String ENCRYPTION_KEY_ID = "EncryptedPersistenceServiceImpl.ENCRYPTION_KEY_ID";
     private static final int MIN_SIZE_FOR_STREAMING = 100 * 1024 * 1024; // 100 MB
 
     ExtendedStoreConnection extendedStoreConnection;

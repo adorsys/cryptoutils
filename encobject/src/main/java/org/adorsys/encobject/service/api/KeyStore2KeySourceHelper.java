@@ -9,6 +9,7 @@ import com.nimbusds.jose.jwk.KeyUse;
 import com.nimbusds.jose.jwk.PasswordLookup;
 import com.nimbusds.jose.jwk.RSAKey;
 import org.adorsys.cryptoutils.exceptions.BaseExceptionHandler;
+import org.adorsys.encobject.complextypes.BucketPath;
 import org.adorsys.encobject.domain.KeyStoreAccess;
 import org.adorsys.encobject.exceptions.AsymmetricEncryptionException;
 import org.adorsys.encobject.exceptions.SymmetricEncryptionException;
@@ -16,6 +17,7 @@ import org.adorsys.encobject.service.impl.KeyStoreBasedPrivateKeySourceImpl;
 import org.adorsys.encobject.service.impl.KeyStoreBasedPublicKeySourceImpl;
 import org.adorsys.encobject.service.impl.KeyStoreBasedSecretKeySourceImpl;
 import org.adorsys.encobject.types.KeyID;
+import org.adorsys.encobject.types.SecretKeyIDWithKey;
 import org.adorsys.encobject.types.PublicKeyJWK;
 import org.adorsys.jjwk.keystore.JwkExport;
 import org.adorsys.jjwk.serverkey.KeyAndJwk;
@@ -24,6 +26,7 @@ import org.adorsys.jkeygen.utils.V3CertificateUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import javax.crypto.SecretKey;
 import java.security.KeyStore;
 import java.security.cert.Certificate;
 import java.security.cert.X509Certificate;
@@ -38,45 +41,36 @@ import java.util.List;
  */
 public class KeyStore2KeySourceHelper {
     private final static Logger LOGGER = LoggerFactory.getLogger(KeyStore2KeySourceHelper.class);
+
     /**
-     *
      * @param keystorePersistence
-     * @param keyStoreAccess Muss nur das ReadStorePassword enthalten. ReadKeyPassword darf null sein
+     * @param keyStoreAccess      Muss nur das ReadStorePassword enthalten. ReadKeyPassword darf null sein
      * @return
      */
     public static KeySourceAndKeyID getForPublicKey(KeystorePersistence keystorePersistence, KeyStoreAccess keyStoreAccess) {
-        LOGGER.debug("get keysource for public key of " + keyStoreAccess.getKeyStorePath());
+        LOGGER.debug("getForPublicKey " + keyStoreAccess.getKeyStorePath());
         KeyStore userKeystore = keystorePersistence.loadKeystore(keyStoreAccess.getKeyStorePath().getObjectHandle(), keyStoreAccess.getKeyStoreAuth().getReadStoreHandler());
 
-        JWKSet exportKeys = load(userKeystore, null);
-        LOGGER.debug("number of public keys found:" + exportKeys.getKeys().size());
+        JWKSet exportKeys = load(userKeystore, null, keyStoreAccess.getKeyStorePath());
         List<JWK> encKeys = selectEncKeys(exportKeys);
-        if (encKeys.isEmpty()) {
-            throw new AsymmetricEncryptionException("did not find any public keys in keystore " + keyStoreAccess.getKeyStorePath());
-        }
         JWK randomKey = JwkExport.randomKey(encKeys);
         KeyID keyID = new KeyID(randomKey.getKeyID());
         KeySource keySource = new KeyStoreBasedPublicKeySourceImpl(exportKeys);
         return new KeySourceAndKeyID(keySource, keyID);
     }
-    
-    public static PublicKeyJWK getPublicKeyJWK(KeystorePersistence keystorePersistence, KeyStoreAccess keyStoreAccess){
-        LOGGER.debug("get keysource for public key of " + keyStoreAccess.getKeyStorePath());
+
+    public static PublicKeyJWK getPublicKeyJWK(KeystorePersistence keystorePersistence, KeyStoreAccess keyStoreAccess) {
+        LOGGER.debug("getPublicKeyJWK " + keyStoreAccess.getKeyStorePath());
         KeyStore userKeystore = keystorePersistence.loadKeystore(keyStoreAccess.getKeyStorePath().getObjectHandle(), keyStoreAccess.getKeyStoreAuth().getReadStoreHandler());
 
-        JWKSet exportKeys = load(userKeystore, null);
-        LOGGER.debug("number of public keys found:" + exportKeys.getKeys().size());
+        JWKSet exportKeys = load(userKeystore, null, keyStoreAccess.getKeyStorePath());
         List<JWK> encKeys = selectEncKeys(exportKeys);
-        if (encKeys.isEmpty()) {
-            throw new AsymmetricEncryptionException("did not find any public keys in keystore " + keyStoreAccess.getKeyStorePath());
-        }
         return new PublicKeyJWK(JwkExport.randomKey(encKeys));
     }
 
     /**
-     *
      * @param keystorePersistence
-     * @param keyStoreAccess bei Passworte muessen gesetzt sein
+     * @param keyStoreAccess      bei Passworte muessen gesetzt sein
      * @return
      */
     public static KeySource getForPrivateKey(KeystorePersistence keystorePersistence, KeyStoreAccess keyStoreAccess) {
@@ -87,9 +81,8 @@ public class KeyStore2KeySourceHelper {
     }
 
     /**
-     *
      * @param keystorePersistence
-     * @param keyStoreAccess bei Passworte muessen gesetzt sein
+     * @param keyStoreAccess      bei Passworte muessen gesetzt sein
      * @return
      */
     public static KeySourceAndKeyID getForSecretKey(KeystorePersistence keystorePersistence, KeyStoreAccess keyStoreAccess) {
@@ -97,18 +90,27 @@ public class KeyStore2KeySourceHelper {
         // KeyStore laden
         KeyStore userKeystore = keystorePersistence.loadKeystore(keyStoreAccess.getKeyStorePath().getObjectHandle(), keyStoreAccess.getKeyStoreAuth().getReadStoreHandler());
         KeySource keySource = new KeyStoreBasedSecretKeySourceImpl(userKeystore, keyStoreAccess.getKeyStoreAuth().getReadKeyHandler());
-
-        // Willkürlich einen SecretKey aus dem KeyStore nehmen für die Verschlüsselung des Guards
-        JWKSet jwkSet = JwkExport.exportKeys(userKeystore, keyStoreAccess.getKeyStoreAuth().getReadKeyHandler());
-        if (jwkSet.getKeys().isEmpty()) {
-            throw new SymmetricEncryptionException("did not find any secret keys in keystore with id: " + keyStoreAccess.getKeyStorePath());
-        }
-        ServerKeyMap serverKeyMap = new ServerKeyMap(jwkSet);
-        KeyAndJwk randomSecretKey = serverKeyMap.randomSecretKey();
-        KeyID keyID = new KeyID(randomSecretKey.jwk.getKeyID());
-        return new KeySourceAndKeyID(keySource, keyID);
+        return new KeySourceAndKeyID(keySource, getRandomSecretKeyIDWithKey(keyStoreAccess, userKeystore).getKeyID());
 
     }
+
+    public static SecretKeyIDWithKey getRandomSecretKeyIDWithKey(KeyStoreAccess keyStoreAccess, KeyStore userKeystore) {
+        // Choose a random secret key with its id
+        JWKSet jwkSet = JwkExport.exportKeys(userKeystore, keyStoreAccess.getKeyStoreAuth().getReadKeyHandler());
+        if (jwkSet.getKeys().isEmpty()) {
+            throw new SymmetricEncryptionException("did not find any keys in keystore with id: " + keyStoreAccess.getKeyStorePath());
+        }
+        ServerKeyMap serverKeyMap = new ServerKeyMap(jwkSet);
+        KeyAndJwk randomSecretKey;
+        try {
+            randomSecretKey = serverKeyMap.randomSecretKey();
+        } catch (IndexOutOfBoundsException b) {
+            throw new SymmetricEncryptionException("did not find any secret keys in keystore with id: " + keyStoreAccess.getKeyStorePath());
+        }
+        KeyID keyID = new KeyID(randomSecretKey.jwk.getKeyID());
+        return new SecretKeyIDWithKey(new KeyID(keyID.getValue()), (SecretKey) randomSecretKey.key);
+    }
+
 
     public static class KeySourceAndKeyID {
         private final KeySource keySource;
@@ -134,7 +136,7 @@ public class KeyStore2KeySourceHelper {
     }
 
 
-    private static JWKSet load(final KeyStore keyStore, final PasswordLookup pwLookup) {
+    private static JWKSet load(final KeyStore keyStore, final PasswordLookup pwLookup, BucketPath keystorePath) {
         try {
 
             List<JWK> jwks = new LinkedList<>();
@@ -172,7 +174,11 @@ public class KeyStore2KeySourceHelper {
                     continue;
                 }
             }
-            return new JWKSet(jwks);
+            JWKSet jwkSet = new JWKSet(jwks);
+            if (jwkSet.getKeys().isEmpty()) {
+                throw new AsymmetricEncryptionException("did not find any public keys in keystore " + keystorePath);
+            }
+            return jwkSet;
         } catch (Exception e) {
             throw BaseExceptionHandler.handle(e);
         }

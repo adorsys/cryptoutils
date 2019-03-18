@@ -116,7 +116,7 @@ public class EncryptionTest {
 
         @Override
         public String toString() {
-            return "KeyIDWithKey{" +
+            return "SecretKeyIDWithKey{" +
                     "\n               keyID = " + keyID.getValue() +
                     "\n   secretKey.encoded = " + HexUtil.convertBytesToHexString(secretKey.getEncoded()) +
                     "\n secretKey.algorithm = " + secretKey.getAlgorithm() +

@@ -2,6 +2,7 @@ package org.adorsys.encobject.service.impl.generator;
 
 import org.adorsys.cryptoutils.exceptions.BaseExceptionHandler;
 import org.adorsys.encobject.domain.ReadKeyPassword;
+import org.adorsys.encobject.exceptions.KeyStoreConfigException;
 import org.adorsys.encobject.service.api.generator.KeyPairGenerator;
 import org.adorsys.encobject.service.api.generator.KeyStoreCreationConfig;
 import org.adorsys.encobject.service.api.generator.SecretKeyGenerator;
@@ -41,6 +42,11 @@ public class KeyStoreGenerator {
     }
 
     public KeyStore generate() {
+        if (config.getEncKeyNumber() == 0 &&
+                config.getSecretKeyNumber() == 0 &&
+                config.getSignKeyNumber() == 0) {
+            throw new KeyStoreConfigException("Configuration of keystore must at least contain one key");
+        }
         if (UglyKeyStoreCache.INSTANCE.isActive()) {
             KeyStore keyStore = UglyKeyStoreCache.INSTANCE.getCachedKeyStoreFor(keyStoreType, serverKeyPairAliasPrefix, readKeyPassword, config);
             if (keyStore != null) {

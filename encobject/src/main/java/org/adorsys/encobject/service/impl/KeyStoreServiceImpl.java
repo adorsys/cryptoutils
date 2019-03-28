@@ -1,11 +1,11 @@
 package org.adorsys.encobject.service.impl;
 
-import org.adorsys.cryptoutils.exceptions.BaseExceptionHandler;
-import org.adorsys.cryptoutils.utils.HexUtil;
-import org.adorsys.encobject.complextypes.BucketPath;
+import de.adorsys.common.exceptions.BaseExceptionHandler;
+import de.adorsys.common.utils.HexUtil;
+import de.adorsys.dfs.connection.api.complextypes.BucketPath;
+import de.adorsys.dfs.connection.api.service.api.ExtendedStoreConnection;
 import org.adorsys.encobject.domain.KeyStoreAuth;
 import org.adorsys.encobject.exceptions.KeyStoreExistsException;
-import org.adorsys.encobject.service.api.ExtendedStoreConnection;
 import org.adorsys.encobject.service.api.KeyStoreService;
 import org.adorsys.encobject.service.api.KeystorePersistence;
 import org.adorsys.encobject.service.api.generator.KeyStoreCreationConfig;

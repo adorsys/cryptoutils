@@ -1,7 +1,7 @@
 package org.adorsys.encobject.userdata;
 
+import de.adorsys.dfs.connection.api.domain.ObjectHandle;
 import org.adorsys.encobject.domain.KeyCredentials;
-import org.adorsys.encobject.domain.ObjectHandle;
 
 /**
  * Defines the semantic for the retrieval of key credential.

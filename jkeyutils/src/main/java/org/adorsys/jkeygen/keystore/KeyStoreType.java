@@ -1,6 +1,6 @@
 package org.adorsys.jkeygen.keystore;
 
-import org.adorsys.cryptoutils.basetypes.BaseTypeString;
+import de.adorsys.common.basetypes.BaseTypeString;
 import org.apache.commons.lang3.StringUtils;
 
 /**

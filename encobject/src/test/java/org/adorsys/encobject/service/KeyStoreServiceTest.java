@@ -1,16 +1,16 @@
 package org.adorsys.encobject.service;
 
-import org.adorsys.cryptoutils.exceptions.BaseExceptionHandler;
-import org.adorsys.cryptoutils.storeconnectionfactory.ExtendedStoreConnectionFactory;
-import org.adorsys.encobject.complextypes.BucketDirectory;
-import org.adorsys.encobject.complextypes.BucketPath;
+import de.adorsys.common.exceptions.BaseExceptionHandler;
+import de.adorsys.dfs.connection.impl.factory.ExtendedStoreConnectionFactory;
+import de.adorsys.dfs.connection.api.complextypes.BucketDirectory;
+import de.adorsys.dfs.connection.api.complextypes.BucketPath;
 import org.adorsys.encobject.domain.KeyStoreAccess;
 import org.adorsys.encobject.domain.KeyStoreAuth;
 import org.adorsys.encobject.domain.ReadKeyPassword;
 import org.adorsys.encobject.domain.ReadStorePassword;
 import org.adorsys.encobject.exceptions.KeyStoreExistsException;
 import org.adorsys.encobject.service.api.ContainerPersistence;
-import org.adorsys.encobject.service.api.ExtendedStoreConnection;
+import de.adorsys.dfs.connection.api.service.api.ExtendedStoreConnection;
 import org.adorsys.encobject.service.api.KeyStoreService;
 import org.adorsys.encobject.service.impl.ContainerPersistenceImpl;
 import org.adorsys.encobject.service.impl.KeyStoreServiceImpl;

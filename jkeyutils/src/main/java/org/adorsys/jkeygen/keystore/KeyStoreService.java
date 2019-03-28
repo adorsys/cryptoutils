@@ -1,38 +1,22 @@
 package org.adorsys.jkeygen.keystore;
 
-import org.adorsys.cryptoutils.exceptions.BaseExceptionHandler;
+import de.adorsys.common.exceptions.BaseExceptionHandler;
 import org.adorsys.jkeygen.keypair.CertificationResult;
 import org.adorsys.jkeygen.keypair.SelfSignedKeyPairData;
 import org.adorsys.jkeygen.pwd.PasswordCallbackHandler;
 import org.adorsys.jkeygen.utils.V3CertificateUtils;
-import org.apache.commons.lang3.StringUtils;
 import org.bouncycastle.cert.X509CertificateHolder;
 
-import javax.crypto.BadPaddingException;
 import javax.crypto.SecretKey;
 import javax.security.auth.callback.CallbackHandler;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
-import java.io.IOException;
 import java.io.InputStream;
-import java.security.KeyPair;
-import java.security.KeyStore;
+import java.security.*;
 import java.security.KeyStore.ProtectionParameter;
-import java.security.KeyStoreException;
-import java.security.NoSuchAlgorithmException;
-import java.security.UnrecoverableEntryException;
-import java.security.UnrecoverableKeyException;
 import java.security.cert.Certificate;
 import java.security.cert.CertificateEncodingException;
-import java.security.cert.CertificateException;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.Enumeration;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.stream.Collectors;
 
 /**

@@ -1,6 +1,6 @@
 package org.adorsys.encobject.service.api;
 
-import org.adorsys.encobject.complextypes.BucketDirectory;
+import de.adorsys.dfs.connection.api.complextypes.BucketDirectory;
 import org.adorsys.encobject.exceptions.ContainerExistsException;
 import org.adorsys.encobject.exceptions.UnknownContainerException;
 

@@ -1,11 +1,13 @@
 package org.adorsys.encobject.service.impl;
 
-import org.adorsys.encobject.complextypes.BucketPath;
-import org.adorsys.encobject.domain.UserMetaData;
-import org.adorsys.encobject.domain.ObjectHandle;
-import org.adorsys.encobject.domain.Payload;
+import de.adorsys.dfs.connection.api.complextypes.BucketPath;
+import de.adorsys.dfs.connection.api.domain.ObjectHandle;
+import de.adorsys.dfs.connection.api.domain.Payload;
+import de.adorsys.dfs.connection.api.domain.UserMetaData;
+import de.adorsys.dfs.connection.api.service.api.ExtendedStoreConnection;
+import de.adorsys.dfs.connection.api.service.impl.SimplePayloadImpl;
+import de.adorsys.dfs.connection.api.service.impl.SimpleStorageMetadataImpl;
 import org.adorsys.encobject.domain.Tuple;
-import org.adorsys.encobject.service.api.ExtendedStoreConnection;
 import org.adorsys.encobject.service.api.KeystorePersistence;
 import org.adorsys.jkeygen.keystore.KeyStoreService;
 import org.adorsys.jkeygen.keystore.KeyStoreType;

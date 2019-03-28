@@ -1,6 +1,6 @@
 package org.adorsys.encobject.types;
 
-import org.adorsys.cryptoutils.exceptions.BaseException;
+import de.adorsys.common.exceptions.BaseException;
 import org.adorsys.encobject.domain.ContentMetaInfo;
 
 import java.util.HashMap;

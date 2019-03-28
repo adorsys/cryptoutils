@@ -1,6 +1,6 @@
 package org.adorsys.encobject.types;
 
-import org.adorsys.cryptoutils.basetypes.BaseTypeString;
+import de.adorsys.common.basetypes.BaseTypeString;
 
 /**
  * Created by peter on 29.12.2017 at 14:11:52.

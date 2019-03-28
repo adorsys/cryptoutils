@@ -1,7 +1,7 @@
 package org.adorsys.jkeygen.keystore;
 
-import org.adorsys.cryptoutils.exceptions.BaseException;
-import org.adorsys.cryptoutils.exceptions.BaseExceptionHandler;
+import de.adorsys.common.exceptions.BaseException;
+import de.adorsys.common.exceptions.BaseExceptionHandler;
 import org.adorsys.jkeygen.keypair.KeyPairBuilder;
 import org.adorsys.jkeygen.keypair.SelfSignedCertBuilder;
 import org.adorsys.jkeygen.keypair.SelfSignedKeyPairData;
@@ -10,11 +10,7 @@ import org.adorsys.jkeygen.secretkey.SecretKeyBuilder;
 import org.bouncycastle.asn1.x500.X500Name;
 import org.bouncycastle.asn1.x500.X500NameBuilder;
 import org.bouncycastle.asn1.x500.style.BCStyle;
-import org.junit.Assert;
-import org.junit.Assume;
-import org.junit.Before;
-import org.junit.BeforeClass;
-import org.junit.Test;
+import org.junit.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -23,12 +19,7 @@ import javax.security.auth.callback.CallbackHandler;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.lang.reflect.Field;
-import java.security.Key;
-import java.security.KeyPair;
-import java.security.KeyStore;
-import java.security.KeyStoreException;
-import java.security.NoSuchAlgorithmException;
-import java.security.UnrecoverableKeyException;
+import java.security.*;
 import java.security.cert.CertificateException;
 import java.util.HashMap;
 import java.util.List;

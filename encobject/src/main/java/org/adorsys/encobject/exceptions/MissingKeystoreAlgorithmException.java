@@ -1,6 +1,6 @@
 package org.adorsys.encobject.exceptions;
 
-import org.adorsys.cryptoutils.exceptions.BaseException;
+import de.adorsys.common.exceptions.BaseException;
 
 public class MissingKeystoreAlgorithmException extends BaseException {
 	private static final long serialVersionUID = -8244399588062333573L;

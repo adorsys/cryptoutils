@@ -4,11 +4,13 @@
 	<parent>
 		<groupId>de.adorsys.cryptoutils</groupId>
 		<artifactId>cryptoutils</artifactId>
-		<version>0.23.14-SNAPSHOT</version>
+		<version>0.23.15-SNAPSHOT</version>
 	</parent>
 	<artifactId>jjwk</artifactId>
 
-	<name>Manipulating json web keys</name>
+	<description>Manipulating json web keys</description>
+	<name>de.adorsys.cryptoutils.jjwk</name>
+
 	<dependencies>
 		<dependency>
 			<groupId>com.nimbusds</groupId>

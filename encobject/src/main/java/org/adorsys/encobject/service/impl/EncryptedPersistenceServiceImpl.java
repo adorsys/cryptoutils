@@ -1,14 +1,16 @@
 package org.adorsys.encobject.service.impl;
 
-import org.adorsys.cryptoutils.exceptions.BaseException;
-import org.adorsys.cryptoutils.exceptions.BaseExceptionHandler;
-import org.adorsys.encobject.complextypes.BucketPath;
-import org.adorsys.encobject.domain.Payload;
-import org.adorsys.encobject.domain.PayloadStream;
-import org.adorsys.encobject.domain.StorageMetadata;
+import de.adorsys.common.exceptions.BaseException;
+import de.adorsys.common.exceptions.BaseExceptionHandler;
+import de.adorsys.dfs.connection.api.complextypes.BucketPath;
+import de.adorsys.dfs.connection.api.domain.Payload;
+import de.adorsys.dfs.connection.api.domain.PayloadStream;
+import de.adorsys.dfs.connection.api.domain.StorageMetadata;
+import de.adorsys.dfs.connection.api.service.api.ExtendedStoreConnection;
+import de.adorsys.dfs.connection.api.service.impl.SimplePayloadImpl;
+import de.adorsys.dfs.connection.api.service.impl.SimplePayloadStreamImpl;
 import org.adorsys.encobject.service.api.EncryptedPersistenceService;
 import org.adorsys.encobject.service.api.EncryptionStreamService;
-import org.adorsys.encobject.service.api.ExtendedStoreConnection;
 import org.adorsys.encobject.service.api.KeySource;
 import org.adorsys.encobject.types.KeyID;
 import org.apache.commons.io.IOUtils;
@@ -16,7 +18,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.ByteArrayInputStream;
-import java.io.IOException;
 import java.io.InputStream;
 
 /**

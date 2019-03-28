@@ -1,20 +1,15 @@
 package org.adorsys.encobject.service.impl;
 
-import com.nimbusds.jose.CompressionAlgorithm;
-import com.nimbusds.jose.JWEDecrypter;
-import com.nimbusds.jose.JWEEncrypter;
-import com.nimbusds.jose.JWEHeader;
-import com.nimbusds.jose.JWEObject;
-import com.nimbusds.jose.Payload;
+import com.nimbusds.jose.*;
 import com.nimbusds.jose.crypto.factories.DefaultJWEDecrypterFactory;
-import org.adorsys.cryptoutils.exceptions.BaseException;
-import org.adorsys.cryptoutils.exceptions.BaseExceptionHandler;
+import de.adorsys.common.exceptions.BaseException;
+import de.adorsys.common.exceptions.BaseExceptionHandler;
 import org.adorsys.encobject.domain.ContentMetaInfo;
 import org.adorsys.encobject.exceptions.ExtendedPersistenceException;
-import org.adorsys.encobject.service.api.KeySource;
 import org.adorsys.encobject.params.EncParamSelector;
 import org.adorsys.encobject.params.EncryptionParams;
 import org.adorsys.encobject.service.api.EncryptionService;
+import org.adorsys.encobject.service.api.KeySource;
 import org.adorsys.encobject.types.EncryptionType;
 import org.adorsys.encobject.types.KeyID;
 import org.adorsys.encobject.types.PersistenceLayerContentMetaInfoUtil;

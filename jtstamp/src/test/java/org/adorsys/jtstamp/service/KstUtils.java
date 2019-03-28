@@ -7,7 +7,7 @@ import java.security.KeyStore;
 
 import javax.security.auth.callback.CallbackHandler;
 
-import org.adorsys.cryptoutils.exceptions.BaseException;
+import de.adorsys.common.exceptions.BaseException;
 import org.adorsys.jkeygen.keypair.KeyPairBuilder;
 import org.adorsys.jkeygen.keypair.SelfSignedCertBuilder;
 import org.adorsys.jkeygen.keypair.SelfSignedKeyPairData;

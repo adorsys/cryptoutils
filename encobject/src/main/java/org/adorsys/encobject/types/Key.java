@@ -1,6 +1,6 @@
 package org.adorsys.encobject.types;
 
-import org.adorsys.cryptoutils.basetypes.BaseTypeString;
+import de.adorsys.common.basetypes.BaseTypeString;
 
 public class Key extends BaseTypeString {
     public Key() {

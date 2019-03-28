@@ -1,6 +1,6 @@
 package org.adorsys.encobject.service.api;
 
-import org.adorsys.encobject.complextypes.BucketPath;
+import de.adorsys.dfs.connection.api.complextypes.BucketPath;
 import org.adorsys.encobject.domain.KeyStoreAuth;
 import org.adorsys.encobject.service.api.generator.KeyStoreCreationConfig;
 import org.adorsys.jkeygen.keystore.KeyStoreType;

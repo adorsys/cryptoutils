@@ -1,6 +1,6 @@
 package org.adorsys.encobject.service.impl.generator;
 
-import org.adorsys.cryptoutils.exceptions.BaseExceptionHandler;
+import de.adorsys.common.exceptions.BaseExceptionHandler;
 import org.adorsys.encobject.domain.ReadKeyPassword;
 import org.adorsys.encobject.exceptions.KeyStoreConfigException;
 import org.adorsys.encobject.service.api.generator.KeyPairGenerator;
@@ -46,13 +46,6 @@ public class KeyStoreGenerator {
                 config.getSecretKeyNumber() == 0 &&
                 config.getSignKeyNumber() == 0) {
             throw new KeyStoreConfigException("Configuration of keystore must at least contain one key");
-        }
-        if (UglyKeyStoreCache.INSTANCE.isActive()) {
-            KeyStore keyStore = UglyKeyStoreCache.INSTANCE.getCachedKeyStoreFor(keyStoreType, serverKeyPairAliasPrefix, readKeyPassword, config);
-            if (keyStore != null) {
-                LOGGER.debug("KeyStoreGeneration (milliseconds) DURATION WAS 0");
-                return keyStore;
-            }
         }
         KeyStore keyStore = null;
         Date startTime = new Date();
@@ -105,9 +98,6 @@ public class KeyStoreGenerator {
             Date stopTime = new Date();
             long duration = stopTime.getTime() - startTime.getTime();
             LOGGER.debug("KeyStoreGeneration (milliseconds) DURATION WAS " + duration);
-            if (UglyKeyStoreCache.INSTANCE.isActive()) {
-                UglyKeyStoreCache.INSTANCE.cacheKeyStoreFor(keyStore, keyStoreType, serverKeyPairAliasPrefix, readKeyPassword, config);
-            }
         }
     }
 }

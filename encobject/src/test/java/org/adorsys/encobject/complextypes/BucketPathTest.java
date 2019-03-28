@@ -1,7 +1,9 @@
 package org.adorsys.encobject.complextypes;
 
-import org.adorsys.encobject.exceptions.BucketException;
-import org.adorsys.encobject.exceptions.BucketRestrictionException;
+import de.adorsys.dfs.connection.api.complextypes.BucketDirectory;
+import de.adorsys.dfs.connection.api.complextypes.BucketPath;
+import de.adorsys.dfs.connection.api.exceptions.BucketException;
+import de.adorsys.dfs.connection.api.exceptions.BucketRestrictionException;
 import org.junit.Assert;
 import org.junit.Test;
 import org.slf4j.Logger;

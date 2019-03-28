@@ -4,11 +4,13 @@
 	<parent>
 		<groupId>de.adorsys.cryptoutils</groupId>
 		<artifactId>cryptoutils</artifactId>
-		<version>0.23.14-SNAPSHOT</version>
+		<version>0.23.15-SNAPSHOT</version>
 	</parent>
 	<artifactId>jtstamp</artifactId>
 
-    <name>Simple time stamping component</name>
+    <description>Simple time stamping component</description>
+    <name>de.adorsys.cryptoutils.jtstamp</name>
+
     <properties>
         <maven.compiler.source>1.8</maven.compiler.source>
         <maven.compiler.target>1.8</maven.compiler.target>

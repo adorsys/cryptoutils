@@ -8,7 +8,7 @@ import com.nimbusds.jose.crypto.ECDSASigner;
 import com.nimbusds.jose.crypto.MACSigner;
 import com.nimbusds.jose.crypto.RSASSASigner;
 import com.nimbusds.jose.jwk.*;
-import org.adorsys.cryptoutils.exceptions.BaseException;
+import de.adorsys.common.exceptions.BaseException;
 
 import javax.crypto.spec.SecretKeySpec;
 import java.security.Key;

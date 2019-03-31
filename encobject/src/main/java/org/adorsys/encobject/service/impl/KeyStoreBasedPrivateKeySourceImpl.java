@@ -1,6 +1,6 @@
 package org.adorsys.encobject.service.impl;
 
-import org.adorsys.cryptoutils.exceptions.BaseExceptionHandler;
+import de.adorsys.common.exceptions.BaseExceptionHandler;
 import org.adorsys.encobject.domain.ReadKeyPassword;
 import org.adorsys.encobject.service.api.KeySource;
 import org.adorsys.encobject.types.KeyID;

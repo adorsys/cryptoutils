@@ -1,5 +1,6 @@
 package org.adorsys.encobject.domain;
 
+import de.adorsys.dfs.connection.api.domain.ObjectHandle;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 

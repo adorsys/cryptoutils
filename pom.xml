@@ -3,8 +3,8 @@
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>de.adorsys.cryptoutils</groupId>
 	<artifactId>cryptoutils</artifactId>
-	<version>0.23.13</version>
-    <name>Cryptographic helpers for Secure Banking</name>
+	<version>0.25.0</version>
+    <name>de.adorsys.cryptoutils root pom</name>
     <description>Utility Components for the development of secure banking modules. Components developed under this tree
         are released as jar.
     </description>
@@ -46,11 +46,11 @@
         <amazon.aws.version>1.11.409</amazon.aws.version>
         <apache.commons.lang3.version>3.8</apache.commons.lang3.version>
         <catch.exception.version>2.0.0-beta-1</catch.exception.version>
+        <common-basetypes.version>0.0.7</common-basetypes.version>
+        <dfs-connection.version>0.0.3</dfs-connection.version>
     </properties>
 
     <modules>
-        <module>basetypes</module>
-        <module>extendedstoreconnection</module>
         <module>jjwk</module>
         <module>encobject</module>
         <module>jtstamp</module>

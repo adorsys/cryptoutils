@@ -5,11 +5,12 @@
     <parent>
         <groupId>de.adorsys.cryptoutils</groupId>
         <artifactId>cryptoutils</artifactId>
-        <version>0.23.13</version>
+        <version>0.25.0</version>
     </parent>
     <artifactId>encobject</artifactId>
 
-    <name>Encrypted Object Service</name>
+    <description>Encrypted Object Service</description>
+    <name>de.adorsys.cryptoutils.encobject</name>
     <properties>
         <maven.compiler.source>1.8</maven.compiler.source>
         <maven.compiler.target>1.8</maven.compiler.target>
@@ -62,13 +63,15 @@
         </dependency>
 
         <dependency>
-            <groupId>de.adorsys.cryptoutils</groupId>
-            <artifactId>basetypes</artifactId>
+            <groupId>de.adorsys</groupId>
+            <artifactId>common-basetypes</artifactId>
+            <version>${common-basetypes.version}</version>
         </dependency>
 
         <dependency>
-            <groupId>de.adorsys.cryptoutils</groupId>
-            <artifactId>storeconnection-api</artifactId>
+            <groupId>de.adorsys</groupId>
+            <artifactId>dfs-connection-api</artifactId>
+            <version>${dfs-connection.version}</version>
         </dependency>
 
         <dependency>
@@ -91,8 +94,9 @@
         </dependency>
 
         <dependency>
-            <groupId>de.adorsys.cryptoutils</groupId>
-            <artifactId>storeconnectionfactory</artifactId>
+            <groupId>de.adorsys</groupId>
+            <artifactId>dfs-connection-impl-factory</artifactId>
+            <version>${dfs-connection.version}</version>
             <scope>test</scope>
         </dependency>
 

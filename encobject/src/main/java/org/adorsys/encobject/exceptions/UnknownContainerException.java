@@ -1,6 +1,6 @@
 package org.adorsys.encobject.exceptions;
 
-import org.adorsys.cryptoutils.exceptions.BaseException;
+import de.adorsys.common.exceptions.BaseException;
 
 /**
  * Requested container not found

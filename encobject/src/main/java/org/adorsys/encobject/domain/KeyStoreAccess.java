@@ -1,6 +1,6 @@
 package org.adorsys.encobject.domain;
 
-import org.adorsys.encobject.complextypes.BucketPath;
+import de.adorsys.dfs.connection.api.complextypes.BucketPath;
 
 /**
  * Created by peter on 08.01.18.

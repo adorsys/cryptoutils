@@ -1,9 +1,9 @@
 package org.adorsys.encobject.service.api;
 
-import org.adorsys.encobject.complextypes.BucketPath;
-import org.adorsys.encobject.domain.Payload;
-import org.adorsys.encobject.domain.PayloadStream;
-import org.adorsys.encobject.domain.StorageMetadata;
+import de.adorsys.dfs.connection.api.complextypes.BucketPath;
+import de.adorsys.dfs.connection.api.domain.Payload;
+import de.adorsys.dfs.connection.api.domain.PayloadStream;
+import de.adorsys.dfs.connection.api.domain.StorageMetadata;
 import org.adorsys.encobject.types.KeyID;
 
 /**

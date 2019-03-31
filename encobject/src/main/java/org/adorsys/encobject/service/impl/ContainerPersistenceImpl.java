@@ -1,10 +1,10 @@
 package org.adorsys.encobject.service.impl;
 
-import org.adorsys.encobject.complextypes.BucketDirectory;
+import de.adorsys.dfs.connection.api.complextypes.BucketDirectory;
+import de.adorsys.dfs.connection.api.service.api.ExtendedStoreConnection;
 import org.adorsys.encobject.exceptions.ContainerExistsException;
 import org.adorsys.encobject.exceptions.UnknownContainerException;
 import org.adorsys.encobject.service.api.ContainerPersistence;
-import org.adorsys.encobject.service.api.ExtendedStoreConnection;
 
 /**
  * Service in charge of creating and deleting container

@@ -1,16 +1,12 @@
 package org.adorsys.encobject.service.impl;
 
-import org.adorsys.cryptoutils.exceptions.BaseExceptionHandler;
+import de.adorsys.common.exceptions.BaseExceptionHandler;
 import org.adorsys.encobject.service.api.KeySource;
 import org.adorsys.encobject.types.KeyID;
 import org.adorsys.jkeygen.keystore.PasswordCallbackUtils;
 
 import javax.security.auth.callback.CallbackHandler;
-import java.security.Key;
-import java.security.KeyStore;
-import java.security.KeyStoreException;
-import java.security.NoSuchAlgorithmException;
-import java.security.UnrecoverableKeyException;
+import java.security.*;
 
 public class KeyStoreBasedSecretKeySourceImpl implements KeySource {
 

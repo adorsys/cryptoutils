@@ -1,6 +1,6 @@
 package org.adorsys.encobject.service.api;
 
-import org.adorsys.encobject.domain.UserMetaData;
+import de.adorsys.dfs.connection.api.domain.UserMetaData;
 import org.adorsys.encobject.types.KeyID;
 
 import java.io.InputStream;

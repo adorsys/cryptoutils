@@ -1,6 +1,6 @@
 package org.adorsys.encobject.exceptions;
 
-import org.adorsys.cryptoutils.exceptions.BaseException;
+import de.adorsys.common.exceptions.BaseException;
 
 /**
  * Object with corresponding handle not found in the object storage.

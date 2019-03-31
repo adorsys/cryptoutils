@@ -1,7 +1,7 @@
 package org.adorsys.encobject.service.impl;
 
-import org.adorsys.cryptoutils.exceptions.BaseExceptionHandler;
-import org.adorsys.encobject.domain.UserMetaData;
+import de.adorsys.common.exceptions.BaseExceptionHandler;
+import de.adorsys.dfs.connection.api.domain.UserMetaData;
 import org.adorsys.encobject.service.api.EncryptionStreamService;
 import org.adorsys.encobject.service.api.KeySource;
 import org.adorsys.encobject.types.KeyID;

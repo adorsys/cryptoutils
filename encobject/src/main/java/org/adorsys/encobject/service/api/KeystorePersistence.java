@@ -1,8 +1,8 @@
 package org.adorsys.encobject.service.api;
 
-import org.adorsys.encobject.domain.ObjectHandle;
+import de.adorsys.dfs.connection.api.domain.ObjectHandle;
+import de.adorsys.dfs.connection.api.domain.UserMetaData;
 import org.adorsys.encobject.domain.Tuple;
-import org.adorsys.encobject.domain.UserMetaData;
 
 import javax.security.auth.callback.CallbackHandler;
 import java.security.KeyStore;

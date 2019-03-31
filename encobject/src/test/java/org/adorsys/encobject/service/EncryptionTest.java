@@ -1,9 +1,9 @@
 package org.adorsys.encobject.service;
 
 import com.googlecode.catchexception.CatchException;
-import org.adorsys.cryptoutils.exceptions.BaseExceptionHandler;
-import org.adorsys.cryptoutils.utils.HexUtil;
-import org.adorsys.encobject.domain.UserMetaData;
+import de.adorsys.common.exceptions.BaseExceptionHandler;
+import de.adorsys.common.utils.HexUtil;
+import de.adorsys.dfs.connection.api.domain.UserMetaData;
 import org.adorsys.encobject.service.api.KeySource;
 import org.adorsys.encobject.service.impl.AESEncryptionStreamServiceImpl;
 import org.adorsys.encobject.service.impl.generator.SecretKeyGeneratorImpl;
@@ -15,8 +15,6 @@ import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import javax.crypto.Cipher;
-import javax.crypto.CipherInputStream;
 import javax.crypto.SecretKey;
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;

@@ -5,7 +5,7 @@
     <parent>
         <groupId>de.adorsys.cryptoutils</groupId>
         <artifactId>cryptoutils</artifactId>
-        <version>0.25.0</version>
+        <version>0.25.1</version>
     </parent>
     <artifactId>encobject</artifactId>
 
@@ -71,6 +71,11 @@
         <dependency>
             <groupId>de.adorsys</groupId>
             <artifactId>dfs-connection-api</artifactId>
+            <version>${dfs-connection.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>de.adorsys</groupId>
+            <artifactId>dfs-connection-impl-factory</artifactId>
             <version>${dfs-connection.version}</version>
         </dependency>
 

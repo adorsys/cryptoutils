@@ -6,6 +6,7 @@ import de.adorsys.dfs.connection.api.complextypes.BucketPath;
 import de.adorsys.dfs.connection.api.domain.Payload;
 import de.adorsys.dfs.connection.api.domain.PayloadStream;
 import de.adorsys.dfs.connection.api.domain.UserMetaData;
+import de.adorsys.dfs.connection.impl.factory.ExtendedStoreConnectionFactory;
 import org.adorsys.encobject.service.api.ContainerPersistence;
 import org.adorsys.encobject.service.api.EncryptionStreamService;
 import de.adorsys.dfs.connection.api.service.api.ExtendedStoreConnection;

@@ -73,6 +73,11 @@
             <artifactId>dfs-connection-api</artifactId>
             <version>${dfs-connection.version}</version>
         </dependency>
+        <dependency>
+            <groupId>de.adorsys</groupId>
+            <artifactId>dfs-connection-impl-factory</artifactId>
+            <version>${dfs-connection.version}</version>
+        </dependency>
 
         <dependency>
             <groupId>de.adorsys.cryptoutils</groupId>
